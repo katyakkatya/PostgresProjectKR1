@@ -1,24 +1,23 @@
-package gui
+package gui.viewmodel
 
 import database.DatabaseInteractor
-import database.model.Database
+import database.model.Table
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import state.DatabaseEditing
-import kotlin.collections.map
+import state.TableEditing
 
-class DatabaseViewModel(
+class TableViewModel(
   private val databaseInteractor: DatabaseInteractor,
 ) {
 
-  private val _databaseEditing: MutableStateFlow<DatabaseEditing?> = MutableStateFlow(null)
-  val databaseEditing: Flow<DatabaseEditing?> = _databaseEditing
+  private val _tableEditing: MutableStateFlow<TableEditing?> = MutableStateFlow(null)
+  val tableEditing: Flow<TableEditing?> = _tableEditing
 
-  fun closeDatabaseEditing() {
-    _databaseEditing.value = null
+  fun closeTableEditing() {
+    _tableEditing.value = null
   }
 
-  private fun validateFields(fields: List<Database.Field>): String? {
+  private fun validateFields(fields: List<Table.Field>): String? {
     fields.forEach { field ->
       if (field.name.isBlank()) {
         return "Field names cannot be empty"
@@ -40,22 +39,22 @@ class DatabaseViewModel(
   }
 
   fun startDatabaseCreating() {
-    _databaseEditing.value = DatabaseEditing(Database("", emptyList()))
+    _tableEditing.value = TableEditing(Table("", emptyList()))
   }
 
   fun addField() {
-    _databaseEditing.value = _databaseEditing.value?.addField()
+    _tableEditing.value = _tableEditing.value?.addField()
   }
 
   fun updateFieldName(index: Int, name: String) {
-    _databaseEditing.value = _databaseEditing.value?.updateFieldName(index, name)
+    _tableEditing.value = _tableEditing.value?.updateFieldName(index, name)
   }
 
   fun updateFieldType(index: Int, type: String) {
-    _databaseEditing.value = _databaseEditing.value?.updateFieldType(index, type)
+    _tableEditing.value = _tableEditing.value?.updateFieldType(index, type)
   }
 
   fun removeField(index: Int) {
-    _databaseEditing.value = _databaseEditing.value?.removeField(index)
+    _tableEditing.value = _tableEditing.value?.removeField(index)
   }
 }
