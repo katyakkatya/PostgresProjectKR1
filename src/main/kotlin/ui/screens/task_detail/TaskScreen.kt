@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,39 +21,42 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import data.TestData
-import gui.components.SubTaskList
-import gui.components.TaskList
-import gui.dialogs.AddSubTaskDialog
+import ui.components.SubTaskList
+import ui.components.TaskList
 import models.Subtask
-import models.Task
+import models.TaskDetail
+import models.TaskItemModel
 import models.TaskStatus
+import ui.screens.task_detail.TaskDetailViewModel
 
 @Composable
 fun TaskScreen(
-    task: Task,
+    viewModel: TaskDetailViewModel,
     onBack: () -> Unit,
-    onRelatedTaskClick: (Task) -> Unit
+    onRelatedTaskClick: (TaskItemModel) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val task by viewModel.taskFlow.collectAsState(null)
 
-    Scaffold(
-        topBar = {
-            TaskScreenTopBar(onBack = onBack)
-        },
-        floatingActionButton = {
-            AddSubTaskFloatingButton(
-                onClick = { showDialog = true }
+    task?.let { task ->
+        Scaffold(
+            topBar = {
+                TaskScreenTopBar(onBack = onBack)
+            },
+            floatingActionButton = {
+                AddSubTaskFloatingButton(
+                    onClick = { showDialog = true }
+                )
+            }
+        ) { innerPadding ->
+            TaskScreenContent(
+                innerPadding = innerPadding,
+                task = task,
+                showDialog = showDialog,
+                onDismissDialog = { showDialog = false },
+                onRelatedTaskClick = onRelatedTaskClick
             )
         }
-    ) { innerPadding ->
-        TaskScreenContent(
-            innerPadding = innerPadding,
-            task = task,
-            showDialog = showDialog,
-            onDismissDialog = { showDialog = false },
-            onRelatedTaskClick = onRelatedTaskClick
-        )
     }
 }
 
@@ -131,16 +135,16 @@ private fun AddSubTaskFloatingButton(onClick: () -> Unit) {
     }
 }
 
-
+// TODO: раскомментировать когда соединю с репозиторием
 @Composable
 private fun TaskScreenContent(
-    innerPadding: PaddingValues,
-    task: Task,
-    showDialog: Boolean,
-    onDismissDialog: () -> Unit,
-    onRelatedTaskClick: (Task) -> Unit
+  innerPadding: PaddingValues,
+  task: TaskDetail,
+  showDialog: Boolean,
+  onDismissDialog: () -> Unit,
+  onRelatedTaskClick: (TaskItemModel) -> Unit
 ) {
-    val allTasks = remember { TestData.sampleTasks }
+    //val allTasks = remember { TestData.sampleTasks }
 
     Column(
         modifier = Modifier
@@ -151,25 +155,25 @@ private fun TaskScreenContent(
     ) {
         TaskHeader(task = task)
         TaskStatusInfo(task = task)
-        SubtasksSection(subtasks = task.subtasks)
-        RelatedTasksSection(
-            relatedTasks = task.relatedTasks,
-            onRelatedTaskClick = onRelatedTaskClick
-        )
-        AddSubTaskDialog(
-            showDialog = showDialog,
-            onDismiss = onDismissDialog,
-            onAddNewSubtask = { title ->
-            },
-            onLinkExistingTask = { task ->
-            },
-            allTasks = allTasks
-        )
+//        SubtasksSection(subtasks = task.subtasks)
+//        RelatedTasksSection(
+//            relatedTasks = task.relatedTasks,
+//            onRelatedTaskClick = onRelatedTaskClick
+//        )
+//        AddSubTaskDialog(
+//            showDialog = showDialog,
+//            onDismiss = onDismissDialog,
+//            onAddNewSubtask = { title ->
+//            },
+//            onLinkExistingTask = { task ->
+//            },
+//            allTasks = allTasks
+//        )
     }
 }
 
 @Composable
-private fun TaskHeader(task: Task) {
+private fun TaskHeader(task: TaskDetail) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,7 +203,7 @@ private fun TaskHeader(task: Task) {
 }
 
 @Composable
-private fun TaskStatusInfo(task: Task) {
+private fun TaskStatusInfo(task: TaskDetail) {
     Text(
         text = "Статус: ${getStatusName(task.status)}",
         fontFamily = FontFamily.Serif,
@@ -222,8 +226,8 @@ private fun SubtasksSection(subtasks: List<Subtask>) {
 
 @Composable
 private fun RelatedTasksSection(
-    relatedTasks: List<Task>,
-    onRelatedTaskClick: (Task) -> Unit
+  relatedTasks: List<TaskItemModel>,
+  onRelatedTaskClick: (Long) -> Unit
 ) {
     if (relatedTasks.isNotEmpty()) {
         Text(
@@ -241,7 +245,9 @@ private fun RelatedTasksSection(
 }
 
 private fun getStatusName(status: TaskStatus): String = when (status) {
-    TaskStatus.TODO -> "К выполнению"
-    TaskStatus.IN_PROGRESS -> "В процессе"
-    TaskStatus.DONE -> "Выполнено"
+  TaskStatus.BACKLOG -> "В бэклоге"
+  TaskStatus.IN_PROGRESS -> "В процессе"
+  TaskStatus.IN_REVIEW -> "На проверке"
+  TaskStatus.DONE -> "Выполнено"
+  TaskStatus.DROPPED -> "Не будет выполнено"
 }

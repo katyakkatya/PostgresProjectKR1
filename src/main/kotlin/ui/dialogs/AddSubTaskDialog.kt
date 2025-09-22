@@ -1,4 +1,4 @@
-package gui.dialogs
+package ui.dialogs
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -10,21 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import models.Task
+import models.TaskItemModel
 
 @Composable
 fun AddSubTaskDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onAddNewSubtask: (String) -> Unit,
-    onLinkExistingTask: (Task) -> Unit,
-    allTasks: List<Task>
+    onLinkExistingTask: (TaskItemModel) -> Unit,
+    allTasks: List<TaskItemModel>
 ) {
     var dialogState by remember { mutableStateOf(AddSubTaskDialogState.SELECT_TYPE) }
     var taskTitle by remember { mutableStateOf("") }
@@ -262,8 +261,8 @@ private fun AddNewSubtaskContent(
 
 @Composable
 private fun LinkExistingTaskContent(
-    allTasks: List<Task>,
-    onTaskSelected: (Task) -> Unit,
+    allTasks: List<TaskItemModel>,
+    onTaskSelected: (TaskItemModel) -> Unit,
     onBack: () -> Unit,
     onDismiss: () -> Unit
 ) {
