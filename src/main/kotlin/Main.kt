@@ -3,7 +3,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import navigation.AppNavigation
+import ui.AppNavigation
 
 fun main() = application {
     Window(
@@ -16,6 +16,6 @@ fun main() = application {
             )
         )
     ) {
-        AppNavigation()
+        AppNavigation(Globals.mainViewModel)
     }
 }

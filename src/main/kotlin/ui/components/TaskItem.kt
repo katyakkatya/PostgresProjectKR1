@@ -1,4 +1,4 @@
-package gui.components
+package ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -26,12 +26,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import models.Task
+import models.TaskItemModel
 
 @Composable
-fun TaskCard(
-    task: Task,
-    onTaskClick: (Task) -> Unit
+fun TaskItem(
+    task: TaskItemModel,
+    onTaskClick: (TaskItemModel) -> Unit
 ) {
     Card(
         modifier = Modifier
