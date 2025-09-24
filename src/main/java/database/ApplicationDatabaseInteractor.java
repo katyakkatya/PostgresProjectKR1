@@ -94,7 +94,15 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) {
-        return null;
+        if(!this.isConnected())
+            return null;
+
+        try(Statement statement = this.connection.get().prepareStatement()){
+            return null;
+        }catch (SQLException e){
+            System.err.println();
+            return null;
+        }
     }
 
     @Override
@@ -104,7 +112,17 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Boolean deleteTask(Long taskId) {
-        return null;
+        if(!this.isConnected())
+            return false;
+
+        try(PreparedStatement statement = this.connection.get().prepareStatement("DELETE FROM task WHERE id = ?")){
+            statement.setLong(1, taskId);
+
+            return statement.executeQuery().rowDeleted();
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            return false;
+        }
     }
 
     @Override
@@ -114,7 +132,18 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Boolean createConnection(Long taskA, Long taskB) {
-        return null;
+        if(!this.isConnected())
+            return false;
+
+        try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO connected_task VALUES (?, ?)")){
+            statement.setLong(1, taskA);
+            statement.setLong(2, taskB);
+
+            return statement.executeQuery().rowInserted();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
     }
 
     @Override
