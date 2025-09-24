@@ -2,18 +2,18 @@ package database;
 
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
+import database.request.ConnectionRequest;
 import database.request.CreateTaskRequest;
 import database.request.TaskListRequest;
 import database.result.Result;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface DatabaseInteractor {
   /**
-   * Sets url to database
-   */
-  void setDatabaseUrl(String url);
+   * Try to connetc to DB
+   * */
+  Boolean tryConnect(ConnectionRequest request);
 
   /**
    * Checks if BOTH Task and TaskConnection tables exists

@@ -4,6 +4,7 @@ import database.DatabaseInteractor
 import database.model.DbTaskDetail
 import database.model.DbTaskItem
 import database.model.DbTaskStatus
+import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
 import database.request.TaskListRequest
 import database.result.Result
@@ -13,7 +14,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class StubDatabaseInteractor: DatabaseInteractor {
-  override fun setDatabaseUrl(url: String?) {
+  override fun tryConnect(request: ConnectionRequest?): Boolean? {
     TODO("Not yet implemented")
   }
 
