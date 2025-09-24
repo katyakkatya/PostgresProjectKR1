@@ -12,7 +12,6 @@ fun main() = application {
     var a = test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres",
         "postgres", "postgres"))
     test.createDatabase();
-    println(a)
 
     Window(
         onCloseRequest = ::exitApplication,

@@ -14,14 +14,13 @@ repositories {
 }
 
 extensions.configure<ComposeExtension> {
-    useComposeFiles.set(listOf("compose.yml")) // можно переименовать в docker-compose.yml
+    useComposeFiles.set(listOf("compose.yml"))
     stopContainers.set(true)
     removeContainers.set(true)
     removeVolumes.set(true)
     waitForTcpPorts.set(true)
     captureContainersOutput.set(true)
 
-    // Правильный способ установки environment variables
     environment.put("DB_PORT", "5432")
     environment.put("DB_HOST", "localhost")
 }
@@ -36,4 +35,11 @@ compose.desktop {
     application {
         mainClass = "MainKt"
     }
+}
+
+tasks.register("runApp"){
+    group = "Application"
+    dependsOn("build",
+        "composeUp", "run")
+    finalizedBy("composeDown")
 }

@@ -7,12 +7,8 @@ import database.request.CreateTaskRequest;
 import database.request.TaskListRequest;
 import database.result.Result;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Optional;
+import java.sql.*;
+import java.util.*;
 
 public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
@@ -45,7 +41,24 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Boolean databaseExists() {
-        return null;
+        if(!this.isConnected())
+            return false;
+        Map<String, Boolean> createdTables = new HashMap<>(2);
+
+        createdTables.put("task", false);
+        createdTables.put("connected_task", false);
+
+        try(Statement statement = this.connection.get().createStatement()){
+            ResultSet set = statement.executeQuery("SELECT * FROM pg_tables WHERE schemaname = 'public'");
+            while(set.next()){
+                createdTables.put(set.getString("tablename"), true);
+            }
+
+            return createdTables.values().stream().allMatch(value -> value.booleanValue() == true);
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            return false;
+        }
     }
 
     @Override
