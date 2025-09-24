@@ -5,7 +5,6 @@ import database.model.DbTaskItem;
 import database.request.CreateTaskRequest;
 import database.request.TaskListRequest;
 import database.result.Result;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -14,6 +13,12 @@ public interface DatabaseInteractor {
    * Sets url to database
    */
   void setDatabaseUrl(String url);
+
+  /**
+   * Tries to connect to database and returns true on success
+   * Url should be set before this method is called
+   */
+  Boolean tryConnect();
 
   /**
    * Checks if BOTH Task and TaskConnection tables exists

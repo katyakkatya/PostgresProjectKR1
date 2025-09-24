@@ -7,22 +7,19 @@ import database.model.DbTaskStatus
 import database.request.CreateTaskRequest
 import database.request.TaskListRequest
 import database.result.Result
-import java.time.LocalDate
-import java.util.Date
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import java.util.*
 
 class StubDatabaseInteractor: DatabaseInteractor {
   override fun setDatabaseUrl(url: String?) {
-    TODO("Not yet implemented")
+
   }
 
-  override fun databaseExists(): Boolean? {
-    TODO("Not yet implemented")
+  override fun databaseExists(): Boolean {
+    return true
   }
 
-  override fun createDatabase(): Boolean? {
-    TODO("Not yet implemented")
+  override fun createDatabase(): Boolean {
+    return true
   }
 
   override fun getTaskList(request: TaskListRequest?): Result<List<DbTaskItem?>?>? {
@@ -47,11 +44,15 @@ class StubDatabaseInteractor: DatabaseInteractor {
     TODO("Not yet implemented")
   }
 
-  override fun createConnection(taskA: Long?, taskB: Long?): Boolean? {
+  override fun createConnection(taskA: Long?, taskB: Long?): Boolean {
     TODO("Not yet implemented")
   }
 
-  override fun markSubtaskCompletion(taskId: Long?, index: Int?): Boolean? {
+  override fun markSubtaskCompletion(taskId: Long?, index: Int?): Boolean {
     TODO("Not yet implemented")
+  }
+
+  override fun tryConnect(): Boolean {
+    return true
   }
 }

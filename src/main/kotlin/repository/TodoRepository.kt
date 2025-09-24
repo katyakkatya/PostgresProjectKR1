@@ -38,7 +38,19 @@ class TodoRepository(
     }
   }
 
-  private fun showErrorMessage(message: String) {
+  fun showErrorMessage(message: String) {
     _errorMessageFlow.value = message
+  }
+
+  fun hideErrorMessage() {
+    _errorMessageFlow.value = null
+  }
+
+  fun tryCreateDatabase(): Boolean {
+    val result = interactor.createDatabase()
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при создании базы данных")
+    }
+    return result
   }
 }
