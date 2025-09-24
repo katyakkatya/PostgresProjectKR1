@@ -4,10 +4,10 @@ package ui
 import Globals
 import MainViewModel
 import androidx.compose.runtime.*
-import screens.TaskScreen
 import ui.Screen.*
 import ui.screens.connection.ConnectionScreen
 import ui.screens.database_creation.DatabaseCreationScreen
+import ui.screens.task_detail.TaskScreen
 import ui.screens.task_list.TaskListScreen
 
 sealed interface Screen {
@@ -23,6 +23,8 @@ fun AppNavigation(
 ) {
   var currentScreen by remember { mutableStateOf<Screen>(Screen.Connection) }
   val errorMessage by mainViewModel.errorMessageFlow.collectAsState(null)
+
+  val taskStack = remember { mutableStateListOf<Long>() }
 
   when (val screen = currentScreen) {
     Screen.Connection -> {
@@ -43,6 +45,7 @@ fun AppNavigation(
       TaskListScreen(
         viewModel = Globals.taskListViewModel,
         onTaskClick = { id ->
+          taskStack.add(id)
           currentScreen = TaskDetail(id)
         }
       )
@@ -52,9 +55,21 @@ fun AppNavigation(
       val viewModel = remember(screen.taskId) { Globals.taskDetailViewModelFactory(screen.taskId) }
       TaskScreen(
         viewModel = viewModel,
-        onBack = { currentScreen = Screen.TaskList },
-        onRelatedTaskClick = { relatedTask ->
-
+        onBack = {
+          if (taskStack.isNotEmpty()) {
+            taskStack.removeAt(taskStack.size - 1)
+            if (taskStack.isNotEmpty()) {
+              currentScreen = TaskDetail(taskStack.last())
+            } else {
+              currentScreen = TaskList
+            }
+          } else {
+            currentScreen = TaskList
+          }
+        },
+        onRelatedTaskClick = { relatedTaskId ->
+          taskStack.add(relatedTaskId)
+          currentScreen = TaskDetail(relatedTaskId)
         }
       )
     }

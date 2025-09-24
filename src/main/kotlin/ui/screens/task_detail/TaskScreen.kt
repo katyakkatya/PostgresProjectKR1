@@ -1,4 +1,4 @@
-package screens
+package ui.screens.task_detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,12 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,19 +16,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.components.SubTaskList
-import ui.components.TaskList
 import models.Subtask
 import models.TaskDetail
 import models.TaskItemModel
 import models.TaskStatus
-import ui.screens.task_detail.TaskDetailViewModel
+import ui.components.SubTaskList
+import ui.components.TaskList
+import ui.dialogs.AddSubTaskDialog
 
 @Composable
 fun TaskScreen(
     viewModel: TaskDetailViewModel,
     onBack: () -> Unit,
-    onRelatedTaskClick: (TaskItemModel) -> Unit
+    onRelatedTaskClick: (Long) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val task by viewModel.taskFlow.collectAsState(null)
@@ -142,7 +137,7 @@ private fun TaskScreenContent(
   task: TaskDetail,
   showDialog: Boolean,
   onDismissDialog: () -> Unit,
-  onRelatedTaskClick: (TaskItemModel) -> Unit
+  onRelatedTaskClick: (Long) -> Unit
 ) {
     //val allTasks = remember { TestData.sampleTasks }
 
@@ -155,20 +150,20 @@ private fun TaskScreenContent(
     ) {
         TaskHeader(task = task)
         TaskStatusInfo(task = task)
-//        SubtasksSection(subtasks = task.subtasks)
-//        RelatedTasksSection(
-//            relatedTasks = task.relatedTasks,
-//            onRelatedTaskClick = onRelatedTaskClick
-//        )
-//        AddSubTaskDialog(
-//            showDialog = showDialog,
-//            onDismiss = onDismissDialog,
-//            onAddNewSubtask = { title ->
-//            },
-//            onLinkExistingTask = { task ->
-//            },
-//            allTasks = allTasks
-//        )
+        SubtasksSection(subtasks = task.subtasks)
+        RelatedTasksSection(
+            relatedTasks = task.relatedTasks,
+            onRelatedTaskClick = onRelatedTaskClick
+        )
+        AddSubTaskDialog(
+            showDialog = showDialog,
+            onDismiss = onDismissDialog,
+            onAddNewSubtask = { title ->
+            },
+            onLinkExistingTask = { task ->
+            },
+            allTasks = listOf()
+        )
     }
 }
 
