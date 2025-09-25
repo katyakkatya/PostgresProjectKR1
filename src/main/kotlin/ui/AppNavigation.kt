@@ -1,38 +1,52 @@
 // Navigation.kt
 package ui
 
+import Globals
 import MainViewModel
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import ui.Screen.*
+import ui.screens.connection.ConnectionScreen
+import ui.screens.database_creation.DatabaseCreationScreen
+import ui.screens.task_detail.TaskScreen
 import ui.screens.task_list.TaskListScreen
-import screens.TaskScreen
 
-sealed class Screen {
-  object TaskList : Screen()
-  data class TaskDetail(val taskId: Long) : Screen()
+sealed interface Screen {
+  object Connection : Screen
+  object DatabaseCreation : Screen
+  object TaskList : Screen
+  data class TaskDetail(val taskId: Long) : Screen
 }
 
 @Composable
 fun AppNavigation(
   mainViewModel: MainViewModel,
 ) {
-  var currentScreen by remember { mutableStateOf<Screen>(Screen.TaskList) }
+  var currentScreen by remember { mutableStateOf<Screen>(Screen.Connection) }
   val errorMessage by mainViewModel.errorMessageFlow.collectAsState(null)
 
-  if (errorMessage != null) {
-    // TODO: Show error message popup
-  }
+  val taskStack = remember { mutableStateListOf<Long>() }
 
   when (val screen = currentScreen) {
+    Screen.Connection -> {
+      ConnectionScreen(
+        viewModel = Globals.connectionViewModel,
+        onConnectionSuccess = { currentScreen = DatabaseCreation }
+      )
+    }
+
+    Screen.DatabaseCreation -> {
+      DatabaseCreationScreen(
+        viewModel = Globals.databaseCreationViewModel,
+        onDatabaseCreated = { currentScreen = TaskList }
+      )
+    }
+
     is Screen.TaskList -> {
       TaskListScreen(
         viewModel = Globals.taskListViewModel,
         onTaskClick = { id ->
-          currentScreen = Screen.TaskDetail(id)
+          taskStack.add(id)
+          currentScreen = TaskDetail(id)
         }
       )
     }
@@ -41,11 +55,27 @@ fun AppNavigation(
       val viewModel = remember(screen.taskId) { Globals.taskDetailViewModelFactory(screen.taskId) }
       TaskScreen(
         viewModel = viewModel,
-        onBack = { currentScreen = Screen.TaskList },
-        onRelatedTaskClick = { relatedTask ->
-
+        onBack = {
+          if (taskStack.isNotEmpty()) {
+            taskStack.removeAt(taskStack.size - 1)
+            if (taskStack.isNotEmpty()) {
+              currentScreen = TaskDetail(taskStack.last())
+            } else {
+              currentScreen = TaskList
+            }
+          } else {
+            currentScreen = TaskList
+          }
+        },
+        onRelatedTaskClick = { relatedTaskId ->
+          taskStack.add(relatedTaskId)
+          currentScreen = TaskDetail(relatedTaskId)
         }
       )
     }
+  }
+
+  if (errorMessage != null) {
+    // TODO: Показывать модалку с текстом ошибки и кнопкой ок, при закрытии вызвать mainViewModel.onMessageSeen()
   }
 }
