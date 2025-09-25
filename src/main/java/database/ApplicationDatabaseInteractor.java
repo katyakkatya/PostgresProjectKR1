@@ -22,7 +22,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean tryConnect(ConnectionRequest request) {
+    public Boolean tryConnect(ConnectionRequest request) { // DONE
         /*
         String url1 = "jdbc:postgresql://localhost:9876/postgres";
         String user = "postgres";
@@ -43,7 +43,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean databaseExists() {
+    public Boolean databaseExists() { // DONE
         if(!this.isConnected())
             return false;
         Map<String, Boolean> createdTables = new HashMap<>(2);
@@ -65,7 +65,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean createDatabase() {
+    public Boolean createDatabase() { // DONE
         if(!this.isConnected())
             return false;
         List<String> commands = List.of(
@@ -100,18 +100,40 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) {
         if(!this.isConnected())
-            return null;
+            return new Result<>(null, "Not connected", false);
 
-        try(Statement statement = this.connection.get().prepareStatement("")){
-            return null;
+        StringBuilder builder = new StringBuilder("SELECT * FROM task WHERE status IN ('");
+        builder.append(request.statuses().getFirst().getName()).append("'");
+
+        for(int i = 1; i < request.statuses().size(); ++i){
+            builder.append(" ,'")
+                    .append(request.statuses().get(i).getName())
+                    .append("'");
+        }
+        builder.append(')');
+
+        try(Statement statement = this.connection.get().createStatement()){
+            ResultSet resultSet = statement.executeQuery(builder.toString());
+            List<DbTaskItem> dbTaskItems = new LinkedList<>();
+
+            while(resultSet.next()){
+                Boolean[] subtasks = (Boolean[]) resultSet.getArray("subtasks_status").getArray();
+                dbTaskItems.add(new DbTaskItem(
+                        resultSet.getLong("id"), resultSet.getString("title"),
+                        resultSet.getDate("date"), DbTaskStatus.converter(resultSet.getString("status")),
+                        subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
+                ));
+            }
+
+            return new Result<>(dbTaskItems, "Success", true);
         }catch (SQLException e){
-            System.err.println();
-            return null;
+            System.err.println(e.getMessage());
+            return new Result<>(null, e.getMessage(), false);
         }
     }
 
     @Override
-    public Result<DbTaskDetail> getTaskDetail(Long taskId) {
+    public Result<DbTaskDetail> getTaskDetail(Long taskId) { // DONE
         if(!this.isConnected())
             return new Result<>(null, "Not connected", false);
 
@@ -125,11 +147,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             ResultSet resultFroConnected = statementForConnected.executeQuery();
             List<DbTaskItem> dbTaskItems = new LinkedList<>();
             while(resultFroConnected.next()){
-                    Boolean[] r = (Boolean[]) resultFroConnected.getArray("subtasks_status").getArray();
+                    Boolean[] subtasks = (Boolean[]) resultFroConnected.getArray("subtasks_status").getArray();
                     dbTaskItems.add(new DbTaskItem(
                             resultFroConnected.getLong("id"), resultFroConnected.getString("title"),
                             resultFroConnected.getDate("date"), DbTaskStatus.converter(resultFroConnected.getString("status")),
-                        r.length, (int) Arrays.stream(r).filter(b -> b == true).count()
+                            subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
                     ));
             }
             resultFroConnected.close();
@@ -160,7 +182,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean deleteTask(Long taskId) {
+    public Boolean deleteTask(Long taskId) { // DONE
         if(!this.isConnected())
             return false;
 
@@ -175,7 +197,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Result<Long> createTask(CreateTaskRequest request) {
+    public Result<Long> createTask(CreateTaskRequest request) { // DONE
         if(!this.isConnected())
             return new Result<>(-1L, "Not connected", false);
 
@@ -216,7 +238,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean createConnection(Long taskA, Long taskB) {
+    public Boolean createConnection(Long taskA, Long taskB) { // DONE
         if(!this.isConnected())
             return false;
 

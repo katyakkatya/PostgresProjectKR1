@@ -4,8 +4,10 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import database.ApplicationDatabaseInteractor
+import database.model.DbTaskStatus
 import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
+import database.request.TaskListRequest
 import ui.AppNavigation
 import java.io.PrintStream
 
@@ -27,6 +29,7 @@ fun main() = application {
     test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2)));
     test.getTaskDetail(4L).data?.relatedTasks()?.forEach { dbTaskItem -> print(dbTaskItem.toString()) };
+    test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
     Window(
         onCloseRequest = ::exitApplication,
         title = "ToDo App",
