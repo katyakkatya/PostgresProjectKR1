@@ -13,20 +13,23 @@ import models.Subtask
 
 @Composable
 fun SubTaskList(
-    subtasks: List<Subtask>
+  subtasks: List<Subtask>,
+  onItemClick: (Int) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 400.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        itemsIndexed(
-            items = subtasks,
-            key = { index, subtask -> "subtask_${index}_${subtask.title}" }
-        ) { _, subtask ->
-            SubTaskCard(subtask = subtask)
-        }
+  LazyColumn(
+    modifier = Modifier
+      .fillMaxWidth()
+      .heightIn(max = 400.dp),
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+    contentPadding = PaddingValues(16.dp)
+  ) {
+    itemsIndexed(
+      items = subtasks,
+      key = { index, subtask -> "subtask_${index}_${subtask.title}" }
+    ) { index, subtask ->
+      SubTaskCard(subtask = subtask) {
+        onItemClick(index)
+      }
     }
+  }
 }

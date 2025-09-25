@@ -2,6 +2,7 @@ package database;
 
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
+import database.model.DbTaskStatus;
 import database.request.ConnectionRequest;
 import database.request.CreateTaskRequest;
 import database.request.TaskListRequest;
@@ -14,12 +15,6 @@ public interface DatabaseInteractor {
    * Try to connetc to DB
    * */
   Boolean tryConnect(ConnectionRequest request);
-
-  /**
-   * Tries to connect to database and returns true on success
-   * Url should be set before this method is called
-   */
-  Boolean tryConnect();// TODO: текст проверка наличия базы данных
 
   /**
    * Checks if BOTH Task and TaskConnection tables exists
@@ -61,4 +56,14 @@ public interface DatabaseInteractor {
    * Marks subtaskCount as completed and returns true on success
    */
   Boolean changeSubtaskCompletion(Long taskId, Integer index);
+
+  /**
+   * Adds subtask to task and returns true on success
+   */
+  Boolean addSubtask(Long taskId, String subtask);
+
+  /**
+   * Changes task status and returns true on success
+   */
+  Boolean updateStatus(Long taskId, DbTaskStatus status);
 }
