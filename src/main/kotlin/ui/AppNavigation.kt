@@ -26,6 +26,20 @@ fun AppNavigation(
 
   val taskStack = remember { mutableStateListOf<Long>() }
 
+  val onTaskDetailNavigateBack = {
+    if (taskStack.isNotEmpty()) {
+      taskStack.removeAt(taskStack.size - 1)
+      if (taskStack.isNotEmpty()) {
+        currentScreen = TaskDetail(taskStack.last())
+      } else {
+        currentScreen = TaskList
+      }
+    } else {
+      currentScreen = TaskList
+    }
+  }
+  GlobalNavigator.handlerNavigateToListOrPreviousTask = onTaskDetailNavigateBack
+
   when (val screen = currentScreen) {
     Screen.Connection -> {
       ConnectionScreen(
@@ -56,16 +70,7 @@ fun AppNavigation(
       TaskScreen(
         viewModel = viewModel,
         onBack = {
-          if (taskStack.isNotEmpty()) {
-            taskStack.removeAt(taskStack.size - 1)
-            if (taskStack.isNotEmpty()) {
-              currentScreen = TaskDetail(taskStack.last())
-            } else {
-              currentScreen = TaskList
-            }
-          } else {
-            currentScreen = TaskList
-          }
+          onTaskDetailNavigateBack()
         },
         onRelatedTaskClick = { relatedTaskId ->
           taskStack.add(relatedTaskId)
@@ -77,5 +82,14 @@ fun AppNavigation(
 
   if (errorMessage != null) {
     // TODO: Показывать модалку с текстом ошибки и кнопкой ок, при закрытии вызвать mainViewModel.onMessageSeen()
+  }
+}
+
+object GlobalNavigator {
+
+  var handlerNavigateToListOrPreviousTask: () -> Unit = {}
+
+  fun navigateToListOrPreviousTask() {
+    handlerNavigateToListOrPreviousTask()
   }
 }

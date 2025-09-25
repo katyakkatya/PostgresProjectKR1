@@ -8,8 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +41,7 @@ fun TaskScreen(
   task?.let { task ->
     Scaffold(
       topBar = {
-        TaskScreenTopBar(task = task, onBack = onBack)
+        TaskScreenTopBar(task = task, onDeleteClicked = { viewModel.openDeletionWindow() }, onBack = onBack)
       }
     ) { innerPadding ->
       TaskScreenContent(
@@ -62,11 +62,18 @@ fun TaskScreen(
 
   val subtaskState by viewModel.newSubtaskState.collectAsState(NewSubtaskState.Closed)
   // TODO: отрисовать окошко добавления подзадачи
+
+  val deletionWindowOpened by viewModel.deletionWindowOpenedFlow.collectAsState(false)
+  if (deletionWindowOpened) {
+    // TODO: отрисовать окошко подтверждения удаления задачи
+    // Текст предупреждения, Кнопки отмена и удалить
+  }
 }
 
 @Composable
 private fun TaskScreenTopBar(
   task: TaskDetail,
+  onDeleteClicked: () -> Unit,
   onBack: () -> Unit
 ) {
   Column(
@@ -101,12 +108,12 @@ private fun TaskScreenTopBar(
       )
 
       IconButton(
-        onClick = { /* Логика комментариев */ },
+        onClick = onDeleteClicked,
         modifier = Modifier.size(64.dp)
       ) {
         Icon(
-          imageVector = Icons.AutoMirrored.Filled.Comment,
-          contentDescription = "Комментарии",
+          imageVector = Icons.Default.Delete,
+          contentDescription = null,
           modifier = Modifier.size(48.dp),
           tint = Color.White
         )

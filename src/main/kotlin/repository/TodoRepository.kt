@@ -78,4 +78,20 @@ class TodoRepository(
     }
     return result
   }
+
+  fun deleteTask(taskId: Long): Boolean {
+    val result = interactor.deleteTask(taskId)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при удалении задачи")
+    }
+    return result
+  }
+
+  fun addRelatedTask(taskId: Long, relatedTaskId: Long): Boolean {
+    val result = interactor.createConnection(taskId, relatedTaskId)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при добавлении связанной задачи")
+    }
+    return result
+  }
 }
