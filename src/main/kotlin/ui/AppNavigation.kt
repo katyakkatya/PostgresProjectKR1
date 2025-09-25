@@ -76,6 +76,54 @@ fun AppNavigation(
   }
 
   if (errorMessage != null) {
-    // TODO: Показывать модалку с текстом ошибки и кнопкой ок, при закрытии вызвать mainViewModel.onMessageSeen()
+    // TODO: Проверить
+      Dialog() {
+          Surface(
+              modifier = Modifier
+                  .wrapContentHeight(),
+              shape = RoundedCornerShape(16.dp),
+              elevation = 8.dp
+          ) {
+              Column(
+                  modifier = Modifier.padding(vertical = 16.dp, horizontal = 64.dp),
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  verticalArrangement = Arrangement.Center
+              ) {
+                  Text(
+                      text = "Ошибка",
+                      fontSize = 32.sp,
+                      fontWeight = FontWeight.Bold,
+                      fontFamily = FontFamily.SansSerif,
+                      color = Color.DarkGray,
+                      modifier = Modifier.padding(vertical = 32.dp)
+                  )
+
+                  Text(
+                      text = errorMessage,
+                      fontSize = 24.sp,
+                      fontFamily = FontFamily.SansSerif,
+                      modifier = Modifier.padding(vertical = 32.dp)
+                  )
+
+                  Button(
+                      onClick = { mainViewModel.onMessageSeen() },
+                      modifier = Modifier.padding(vertical = 32.dp),
+                      shape = RoundedCornerShape(16.dp),
+                      colors = ButtonDefaults.buttonColors(
+                          backgroundColor = Color.Gray,
+                          contentColor = Color.White
+                      )
+                  ){
+                      Text(
+                          text = "OK",
+                          fontFamily = FontFamily.SansSerif,
+                          fontSize = 18.sp,
+                          fontWeight = FontWeight.W400,
+                          modifier = Modifier.padding(vertical = 12.dp, horizontal = 48.dp)
+                      )
+                  }
+              }
+          }
+      }
   }
 }
