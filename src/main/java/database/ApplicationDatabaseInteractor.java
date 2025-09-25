@@ -1,5 +1,6 @@
 package database;
 
+import androidx.compose.material.icons.sharp.SouthAmericaKt;
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.request.ConnectionRequest;
@@ -8,6 +9,7 @@ import database.request.TaskListRequest;
 import database.result.Result;
 
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 public class ApplicationDatabaseInteractor implements DatabaseInteractor{
@@ -21,7 +23,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     @Override
     public Boolean tryConnect(ConnectionRequest request) {
         /*
-        String url1 = "jdbc:postgresql://localhost:9876/postgres"; // одключение к бд
+        String url1 = "jdbc:postgresql://localhost:9876/postgres";
         String user = "postgres";
         String password = "postgres";
         * */
@@ -54,7 +56,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 createdTables.put(set.getString("tablename"), true);
             }
 
-            return createdTables.values().stream().allMatch(value -> value.booleanValue() == true);
+            return createdTables.values().stream().allMatch(value -> value == true);
         }catch (SQLException e){
             System.err.println(e.getMessage());
             return false;
@@ -66,13 +68,15 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if(!this.isConnected())
             return false;
         List<String> commands = List.of(
+                "DROP TABLE IF EXISTS connected_task",
+                "DROP TABLE IF EXISTS task",
                 "DROP TYPE IF EXISTS state CASCADE;", // FOR TEST
                 "CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
                 "CREATE TABLE IF NOT EXISTS task (\n" +
                         "id SERIAL PRIMARY KEY,\n" +
                         "title VARCHAR(100) NOT NULL UNIQUE CHECK (LENGTH(title) > 0),\n" +
                         "date DATE,\n" +
-                        "status state,\n" +
+                        "status state DEFAULT 'Бэклог',\n" +
                         "subtasks VARCHAR(100)[],\n" +
                         "subtasks_status BOOLEAN[]);",
                 "CREATE TABLE IF NOT EXISTS connected_task (\n" +
@@ -97,7 +101,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if(!this.isConnected())
             return null;
 
-        try(Statement statement = this.connection.get().prepareStatement()){
+        try(Statement statement = this.connection.get().prepareStatement("")){
             return null;
         }catch (SQLException e){
             System.err.println();
@@ -127,7 +131,43 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Result<Long> createTask(CreateTaskRequest request) {
-        return null;
+        if(!this.isConnected())
+            return new Result<>(-1L, "Not connected", false);
+
+        try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO task " +
+                "(title, date, subtasks, subtasks_status) VALUES (?, ?, ?, ?) RETURNING id")){
+            statement.setString(1, request.title());
+            statement.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            statement.setArray(3,
+                    this.connection.get().createArrayOf(
+                            "VARCHAR", request.subtasks().toArray(new String[0])));
+            Boolean[] boolArr = new Boolean[request.subtasks().size()];
+            Arrays.fill(boolArr, false);
+
+            statement.setArray(4, this.connection.get().createArrayOf("BOOLEAN",
+                    boolArr));
+
+            long id = -1L;
+
+            try(ResultSet res = statement.executeQuery();
+                PreparedStatement statementById = this.connection.get()
+                        .prepareStatement("INSERT INTO connected_task (task_id, another_task_id) VALUES (?, ?)")){
+                if(res.next()) {
+                    id = res.getLong("id");
+
+                    for (long taskId : request.tasksId()) {
+                        statementById.setLong(1, id);
+                        statementById.setLong(2, taskId);
+                        statementById.executeUpdate();
+                    }
+                }
+            }
+
+            return new Result<>(id, "%sInserted".formatted(id != -1 ? "" : "Not "), id != -1);
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            return new Result<Long>(-1L, e.getMessage(), false);
+        }
     }
 
     @Override
