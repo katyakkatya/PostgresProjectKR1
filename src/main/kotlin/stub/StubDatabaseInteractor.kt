@@ -4,14 +4,15 @@ import database.DatabaseInteractor
 import database.model.DbTaskDetail
 import database.model.DbTaskItem
 import database.model.DbTaskStatus
+import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
 import database.request.TaskListRequest
 import database.result.Result
 import java.util.*
 
 class StubDatabaseInteractor: DatabaseInteractor {
-  override fun setDatabaseUrl(url: String?) {
-
+  override fun tryConnect(request: ConnectionRequest?): Boolean? {
+    TODO("Not yet implemented")
   }
 
   override fun databaseExists(): Boolean {
@@ -80,7 +81,7 @@ class StubDatabaseInteractor: DatabaseInteractor {
     TODO("Not yet implemented")
   }
 
-  override fun markSubtaskCompletion(taskId: Long?, index: Int?): Boolean {
+  override fun changeSubtaskCompletion(taskId: Long?, index: Int?): Boolean? {
     TODO("Not yet implemented")
   }
 
