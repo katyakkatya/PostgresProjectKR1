@@ -84,8 +84,4 @@ class StubDatabaseInteractor: DatabaseInteractor {
   override fun changeSubtaskCompletion(taskId: Long?, index: Int?): Boolean? {
     TODO("Not yet implemented")
   }
-
-  override fun tryConnect(): Boolean {
-    return true
-  }
 }

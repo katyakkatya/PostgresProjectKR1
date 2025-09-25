@@ -16,12 +16,6 @@ public interface DatabaseInteractor {
   Boolean tryConnect(ConnectionRequest request);
 
   /**
-   * Tries to connect to database and returns true on success
-   * Url should be set before this method is called
-   */
-  Boolean tryConnect();
-
-  /**
    * Checks if BOTH Task and TaskConnection tables exists
    */
   Boolean databaseExists();
