@@ -2,6 +2,7 @@ package database;
 
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
+import database.request.ConnectionRequest;
 import database.request.CreateTaskRequest;
 import database.request.TaskListRequest;
 import database.result.Result;
@@ -10,9 +11,9 @@ import java.util.List;
 
 public interface DatabaseInteractor {
   /**
-   * Sets url to database
-   */
-  void setDatabaseUrl(String url);
+   * Try to connetc to DB
+   * */
+  Boolean tryConnect(ConnectionRequest request);
 
   /**
    * Tries to connect to database and returns true on success
@@ -59,5 +60,5 @@ public interface DatabaseInteractor {
   /**
    * Marks subtaskCount as completed and returns true on success
    */
-  Boolean markSubtaskCompletion(Long taskId, Integer index);
+  Boolean changeSubtaskCompletion(Long taskId, Integer index);
 }
