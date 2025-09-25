@@ -1,6 +1,5 @@
 package database;
 
-import androidx.compose.material.icons.sharp.SouthAmericaKt;
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.model.DbTaskStatus;
@@ -10,7 +9,6 @@ import database.request.TaskListRequest;
 import database.result.Result;
 
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 
 public class ApplicationDatabaseInteractor implements DatabaseInteractor{
@@ -272,7 +270,14 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean tryConnect() {
-        return true;
+    public Boolean addSubtask(Long taskId, String subtask) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public Boolean updateStatus(Long taskId, DbTaskStatus status) {
+        // TODO
+        return null;
     }
 }

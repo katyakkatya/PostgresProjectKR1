@@ -1,6 +1,7 @@
 package ui.screens.connection
 
 import database.DatabaseInteractor
+import database.request.ConnectionRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import repository.TodoRepository
 
@@ -10,6 +11,12 @@ class ConnectionViewModel(
 ) {
   private val _urlFlow = MutableStateFlow("")
   val urlFlow = _urlFlow
+
+  private val _usernameFlow = MutableStateFlow("")
+  val usernameFlow = _usernameFlow
+
+  private val _passwordFlow = MutableStateFlow("")
+  val passwordFlow = _passwordFlow
 
   private val _isLoadingFlow = MutableStateFlow(false)
   val isLoadingFlow = _isLoadingFlow
@@ -23,8 +30,9 @@ class ConnectionViewModel(
 
   fun tryConnect() {
     _isLoadingFlow.value = true
-    //databaseInteractor.setDatabaseUrl(urlFlow.value)
-    val result = databaseInteractor.tryConnect()
+    val result = databaseInteractor.tryConnect(
+      ConnectionRequest(_urlFlow.value, _usernameFlow.value, _passwordFlow.value)
+    )
     if (result == true) {
       _successfulConnectionFlow.value = true
     } else {

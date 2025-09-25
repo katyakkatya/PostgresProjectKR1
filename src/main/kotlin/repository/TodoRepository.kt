@@ -1,6 +1,7 @@
 package repository
 
 import database.DatabaseInteractor
+import database.model.DbTaskStatus
 import database.request.TaskListRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +56,30 @@ class TodoRepository(
     val result = interactor.createDatabase()
     if (result == false) {
       showErrorMessage("Произошла ошибка при создании базы данных")
+    }
+    return result
+  }
+
+  fun addSubtask(taskId: Long, subtask: String): Boolean {
+    val result = interactor.addSubtask(taskId, subtask)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при добавлении подзадачи")
+    }
+    return result
+  }
+
+  fun toggleSubtask(taskId: Long, index: Int): Boolean {
+    val result = interactor.changeSubtaskCompletion(taskId, index)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при переключении подзадачи")
+    }
+    return result
+  }
+
+  fun updateStatus(taskId: Long, status: DbTaskStatus): Boolean {
+    val result = interactor.updateStatus(taskId, status)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при обновлении статуса задачи")
     }
     return result
   }
