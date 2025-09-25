@@ -66,6 +66,12 @@ fun TaskListScreen(
       }
     }
   }
+
+  val newTaskState by viewModel.newTaskWindowStateFlow.collectAsState()
+  // TODO: нарисовать окно новой задачи
+
+  val taskSelectionState by viewModel.taskSelectWindowState.collectAsState()
+  // TODO: нарисовать окно выбора задачи из списка
 }
 
 // TODO: компонент для фильтра

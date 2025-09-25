@@ -11,10 +11,6 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,26 +24,26 @@ import models.Subtask
 
 @Composable
 fun SubTaskCard(
-    subtask: Subtask
+    subtask: Subtask,
+    onClick: () -> Unit
 ) {
-    var checked by remember { mutableStateOf(subtask.isCompleted) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
-            .clickable { checked = !checked },
+            .clickable { onClick() },
         shape = RoundedCornerShape(4.dp),
         elevation = 2.dp,
-        backgroundColor = if (checked) Color(0xFFE8F5E8) else Color.White
+        backgroundColor = if (subtask.isCompleted) Color(0xFFE8F5E8) else Color.White
     ) {
         Row(
             modifier = Modifier.padding(24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it },
+                checked = subtask.isCompleted,
+                onCheckedChange = { onClick() },
                 modifier = Modifier.size(48.dp),
                 colors = CheckboxDefaults.colors(
                     checkedColor = Color(0xFF27AE60),
@@ -63,8 +59,8 @@ fun SubTaskCard(
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Normal,
                 fontFamily = FontFamily.Serif,
-                color = if (checked) Color.Gray else Color.Black,
-                textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None
+                color = if (subtask.isCompleted) Color.Gray else Color.Black,
+                textDecoration = if (subtask.isCompleted) TextDecoration.LineThrough else TextDecoration.None
             )
         }
     }
