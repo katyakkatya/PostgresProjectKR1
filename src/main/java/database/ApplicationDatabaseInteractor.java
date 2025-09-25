@@ -271,4 +271,8 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    @Override
+    public Boolean tryConnect() {
+        return true;
+    }
 }

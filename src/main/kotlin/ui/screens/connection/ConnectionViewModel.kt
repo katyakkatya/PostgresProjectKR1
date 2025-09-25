@@ -23,7 +23,7 @@ class ConnectionViewModel(
 
   fun tryConnect() {
     _isLoadingFlow.value = true
-    databaseInteractor.setDatabaseUrl(urlFlow.value)
+    //databaseInteractor.setDatabaseUrl(urlFlow.value)
     val result = databaseInteractor.tryConnect()
     if (result == true) {
       _successfulConnectionFlow.value = true
