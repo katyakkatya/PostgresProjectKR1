@@ -52,7 +52,7 @@ class StubDatabaseInteractor: DatabaseInteractor {
     TODO("Not yet implemented")
   }
 
-  override fun markSubtaskCompletion(taskId: Long?, index: Int?): Boolean? {
+  override fun changeSubtaskCompletion(taskId: Long?, index: Int?): Boolean? {
     TODO("Not yet implemented")
   }
 }

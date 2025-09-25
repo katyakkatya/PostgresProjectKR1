@@ -98,7 +98,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) {
+    public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) { // DONE
         if(!this.isConnected())
             return new Result<>(null, "Not connected", false);
 
@@ -254,8 +254,21 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean markSubtaskCompletion(Long taskId, Integer index) {
-        return null;
+    public Boolean changeSubtaskCompletion(Long taskId, Integer index) { // DONE
+        if(!this.isConnected())
+            return false;
+
+        try(PreparedStatement statement = this.connection.get()
+                .prepareStatement("UPDATE task SET subtasks_status[?] = NOT subtasks_status[?] WHERE id = ?")){
+            statement.setLong(1, index + 1);
+            statement.setLong(2, index + 1);
+            statement.setLong(3, taskId);
+
+            return statement.executeUpdate() == 1;
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            return false;
+        }
     }
 
 }

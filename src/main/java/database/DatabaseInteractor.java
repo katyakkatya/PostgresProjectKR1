@@ -54,5 +54,5 @@ public interface DatabaseInteractor {
   /**
    * Marks subtaskCount as completed and returns true on success
    */
-  Boolean markSubtaskCompletion(Long taskId, Integer index);
+  Boolean changeSubtaskCompletion(Long taskId, Integer index);
 }
