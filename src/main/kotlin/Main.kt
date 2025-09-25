@@ -22,8 +22,11 @@ fun main() = application {
         "postgres", "postgres"))
     test.createDatabase();
 
-    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1)));
-
+    test.createTask(CreateTaskRequest("gjrt", listOf("w"), listOf()));
+    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf()));
+    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf()));
+    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2)));
+    test.getTaskDetail(4L).data?.relatedTasks()?.forEach { dbTaskItem -> print(dbTaskItem.toString()) };
     Window(
         onCloseRequest = ::exitApplication,
         title = "ToDo App",

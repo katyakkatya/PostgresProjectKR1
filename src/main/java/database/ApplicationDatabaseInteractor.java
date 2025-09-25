@@ -3,6 +3,7 @@ package database;
 import androidx.compose.material.icons.sharp.SouthAmericaKt;
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
+import database.model.DbTaskStatus;
 import database.request.ConnectionRequest;
 import database.request.CreateTaskRequest;
 import database.request.TaskListRequest;
@@ -111,7 +112,51 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Result<DbTaskDetail> getTaskDetail(Long taskId) {
-        return null;
+        if(!this.isConnected())
+            return new Result<>(null, "Not connected", false);
+
+        try(PreparedStatement statementForConnected = this.
+                connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, ct.task_id  \n" +
+                        "FROM connected_task ct INNER JOIN task t ON ct.another_task_id = t.id WHERE ct.task_id = ?");
+            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT * FROM task WHERE id = ?")){
+            // CONNECTED TASKS
+            statementForConnected.setLong(1, taskId);
+
+            ResultSet resultFroConnected = statementForConnected.executeQuery();
+            List<DbTaskItem> dbTaskItems = new LinkedList<>();
+            while(resultFroConnected.next()){
+                    Boolean[] r = (Boolean[]) resultFroConnected.getArray("subtasks_status").getArray();
+                    dbTaskItems.add(new DbTaskItem(
+                            resultFroConnected.getLong("id"), resultFroConnected.getString("title"),
+                            resultFroConnected.getDate("date"), DbTaskStatus.converter(resultFroConnected.getString("status")),
+                        r.length, (int) Arrays.stream(r).filter(b -> b == true).count()
+                    ));
+            }
+            resultFroConnected.close();
+
+            // THIS TASK
+            statementForTask.setLong(1, taskId);
+            ResultSet resultForTask = statementForTask.executeQuery();
+
+            DbTaskDetail dbTaskDetail = null;
+
+            if(resultForTask.next()){
+                dbTaskDetail = new DbTaskDetail(resultForTask.getLong("id"),
+                        resultForTask.getString("title"), resultForTask.getDate("date"),
+                        DbTaskStatus.converter(resultForTask.getString("status")),
+                        List.of((String[]) resultForTask.getArray("subtasks").getArray()),
+                        List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
+                        dbTaskItems);
+            }
+
+
+            return new Result<>(dbTaskDetail, "Done", true);
+
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            return new Result<>(null, e.getMessage(), false);
+        }
+
     }
 
     @Override
