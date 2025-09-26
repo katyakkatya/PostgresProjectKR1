@@ -2,6 +2,8 @@ package ui.screens.task_list
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -32,7 +34,7 @@ fun SelectConnectedTaskDialog(
         Surface(
           modifier = Modifier
             .width(600.dp)
-            .height(400.dp),
+            .height(800.dp),
           shape = RoundedCornerShape(16.dp),
           elevation = 8.dp
         ) {
@@ -51,10 +53,12 @@ fun SelectConnectedTaskDialog(
                 fontSize = 32.sp,
               )
             )
-            Column(
+            LazyColumn(
               modifier = Modifier.weight(1f),
             ) {
-              state.tasks.forEach { task ->
+              items(
+                items = state.tasks
+              ) { task ->
                 TaskItemClickable(task, onTaskClicked = {
                   onTaskSelected(task)
                   onWindowClosed()

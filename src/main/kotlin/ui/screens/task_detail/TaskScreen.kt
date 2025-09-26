@@ -1,9 +1,9 @@
 package ui.screens.task_detail
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -19,8 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -40,7 +38,6 @@ fun TaskScreen(
   onBack: () -> Unit,
   onRelatedTaskClick: (Long) -> Unit
 ) {
-  var showDialog by remember { mutableStateOf(false) }
   val task by viewModel.taskFlow.collectAsState(null)
 
   task?.let { task ->
@@ -52,8 +49,6 @@ fun TaskScreen(
       TaskScreenContent(
         innerPadding = innerPadding,
         task = task,
-        showDialog = showDialog,
-        onDismissDialog = { showDialog = false },
         onRelatedTaskClick = onRelatedTaskClick,
         onSubtaskToggled = { index ->
           viewModel.toggleSubtask(index)
@@ -61,7 +56,8 @@ fun TaskScreen(
         onStatusChanged = { status ->
           viewModel.updateStatus(status)
         },
-        onAddSubtaskClick = {viewModel.openSubtaskWindow()}
+        onAddSubtaskClick = { viewModel.openSubtaskWindow() },
+        onAddRelatedTaskClick = { viewModel.openRelatedTaskWindow() }
       )
     }
   }
@@ -72,9 +68,25 @@ fun TaskScreen(
     is NewSubtaskState.Opened -> {
       AddSubtaskWindow(viewModel)
     }
-    NewSubtaskState.Closed -> {
-      // Логика для закрытого состояния
+
+    NewSubtaskState.Closed -> Unit
+  }
+
+  val relatedTasksState by viewModel.relatedTasksStateFlow.collectAsState(NewRelatedTaskState.Closed)
+  when (relatedTasksState) {
+    is NewRelatedTaskState.Opened -> {
+      AddRelatedTaskWindow(
+        state = relatedTasksState as NewRelatedTaskState.Opened,
+        onWindowClosed = {
+          viewModel.closeRelatedTaskWindow()
+        },
+        onTaskSelected = { task ->
+          viewModel.addRelatedTask(task.id)
+        }
+      )
     }
+
+    NewRelatedTaskState.Closed -> Unit
   }
 
   val deletionWindowOpened by viewModel.deletionWindowOpenedFlow.collectAsState(false)
@@ -166,33 +178,35 @@ private fun AddSubTaskFloatingButton(onClick: () -> Unit) {
 private fun TaskScreenContent(
   innerPadding: PaddingValues,
   task: TaskDetail,
-  showDialog: Boolean,
-  onDismissDialog: () -> Unit,
   onAddSubtaskClick: () -> Unit,
   onSubtaskToggled: (Int) -> Unit,
   onRelatedTaskClick: (Long) -> Unit,
   onStatusChanged: (DbTaskStatus) -> Unit,
+  onAddRelatedTaskClick: () -> Unit,
 ) {
-  Column(
+  LazyColumn(
     modifier = Modifier
       .fillMaxSize()
       .background(color = Color.LightGray)
       .padding(innerPadding)
-      .padding(24.dp)
+      .padding(horizontal = 24.dp)
   ) {
-    TaskHeader(task = task)
-    TaskStatusInfo(task = task) { status ->
-      onStatusChanged(status)
+    item {
+      TaskHeader(task = task)
+      TaskStatusInfo(task = task) { status ->
+        onStatusChanged(status)
+      }
+      SubtasksSection(
+        subtasks = task.subtasks,
+        onItemClick = { index -> onSubtaskToggled(index) },
+        onAddSubtaskClick = onAddSubtaskClick
+      )
+      RelatedTasksSection(
+        relatedTasks = task.relatedTasks,
+        onRelatedTaskClick = onRelatedTaskClick,
+        onAddRelatedTaskClick = onAddRelatedTaskClick,
+      )
     }
-    SubtasksSection(
-      subtasks = task.subtasks,
-      onItemClick = { index -> onSubtaskToggled(index) },
-      onAddSubtaskClick = onAddSubtaskClick
-    )
-    RelatedTasksSection(
-      relatedTasks = task.relatedTasks,
-      onRelatedTaskClick = onRelatedTaskClick
-    )
   }
 }
 
@@ -306,7 +320,8 @@ private fun SubtasksSection(subtasks: List<Subtask>, onItemClick: (Int) -> Unit,
 @Composable
 private fun RelatedTasksSection(
   relatedTasks: List<TaskItemModel>,
-  onRelatedTaskClick: (Long) -> Unit
+  onRelatedTaskClick: (Long) -> Unit,
+  onAddRelatedTaskClick: () -> Unit,
 ) {
   if (relatedTasks.isNotEmpty()) {
     Text(
@@ -321,12 +336,31 @@ private fun RelatedTasksSection(
       onTaskClick = onRelatedTaskClick
     )
   }
+  Button(
+    onClick = onAddRelatedTaskClick,
+    shape = RoundedCornerShape(16.dp),
+    modifier = Modifier.padding(24.dp),
+    colors = ButtonDefaults.buttonColors(
+      backgroundColor = Color.Gray,
+      contentColor = Color.Transparent
+    ),
+    elevation = null
+  ) {
+    Text(
+      text = "Добавить связанную задачу",
+      fontFamily = FontFamily.SansSerif,
+      fontSize = 24.sp,
+      fontWeight = FontWeight.W500,
+      color = Color.White,
+      modifier = Modifier.padding(vertical = 12.dp, horizontal = 24.dp)
+    )
+  }
 }
 
 @Composable
 private fun DeletionWindow(
   viewModel: TaskDetailViewModel
-){
+) {
   Dialog(onDismissRequest = {}) {
     Surface(
       modifier = Modifier
@@ -358,7 +392,7 @@ private fun DeletionWindow(
 
         Row {
           Button(
-            onClick = {viewModel.closeDeletionWindow()},
+            onClick = { viewModel.closeDeletionWindow() },
             modifier = Modifier
               .padding(24.dp).weight(1f),
             shape = RoundedCornerShape(16.dp),
@@ -377,7 +411,7 @@ private fun DeletionWindow(
           }
           Spacer(modifier = Modifier.width(16.dp))
           Button(
-            onClick = {viewModel.deleteTask()},
+            onClick = { viewModel.deleteTask() },
             modifier = Modifier
               .padding(24.dp).weight(1f),
             shape = RoundedCornerShape(16.dp),
@@ -403,7 +437,7 @@ private fun DeletionWindow(
 @Composable
 private fun AddSubtaskWindow(
   viewModel: TaskDetailViewModel
-){
+) {
   var subtask by remember { mutableStateOf("") }
   Dialog(onDismissRequest = {}) {
     Surface(
@@ -430,7 +464,8 @@ private fun AddSubtaskWindow(
           value = subtask,
           onValueChange = {
             subtask = it
-            viewModel.editSubtask(it) },
+            viewModel.editSubtask(it)
+          },
           placeholder = {
             Text(
               text = "Введите название подзадачи",
@@ -464,7 +499,7 @@ private fun AddSubtaskWindow(
 
         Row {
           Button(
-            onClick = {viewModel.closeSubtaskWindow()},
+            onClick = { viewModel.closeSubtaskWindow() },
             modifier = Modifier
               .padding(24.dp).weight(1f),
             shape = RoundedCornerShape(16.dp),
@@ -483,7 +518,7 @@ private fun AddSubtaskWindow(
           }
           Spacer(modifier = Modifier.width(16.dp))
           Button(
-            onClick = {viewModel.addSubtask(subtask)},
+            onClick = { viewModel.addSubtask(subtask) },
             modifier = Modifier
               .padding(24.dp).weight(1f),
             shape = RoundedCornerShape(16.dp),

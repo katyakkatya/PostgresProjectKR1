@@ -30,7 +30,13 @@ class StubDatabaseInteractor : DatabaseInteractor {
     println("StubDatabaseInteractor: getTaskList called with request: $request")
     return Result(
       listOf(
-        DbTaskItem(1, "Тестовая таска", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 10, 5)
+        DbTaskItem(1, "Тестовая таска", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 10, 5),
+        DbTaskItem(2, "Тестовая таска 2", Date.from(java.time.Instant.now()), DbTaskStatus.BACKLOG, 10, 5),
+        DbTaskItem(3, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
+        DbTaskItem(4, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
+        DbTaskItem(5, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
+        DbTaskItem(6, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
+        DbTaskItem(7, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
       ),
       null,
       true

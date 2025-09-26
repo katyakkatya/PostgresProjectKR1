@@ -33,6 +33,7 @@ sealed interface Screen {
   object DatabaseCreation : Screen
   object TaskList : Screen
   data class TaskDetail(val taskId: Long) : Screen
+  object Logs : Screen
 }
 
 @Composable
@@ -79,7 +80,8 @@ fun AppNavigation(
         onTaskClick = { id ->
           taskStack.add(id)
           currentScreen = TaskDetail(id)
-        }
+        },
+        onLogsClicked = { currentScreen = Screen.Logs }
       )
     }
 
@@ -95,6 +97,10 @@ fun AppNavigation(
           currentScreen = TaskDetail(relatedTaskId)
         }
       )
+    }
+
+    Screen.Logs -> {
+      // TODO: экран логов
     }
   }
 
