@@ -1,3 +1,4 @@
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -9,6 +10,7 @@ import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
 import database.request.TaskListRequest
 import ui.AppNavigation
+import java.awt.Dimension
 import java.io.PrintStream
 
 
@@ -38,9 +40,13 @@ fun main() = application {
             size = DpSize(
                 width = 800.dp,
                 height = 1200.dp
-            )
-        )
+            ),
+        ),
     ) {
+        val density = LocalDensity.current
+        val minWidth = with(density) { 300.dp.toPx().toInt() }
+        val minHeight = with(density) { 500.dp.toPx().toInt() }
+        window.minimumSize = Dimension(minWidth, minHeight)
         AppNavigation(Globals.mainViewModel)
     }
 }

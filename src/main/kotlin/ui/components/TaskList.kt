@@ -12,22 +12,22 @@ import models.TaskItemModel
 
 @Composable
 fun TaskList(
-    tasks: List<TaskItemModel>,
-    onTaskClick: (Long) -> Unit
+  tasks: List<TaskItemModel>,
+  onTaskClick: (Long) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(
-            items = tasks,
-            key = { it.title }
-        ) { task ->
-            TaskItem(
-                task = task,
-                onTaskClick = { onTaskClick(it.id) }
-            )
-        }
+  LazyColumn(
+    modifier = Modifier.fillMaxSize(),
+    contentPadding = PaddingValues(16.dp),
+    verticalArrangement = Arrangement.spacedBy(12.dp)
+  ) {
+    items(
+      items = tasks,
+      key = { it.title }
+    ) { task ->
+      TaskItem(
+        task = task,
+        onTaskClick = { onTaskClick(it.id) }
+      )
     }
+  }
 }

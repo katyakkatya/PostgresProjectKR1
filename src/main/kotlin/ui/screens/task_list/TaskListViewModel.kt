@@ -23,8 +23,7 @@ class TaskListViewModel(
 
   private val _statusFilterFlow = MutableStateFlow(
     mutableSetOf(
-      DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW,
-      DbTaskStatus.DONE, DbTaskStatus.DROPPED
+      DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW, DbTaskStatus.DONE, DbTaskStatus.DROPPED
     )
   )
   val statusFilterFlow = _statusFilterFlow
@@ -47,7 +46,7 @@ class TaskListViewModel(
     updateList()
   }
 
-  fun openNewTaskWindow(taskId: Long) {
+  fun openNewTaskWindow() {
     _newTaskWindowStateFlow.value = NewTaskWindowState.Opened()
   }
 
@@ -59,25 +58,28 @@ class TaskListViewModel(
     _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(taskName = name)
   }
 
-  fun editSubtask(subtask: String, index: Int) {
+  fun editSubtask(index: Int, subtask: String) {
     val state = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened)
     _newTaskWindowStateFlow.value = state.copy(
-      subtasks = state.subtasks.toMutableList().apply { set(index, subtask) }
-    )
+      subtasks = state.subtasks.toMutableList().apply { set(index, subtask) })
   }
 
   fun addSubtask() {
     val state = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened)
     _newTaskWindowStateFlow.value = state.copy(
-      subtasks = state.subtasks.toMutableList().apply { add("") }
-    )
+      subtasks = state.subtasks.toMutableList().apply { add("") })
   }
 
   fun addConnectedTask(task: TaskItemModel) {
     val state = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened)
     _newTaskWindowStateFlow.value = state.copy(
-      connectedTasks = state.connectedTasks.toMutableList().apply { add(task) }
-    )
+      connectedTasks = state.connectedTasks.toMutableList().apply { add(task) })
+  }
+
+  fun removeConnectedTask(index: Int) {
+    val state = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened)
+    _newTaskWindowStateFlow.value = state.copy(
+      connectedTasks = state.connectedTasks.toMutableList().apply { removeAt(index) })
   }
 
   fun openTaskSelectWindow() {
@@ -85,13 +87,50 @@ class TaskListViewModel(
       val state = _newTaskWindowStateFlow.value as NewTaskWindowState.Opened
       _taskSelectWindowState.value = TaskSelectWindowState.Opened(
         tasks = tasksListFlow.first()
-          .filter { task -> task.id !in state.connectedTasks.map { connectedTask -> connectedTask.id } }
-      )
+          .filter { task -> task.id !in state.connectedTasks.map { connectedTask -> connectedTask.id } })
     }
   }
 
   fun closeTaskSelectWindow() {
     _taskSelectWindowState.value = TaskSelectWindowState.Closed
+  }
+
+  fun onSubtaskDeleted(index: Int) {
+    _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(
+      subtasks = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).subtasks.toMutableList()
+        .apply { removeAt(index) })
+  }
+
+  fun saveNewTask() {
+    val state = _newTaskWindowStateFlow.value as NewTaskWindowState.Opened
+    _newTaskWindowStateFlow.value = state.copy(error = null)
+    if (!validateNewTask(state)) {
+      return
+    }
+    val result = todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id })
+    if (result.success) {
+      closeNewTaskWindow()
+    }
+  }
+
+  private fun validateNewTask(state: NewTaskWindowState.Opened): Boolean {
+    state.subtasks.forEach { subtask ->
+      if (subtask.trim().length < 3) {
+        _newTaskWindowStateFlow.value = state.copy(error = "Подзача должна быть минимум 3 символа")
+        return false
+      } else if (subtask.trim().length >= 100) {
+        _newTaskWindowStateFlow.value = state.copy(error = "Подзача должна быть максимум 100 символов")
+        return false
+      }
+    }
+    if (state.taskName.trim().length < 3) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Название должно быть минимум 3 символа")
+      return false
+    } else if (state.taskName.trim().length >= 100) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Название должно быть максимум 100 символов")
+      return false
+    }
+    return true
   }
 }
 
