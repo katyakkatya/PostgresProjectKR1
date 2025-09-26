@@ -270,9 +270,20 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean addSubtask(Long taskId, String subtask) {
-        // TODO
-        return null;
+    public Boolean addSubtask(Long taskId, String subtask) { // DONE
+        if(!this.isConnected())
+            return false;
+
+        try(PreparedStatement statement = this.connection.get()
+                .prepareStatement("UPDATE task SET subtasks = subtasks || ?, subtasks_status = subtasks_status || FALSE WHERE id = ?")){
+            statement.setString(1, subtask);
+            statement.setLong(2, taskId);
+
+            return statement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
     }
 
     @Override

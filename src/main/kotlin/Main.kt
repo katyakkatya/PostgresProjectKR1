@@ -30,9 +30,12 @@ fun main() = application {
     test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2)));
-    test.changeSubtaskCompletion(1, 0);
-    test.getTaskDetail(1L).data?.relatedTasks()?.forEach { dbTaskItem -> print(dbTaskItem.toString()) };
-    test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
+    //test.changeSubtaskCompletion(1, 0);
+    println(test.addSubtask(1, "test"))
+    test.getTaskDetail(1L).data?.subtaskStatus()?.forEach { s -> println(s) };
+    //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
+
+
     Window(
         onCloseRequest = ::exitApplication,
         title = "ToDo App",
