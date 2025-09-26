@@ -21,7 +21,6 @@ class TodoRepository(
 
   private val _errorMessageFlow = MutableStateFlow<String?>(null)
   val errorMessageFlow: Flow<String?> = _errorMessageFlow
-
   fun getTasksList(request: TaskListRequest) {
     val result = interactor.getTaskList(request)
     if (result.success) {
