@@ -16,11 +16,13 @@ import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -82,7 +84,6 @@ fun TaskListScreen(
   )
 }
 
-// TODO: компонент для фильтра
 @Composable
 fun FilterStatusItem(
   enabled: Boolean,
@@ -90,16 +91,29 @@ fun FilterStatusItem(
   onClick: () -> Unit
 ) {
   Row(
-    modifier = Modifier.clickable { onClick() },
-    verticalAlignment = Alignment.CenterVertically
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable { onClick() }
+      .padding(vertical = 12.dp, horizontal = 8.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween
   ) {
-    if (enabled) {
-      Text("вкл")
-    }
-    Text(status.name)
+    Text(
+      text = status.name.replace("_", " ").replaceFirstChar { it.uppercase() },
+      fontSize = 20.sp
+    )
+
+    Checkbox(
+      checked = enabled,
+      onCheckedChange = { onClick() },
+      modifier = Modifier.size(36.dp),
+      colors = CheckboxDefaults.colors(
+        checkedColor = Color.DarkGray,
+        uncheckedColor = Color.Gray
+      )
+    )
   }
 }
-
 @Composable
 private fun TaskListTopBar() {
   var expanded by remember { mutableStateOf(false) }
@@ -138,7 +152,7 @@ private fun TaskListTopBar() {
         DropdownMenu(
           expanded = expanded,
           onDismissRequest = { expanded = false },
-          modifier = Modifier.width(280.dp)
+          modifier = Modifier.width(380.dp).clip(RoundedCornerShape(8.dp))
         ) {
           FiltersPopupContent( onDismiss = { expanded = false })
         }
@@ -154,17 +168,16 @@ fun FiltersPopupContent(
   Column(
     modifier = Modifier.padding(8.dp)
   ) {
-    // Заголовок
     Text(
       text = "Фильтры по статусу",
-      fontSize = 16.sp,
-      fontWeight = FontWeight.Bold,
-      modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+      fontSize = 28.sp,
+      fontWeight = FontWeight.W500,
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+      textAlign = TextAlign.Center
     )
 
     Divider(modifier = Modifier.padding(bottom = 8.dp))
 
-    // Список статусов
     val statuses = listOf(
       DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW,
       DbTaskStatus.DONE, DbTaskStatus.DROPPED
@@ -174,33 +187,58 @@ fun FiltersPopupContent(
       FilterStatusItem(
         enabled = false,
         status = status,
-        onClick = {
-//          viewModel.toggleStatusFilter(status)
-          // onDismiss() // можно закрывать после выбора или оставлять открытым
-        }
+        onClick = {}
       )
     }
 
     Divider(modifier = Modifier.padding(top = 8.dp))
 
-    // Кнопки действий
     Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(top = 8.dp),
-      horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-      TextButton(onClick = {
-      }) {
-        Text("Сбросить")
+      modifier = Modifier.fillMaxSize(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center
+    ){
+      Button(
+        onClick = {},
+        modifier = Modifier
+          .padding(12.dp).weight(1f),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = Color.Gray,
+          contentColor = Color.White
+        )
+      ) {
+        Text(
+          text = "Сбросить",
+          fontFamily = FontFamily.SansSerif,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.W400,
+          modifier = Modifier.padding(vertical = 8.dp)
+        )
       }
-
-      Button(onClick = onDismiss) {
-        Text("Готово")
+      Spacer(modifier = Modifier.width(16.dp))
+      Button(
+        onClick = {},
+        modifier = Modifier
+          .padding(12.dp).weight(1f),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+          backgroundColor = Color.DarkGray,
+          contentColor = Color.White
+        )
+      ) {
+        Text(
+          text = "Применить",
+          fontFamily = FontFamily.SansSerif,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.W400,
+          modifier = Modifier.padding(vertical = 8.dp)
+        )
       }
     }
   }
 }
+
 @Composable
 private fun AddTaskFloatingButton(
   onClick: () -> Unit
