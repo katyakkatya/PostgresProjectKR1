@@ -18,7 +18,7 @@ class StubDatabaseInteractor : DatabaseInteractor {
 
   override fun databaseExists(): Boolean {
     println("StubDatabaseInteractor: databaseExists called")
-    return true
+    return false
   }
 
   override fun createDatabase(): Boolean {

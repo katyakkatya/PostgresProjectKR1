@@ -71,7 +71,7 @@ fun DatabaseCreationScreen(
             textAlign = TextAlign.Center
           )
           Button(
-            onClick = { },
+            onClick = {viewModel.createDatabase()},
             modifier = Modifier.padding(top = 64.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -110,7 +110,7 @@ fun DatabaseCreationScreen(
           textAlign = TextAlign.Center
         )
         Button(
-          onClick = {},
+          onClick = {onDatabaseCreated()},
           modifier = Modifier.padding(top = 64.dp),
           shape = RoundedCornerShape(16.dp),
           colors = ButtonDefaults.buttonColors(
