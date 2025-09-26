@@ -225,6 +225,12 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         statementById.setLong(2, taskId);
                         statementById.executeUpdate();
                     }
+
+                    for(long taskId : request.tasksId()){
+                        statementById.setLong(1, taskId);
+                        statementById.setLong(2, id);
+                        statementById.executeUpdate();
+                    }
                 }
             }
 
@@ -243,8 +249,12 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO connected_task VALUES (?, ?)")){
             statement.setLong(1, taskA);
             statement.setLong(2, taskB);
+            int first = statement.executeUpdate();
 
-            return statement.executeQuery().rowInserted();
+            statement.setLong(2, taskA);
+            statement.setLong(1, taskB);
+
+            return 2 == (first + statement.executeUpdate());
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return false;
