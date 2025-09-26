@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import database.model.DbTaskStatus
 import models.Subtask
 import models.TaskDetail
@@ -65,8 +66,77 @@ fun TaskScreen(
 
   val deletionWindowOpened by viewModel.deletionWindowOpenedFlow.collectAsState(false)
   if (deletionWindowOpened) {
-    // TODO: отрисовать окошко подтверждения удаления задачи
-    // Текст предупреждения, Кнопки отмена и удалить
+    Dialog(onDismissRequest = {}) {
+      Surface(
+        modifier = Modifier
+          .wrapContentHeight(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = 8.dp
+      ) {
+        Column(
+          modifier = Modifier.padding(vertical = 16.dp, horizontal = 48.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center
+        ) {
+          Text(
+            text = "Удаление",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.SansSerif,
+            color = Color.DarkGray,
+            modifier = Modifier.padding(vertical = 32.dp)
+          )
+
+          Text(
+            text = "Задача будет удалена без возможности восстановления.\n\nВы уверены, что хотите это сделать?",
+            fontSize = 28.sp,
+            fontFamily = FontFamily.SansSerif,
+            modifier = Modifier.padding(vertical = 32.dp),
+            textAlign = TextAlign.Center
+          )
+
+          Row {
+            Button(
+              onClick = {viewModel.closeDeletionWindow()},
+              modifier = Modifier
+                .padding(24.dp).weight(1f),
+              shape = RoundedCornerShape(16.dp),
+              colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Gray,
+                contentColor = Color.White
+              )
+            ) {
+              Text(
+                text = "Отмена",
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.W400,
+                modifier = Modifier.padding(vertical = 12.dp)
+              )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Button(
+              onClick = {viewModel.deleteTask()},
+              modifier = Modifier
+                .padding(24.dp).weight(1f),
+              shape = RoundedCornerShape(16.dp),
+              colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Red,
+                contentColor = Color.White
+              )
+            ) {
+              Text(
+                text = "Удалить",
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.W400,
+                modifier = Modifier.padding(vertical = 12.dp)
+              )
+            }
+          }
+        }
+      }
+    }
   }
 }
 
