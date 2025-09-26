@@ -61,13 +61,23 @@ fun SelectConnectedTaskDialog(
                 })
               }
             }
-            // TODO: заменить кнопки
             Button(
-              onClick = {
-                onWindowClosed()
-              }
+              onClick = { onWindowClosed() },
+              modifier = Modifier
+                .padding(24.dp),
+              shape = RoundedCornerShape(16.dp),
+              colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Gray,
+                contentColor = Color.White
+              )
             ) {
-              Text("отмена")
+              Text(
+                text = "Отмена",
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.W400,
+                modifier = Modifier.padding(vertical = 12.dp, horizontal = 48.dp)
+              )
             }
           }
         }

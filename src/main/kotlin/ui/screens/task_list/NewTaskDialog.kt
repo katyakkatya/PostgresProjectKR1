@@ -215,56 +215,48 @@ fun NewTaskDialog(
               Spacer(modifier = Modifier.height(16.dp))
             }
             Row {
-              // TODO: заменить кнопки
               Button(
                 onClick = onNewTaskClosed,
                 modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 24.dp)
-                  .weight(1f)
-                  .height(60.dp),
+                  .padding(24.dp).weight(1f),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                  backgroundColor = Color.Black,
+                  backgroundColor = Color.Gray,
                   contentColor = Color.White
                 )
               ) {
                 Text(
                   text = "Отмена",
-                  style = LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    color = Color.White
-                  )
+                  fontFamily = FontFamily.SansSerif,
+                  fontSize = 22.sp,
+                  fontWeight = FontWeight.W400,
+                  modifier = Modifier.padding(vertical = 12.dp)
                 )
               }
               Spacer(modifier = Modifier.width(16.dp))
               Button(
                 onClick = onNewTaskSaved,
                 modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 24.dp)
-                  .weight(1f)
-                  .height(60.dp),
+                  .padding(24.dp).weight(1f),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                  backgroundColor = Color.Black,
+                  backgroundColor = Color.Gray,
                   contentColor = Color.White
                 )
               ) {
                 Text(
                   text = "Сохранить",
-                  style = LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    color = Color.White
-                  )
+                  fontFamily = FontFamily.SansSerif,
+                  fontSize = 22.sp,
+                  fontWeight = FontWeight.W400,
+                  modifier = Modifier.padding(vertical = 12.dp)
                 )
               }
             }
-
           }
         }
       }
-
     }
-
   }
 }
 

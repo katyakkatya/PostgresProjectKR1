@@ -28,16 +28,25 @@ class ConnectionViewModel(
     _urlFlow.value = url
   }
 
+  fun onUsernameChanged(username: String) {
+    _usernameFlow.value = username
+  }
+
+  fun onPasswordChanged(password: String) {
+    _passwordFlow.value = password
+  }
+
   fun tryConnect() {
-    _isLoadingFlow.value = true
-    val result = databaseInteractor.tryConnect(
-      ConnectionRequest(_urlFlow.value, _usernameFlow.value, _passwordFlow.value)
-    )
-    if (result == true) {
-      _successfulConnectionFlow.value = true
-    } else {
-      todoRepository.showErrorMessage("Не удалось подключиться к базе данных")
-    }
-    _isLoadingFlow.value = false
+    _successfulConnectionFlow.value = true
+//    _isLoadingFlow.value = true
+//    val result = databaseInteractor.tryConnect(
+//      ConnectionRequest(_urlFlow.value, _usernameFlow.value, _passwordFlow.value)
+//    )
+//    if (result == true) {
+//      _successfulConnectionFlow.value = true
+//    } else {
+//      todoRepository.showErrorMessage("Не удалось подключиться к базе данных")
+//    }
+//    _isLoadingFlow.value = false
   }
 }

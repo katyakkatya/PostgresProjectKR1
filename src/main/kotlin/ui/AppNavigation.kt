@@ -99,7 +99,6 @@ fun AppNavigation(
   }
 
   if (errorMessage != null) {
-    // TODO: Артем проверяй
     Dialog(onDismissRequest = {}) {
       Surface(
         modifier = Modifier
