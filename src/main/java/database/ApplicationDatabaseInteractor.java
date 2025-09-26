@@ -287,8 +287,19 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean updateStatus(Long taskId, DbTaskStatus status) {
-        // TODO
-        return null;
+    public Boolean updateStatus(Long taskId, DbTaskStatus status) { // DONE
+        if(!this.isConnected())
+            return false;
+
+        try(PreparedStatement statement = this.connection.get()
+                .prepareStatement("UPDATE task SET status = ?::state WHERE id = ?")){
+            statement.setString(1, status.getName());
+            statement.setLong(2, taskId);
+
+            return statement.executeUpdate() == 1;
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+            return false;
+        }
     }
 }

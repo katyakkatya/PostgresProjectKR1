@@ -31,8 +31,9 @@ fun main() = application {
     test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2)));
     //test.changeSubtaskCompletion(1, 0);
-    println(test.addSubtask(1, "test"))
-    test.getTaskDetail(1L).data?.subtaskStatus()?.forEach { s -> println(s) };
+    println(test.addSubtask(1L, "test"))
+    test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
+    println(test.getTaskDetail(1L).data?.status())
     //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
 
 
