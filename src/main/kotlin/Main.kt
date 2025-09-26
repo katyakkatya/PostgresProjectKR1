@@ -31,9 +31,10 @@ fun main() = application {
     test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2)));
     //test.changeSubtaskCompletion(1, 0);
-    println(test.addSubtask(1L, "test"))
-    test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
-    println(test.getTaskDetail(1L).data?.status())
+    //println(test.addSubtask(1L, "test"))
+    //println(test.createConnection(1L, 2L))
+    //test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
+    test.getTaskDetail(1L).data?.relatedTasks()?.forEach { s -> println(s) }
     //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
 
 
