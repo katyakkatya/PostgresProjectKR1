@@ -28,6 +28,14 @@ class ConnectionViewModel(
     _urlFlow.value = url
   }
 
+  fun onUsernameChanged(username: String) {
+    _usernameFlow.value = username
+  }
+
+  fun onPasswordChanged(password: String) {
+    _passwordFlow.value = password
+  }
+
   fun tryConnect() {
     _isLoadingFlow.value = true
     val result = databaseInteractor.tryConnect(
