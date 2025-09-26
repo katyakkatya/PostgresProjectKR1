@@ -35,7 +35,7 @@ fun TaskListScreen(
     },
     floatingActionButton = {
       AddTaskFloatingButton(
-        onClick = { showDialog = true }
+        onClick = { viewModel.openNewTaskWindow() }
       )
     }
   ) { innerPadding ->
@@ -44,7 +44,7 @@ fun TaskListScreen(
       tasks = tasks,
       onTaskClick = onTaskClick,
       showDialog = showDialog,
-      onDismissDialog = { showDialog = false }
+      onDismissDialog = { }
     )
   }
 
@@ -68,10 +68,24 @@ fun TaskListScreen(
   }
 
   val newTaskState by viewModel.newTaskWindowStateFlow.collectAsState()
-  // TODO: нарисовать окно новой задачи
+  NewTaskDialog(
+    newTaskState,
+    onTaskNameChanged = viewModel::setNewTaskName,
+    onSubtaskDeleted = viewModel::onSubtaskDeleted,
+    onSubtaskChanged = viewModel::editSubtask,
+    onSubtaskAdded = viewModel::addSubtask,
+    onTaskSelectWindowOpened = viewModel::openTaskSelectWindow,
+    onConnectedTaskDeleted = viewModel::removeConnectedTask,
+    onNewTaskSaved = viewModel::saveNewTask,
+    onNewTaskClosed = viewModel::closeNewTaskWindow,
+  )
 
   val taskSelectionState by viewModel.taskSelectWindowState.collectAsState()
-  // TODO: нарисовать окно выбора задачи из списка
+  SelectConnectedTaskDialog(
+    taskSelectionState,
+    onWindowClosed = viewModel::closeTaskSelectWindow,
+    onTaskSelected = viewModel::addConnectedTask,
+  )
 }
 
 // TODO: компонент для фильтра
