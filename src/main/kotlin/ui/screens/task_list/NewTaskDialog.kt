@@ -240,7 +240,7 @@ fun NewTaskDialog(
                   .padding(24.dp).weight(1f),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                  backgroundColor = Color.Gray,
+                  backgroundColor = Color.Green,
                   contentColor = Color.White
                 )
               ) {

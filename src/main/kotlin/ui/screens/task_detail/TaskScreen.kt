@@ -1,5 +1,6 @@
 package ui.screens.task_detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,8 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -56,87 +60,26 @@ fun TaskScreen(
         },
         onStatusChanged = { status ->
           viewModel.updateStatus(status)
-        }
+        },
+        onAddSubtaskClick = {viewModel.openSubtaskWindow()}
       )
     }
   }
 
   val subtaskState by viewModel.newSubtaskState.collectAsState(NewSubtaskState.Closed)
-  // TODO: отрисовать окошко добавления подзадачи
+
+  when (subtaskState) {
+    is NewSubtaskState.Opened -> {
+      AddSubtaskWindow(viewModel)
+    }
+    NewSubtaskState.Closed -> {
+      // Логика для закрытого состояния
+    }
+  }
 
   val deletionWindowOpened by viewModel.deletionWindowOpenedFlow.collectAsState(false)
   if (deletionWindowOpened) {
-    Dialog(onDismissRequest = {}) {
-      Surface(
-        modifier = Modifier
-          .wrapContentHeight(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = 8.dp
-      ) {
-        Column(
-          modifier = Modifier.padding(vertical = 16.dp, horizontal = 48.dp),
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.Center
-        ) {
-          Text(
-            text = "Удаление",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif,
-            color = Color.DarkGray,
-            modifier = Modifier.padding(vertical = 32.dp)
-          )
-
-          Text(
-            text = "Задача будет удалена без возможности восстановления.\n\nВы уверены, что хотите это сделать?",
-            fontSize = 28.sp,
-            fontFamily = FontFamily.SansSerif,
-            modifier = Modifier.padding(vertical = 32.dp),
-            textAlign = TextAlign.Center
-          )
-
-          Row {
-            Button(
-              onClick = {viewModel.closeDeletionWindow()},
-              modifier = Modifier
-                .padding(24.dp).weight(1f),
-              shape = RoundedCornerShape(16.dp),
-              colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Gray,
-                contentColor = Color.White
-              )
-            ) {
-              Text(
-                text = "Отмена",
-                fontFamily = FontFamily.SansSerif,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(vertical = 12.dp)
-              )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(
-              onClick = {viewModel.deleteTask()},
-              modifier = Modifier
-                .padding(24.dp).weight(1f),
-              shape = RoundedCornerShape(16.dp),
-              colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Red,
-                contentColor = Color.White
-              )
-            ) {
-              Text(
-                text = "Удалить",
-                fontFamily = FontFamily.SansSerif,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(vertical = 12.dp)
-              )
-            }
-          }
-        }
-      }
-    }
+    DeletionWindow(viewModel)
   }
 }
 
@@ -225,6 +168,7 @@ private fun TaskScreenContent(
   task: TaskDetail,
   showDialog: Boolean,
   onDismissDialog: () -> Unit,
+  onAddSubtaskClick: () -> Unit,
   onSubtaskToggled: (Int) -> Unit,
   onRelatedTaskClick: (Long) -> Unit,
   onStatusChanged: (DbTaskStatus) -> Unit,
@@ -240,9 +184,11 @@ private fun TaskScreenContent(
     TaskStatusInfo(task = task) { status ->
       onStatusChanged(status)
     }
-    SubtasksSection(subtasks = task.subtasks) { index ->
-      onSubtaskToggled(index)
-    }
+    SubtasksSection(
+      subtasks = task.subtasks,
+      onItemClick = { index -> onSubtaskToggled(index) },
+      onAddSubtaskClick = onAddSubtaskClick
+    )
     RelatedTasksSection(
       relatedTasks = task.relatedTasks,
       onRelatedTaskClick = onRelatedTaskClick
@@ -327,7 +273,7 @@ private fun TaskStatusInfo(
 }
 
 @Composable
-private fun SubtasksSection(subtasks: List<Subtask>, onItemClick: (Int) -> Unit) {
+private fun SubtasksSection(subtasks: List<Subtask>, onItemClick: (Int) -> Unit, onAddSubtaskClick: () -> Unit) {
   Text(
     text = "Подзадачи:",
     fontSize = 24.sp,
@@ -336,6 +282,25 @@ private fun SubtasksSection(subtasks: List<Subtask>, onItemClick: (Int) -> Unit)
     modifier = Modifier.padding(vertical = 8.dp)
   )
   SubTaskList(subtasks = subtasks, onItemClick = onItemClick)
+  Button(
+    onClick = onAddSubtaskClick,
+    shape = RoundedCornerShape(16.dp),
+    modifier = Modifier.padding(24.dp),
+    colors = ButtonDefaults.buttonColors(
+      backgroundColor = Color.Gray,
+      contentColor = Color.Transparent
+    ),
+    elevation = null
+  ) {
+    Text(
+      text = "Добавить подзадачу",
+      fontFamily = FontFamily.SansSerif,
+      fontSize = 24.sp,
+      fontWeight = FontWeight.W500,
+      color = Color.White,
+      modifier = Modifier.padding(vertical = 12.dp, horizontal = 24.dp)
+    )
+  }
 }
 
 @Composable
@@ -357,6 +322,190 @@ private fun RelatedTasksSection(
     )
   }
 }
+
+@Composable
+private fun DeletionWindow(
+  viewModel: TaskDetailViewModel
+){
+  Dialog(onDismissRequest = {}) {
+    Surface(
+      modifier = Modifier
+        .wrapContentHeight(),
+      shape = RoundedCornerShape(16.dp),
+      elevation = 8.dp
+    ) {
+      Column(
+        modifier = Modifier.padding(vertical = 16.dp, horizontal = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+      ) {
+        Text(
+          text = "Удаление",
+          fontSize = 32.sp,
+          fontWeight = FontWeight.Bold,
+          fontFamily = FontFamily.SansSerif,
+          color = Color.DarkGray,
+          modifier = Modifier.padding(vertical = 32.dp)
+        )
+
+        Text(
+          text = "Задача будет удалена без возможности восстановления.\n\nВы уверены, что хотите это сделать?",
+          fontSize = 28.sp,
+          fontFamily = FontFamily.SansSerif,
+          modifier = Modifier.padding(vertical = 32.dp),
+          textAlign = TextAlign.Center
+        )
+
+        Row {
+          Button(
+            onClick = {viewModel.closeDeletionWindow()},
+            modifier = Modifier
+              .padding(24.dp).weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = Color.Gray,
+              contentColor = Color.White
+            )
+          ) {
+            Text(
+              text = "Отмена",
+              fontFamily = FontFamily.SansSerif,
+              fontSize = 22.sp,
+              fontWeight = FontWeight.W400,
+              modifier = Modifier.padding(vertical = 12.dp)
+            )
+          }
+          Spacer(modifier = Modifier.width(16.dp))
+          Button(
+            onClick = {viewModel.deleteTask()},
+            modifier = Modifier
+              .padding(24.dp).weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = Color.Red,
+              contentColor = Color.White
+            )
+          ) {
+            Text(
+              text = "Удалить",
+              fontFamily = FontFamily.SansSerif,
+              fontSize = 22.sp,
+              fontWeight = FontWeight.W400,
+              modifier = Modifier.padding(vertical = 12.dp)
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun AddSubtaskWindow(
+  viewModel: TaskDetailViewModel
+){
+  var subtask by remember { mutableStateOf("") }
+  Dialog(onDismissRequest = {}) {
+    Surface(
+      modifier = Modifier
+        .wrapContentHeight(),
+      shape = RoundedCornerShape(16.dp),
+      elevation = 8.dp
+    ) {
+      Column(
+        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+      ) {
+        Text(
+          text = "Добавление подзадачи",
+          fontSize = 32.sp,
+          fontWeight = FontWeight.Bold,
+          fontFamily = FontFamily.SansSerif,
+          color = Color.DarkGray,
+          modifier = Modifier.padding(vertical = 32.dp)
+        )
+
+        TextField(
+          value = subtask,
+          onValueChange = {
+            subtask = it
+            viewModel.editSubtask(it) },
+          placeholder = {
+            Text(
+              text = "Введите название подзадачи",
+              textAlign = TextAlign.Start,
+              color = Color.Gray,
+              fontFamily = FontFamily.SansSerif,
+              fontSize = 24.sp,
+              fontWeight = FontWeight.W400
+            )
+          },
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .height(90.dp)
+            .wrapContentHeight(Alignment.CenterVertically),
+          shape = RoundedCornerShape(16.dp),
+          colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.DarkGray,
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.DarkGray
+          ),
+          textStyle = TextStyle(
+            fontSize = 28.sp,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.W400,
+            color = Color.DarkGray,
+            textAlign = TextAlign.Start
+          ),
+          singleLine = true,
+        )
+
+        Row {
+          Button(
+            onClick = {viewModel.closeSubtaskWindow()},
+            modifier = Modifier
+              .padding(24.dp).weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = Color.Gray,
+              contentColor = Color.White
+            )
+          ) {
+            Text(
+              text = "Отмена",
+              fontFamily = FontFamily.SansSerif,
+              fontSize = 22.sp,
+              fontWeight = FontWeight.W400,
+              modifier = Modifier.padding(vertical = 12.dp)
+            )
+          }
+          Spacer(modifier = Modifier.width(16.dp))
+          Button(
+            onClick = {viewModel.addSubtask(subtask)},
+            modifier = Modifier
+              .padding(24.dp).weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+              backgroundColor = Color.Green,
+              contentColor = Color.White
+            )
+          ) {
+            Text(
+              text = "Добавить",
+              fontFamily = FontFamily.SansSerif,
+              fontSize = 22.sp,
+              fontWeight = FontWeight.W400,
+              modifier = Modifier.padding(vertical = 12.dp)
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
 
 private fun getStatusName(status: TaskStatus): String = when (status) {
   TaskStatus.BACKLOG -> "В бэклоге"

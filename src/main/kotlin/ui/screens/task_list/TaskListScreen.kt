@@ -4,16 +4,29 @@ import AddTaskDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import database.model.DbTaskStatus
 import models.TaskItemModel
 import models.asTaskStatus
@@ -46,25 +59,6 @@ fun TaskListScreen(
       showDialog = showDialog,
       onDismissDialog = { }
     )
-  }
-
-  Column {
-    // TODO: заменить бокс на нормальную кнопку фильтров
-    Text(
-      modifier = Modifier.clickable {
-        filtersModalOpened = !filtersModalOpened
-      },
-      text = "открыть фильтр"
-    )
-    if (filtersModalOpened) {
-      listOf(
-        DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW,
-        DbTaskStatus.DONE, DbTaskStatus.DROPPED
-      ).forEach { status ->
-        val color = status.asTaskStatus().color
-        FilterStatusItem((status in appliedFilters), status) { viewModel.toggleStatusFilter(status) }
-      }
-    }
   }
 
   val newTaskState by viewModel.newTaskWindowStateFlow.collectAsState()
@@ -108,26 +102,105 @@ fun FilterStatusItem(
 
 @Composable
 private fun TaskListTopBar() {
+  var expanded by remember { mutableStateOf(false) }
+  var anchorBounds by remember { mutableStateOf<Rect?>(null) }
+
   TopAppBar(
     modifier = Modifier.height(70.dp),
     backgroundColor = Color.Gray,
-    content = {
-      Row(
-        modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      Text(
+        text = "TODO",
+        fontSize = 32.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White,
+        modifier = Modifier.align(Alignment.Center)
+      )
+
+      Box(
+        modifier = Modifier.align(Alignment.CenterEnd)
       ) {
-        Text(
-          text = "TODO",
-          fontSize = 32.sp,
-          fontWeight = FontWeight.SemiBold,
-          color = Color.White
-        )
+        IconButton(
+          onClick = { expanded = true },
+          modifier = Modifier.onGloballyPositioned { coordinates ->
+            anchorBounds = coordinates.boundsInRoot()
+          }
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.FilterList,
+            contentDescription = "Фильтр",
+            modifier = Modifier.size(48.dp),
+            tint = Color.White
+          )
+        }
+
+        DropdownMenu(
+          expanded = expanded,
+          onDismissRequest = { expanded = false },
+          modifier = Modifier.width(280.dp)
+        ) {
+          FiltersPopupContent( onDismiss = { expanded = false })
+        }
       }
     }
-  )
+  }
 }
 
+@Composable
+fun FiltersPopupContent(
+  onDismiss: () -> Unit
+) {
+  Column(
+    modifier = Modifier.padding(8.dp)
+  ) {
+    // Заголовок
+    Text(
+      text = "Фильтры по статусу",
+      fontSize = 16.sp,
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+    )
+
+    Divider(modifier = Modifier.padding(bottom = 8.dp))
+
+    // Список статусов
+    val statuses = listOf(
+      DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW,
+      DbTaskStatus.DONE, DbTaskStatus.DROPPED
+    )
+
+    statuses.forEach { status ->
+      FilterStatusItem(
+        enabled = false,
+        status = status,
+        onClick = {
+//          viewModel.toggleStatusFilter(status)
+          // onDismiss() // можно закрывать после выбора или оставлять открытым
+        }
+      )
+    }
+
+    Divider(modifier = Modifier.padding(top = 8.dp))
+
+    // Кнопки действий
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 8.dp),
+      horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+      TextButton(onClick = {
+      }) {
+        Text("Сбросить")
+      }
+
+      Button(onClick = onDismiss) {
+        Text("Готово")
+      }
+    }
+  }
+}
 @Composable
 private fun AddTaskFloatingButton(
   onClick: () -> Unit
