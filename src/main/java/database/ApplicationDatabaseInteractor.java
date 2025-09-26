@@ -73,7 +73,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 "CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
                 "CREATE TABLE IF NOT EXISTS task (\n" +
                         "id SERIAL PRIMARY KEY,\n" +
-                        "title VARCHAR(100) NOT NULL UNIQUE CHECK (LENGTH(title) > 0),\n" +
+                  "title VARCHAR(100) NOT NULL UNIQUE CHECK (LENGTH(title) > 2),\n" +
                         "date DATE,\n" +
                         "status state DEFAULT 'Бэклог',\n" +
                         "subtasks VARCHAR(100)[],\n" +
