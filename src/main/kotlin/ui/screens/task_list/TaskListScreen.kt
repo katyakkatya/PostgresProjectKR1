@@ -34,9 +34,11 @@ fun TaskListScreen(
 
   Scaffold(
     topBar = {
-      TaskListTopBar(appliedFilters) { status ->
-        viewModel.toggleStatusFilter(status)
-      }
+      TaskListTopBar(
+        appliedFilters,
+        onFilterToggled = {status -> viewModel.toggleStatusFilter(status)},
+        onFilterReset = { viewModel.resetFilters() }
+      )
     },
     floatingActionButton = {
       AddTaskFloatingButton(
@@ -108,6 +110,7 @@ fun FilterStatusItem(
 private fun TaskListTopBar(
   appliedFilters: Set<DbTaskStatus>,
   onFilterToggled: (DbTaskStatus) -> Unit,
+  onFilterReset: () -> Unit
 ) {
   var expanded by remember { mutableStateOf(false) }
 
@@ -146,6 +149,7 @@ private fun TaskListTopBar(
           FiltersPopupContent(
             appliedFilters = appliedFilters,
             onFilterToggled = onFilterToggled,
+            onFilterReset = onFilterReset
           )
         }
       }
@@ -157,6 +161,7 @@ private fun TaskListTopBar(
 fun FiltersPopupContent(
   appliedFilters: Set<DbTaskStatus>,
   onFilterToggled: (DbTaskStatus) -> Unit,
+  onFilterReset: () -> Unit
 ) {
   Column(
     modifier = Modifier.padding(8.dp)
@@ -185,49 +190,23 @@ fun FiltersPopupContent(
     }
 
     Divider(modifier = Modifier.padding(top = 8.dp))
-
-    Row(
-      modifier = Modifier.fillMaxSize(),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.Center
-    ){
-      Button(
-        onClick = {},
-        modifier = Modifier
-          .padding(12.dp).weight(1f),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-          backgroundColor = Color.Gray,
-          contentColor = Color.White
-        )
-      ) {
-        Text(
-          text = "Сбросить",
-          fontFamily = FontFamily.SansSerif,
-          fontSize = 16.sp,
-          fontWeight = FontWeight.W400,
-          modifier = Modifier.padding(vertical = 8.dp)
-        )
-      }
-      Spacer(modifier = Modifier.width(16.dp))
-      Button(
-        onClick = {},
-        modifier = Modifier
-          .padding(12.dp).weight(1f),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-          backgroundColor = Color.DarkGray,
-          contentColor = Color.White
-        )
-      ) {
-        Text(
-          text = "Применить",
-          fontFamily = FontFamily.SansSerif,
-          fontSize = 16.sp,
-          fontWeight = FontWeight.W400,
-          modifier = Modifier.padding(vertical = 8.dp)
-        )
-      }
+    Button(
+      onClick = {onFilterReset()},
+      modifier = Modifier
+        .fillMaxWidth().padding(12.dp),
+      shape = RoundedCornerShape(16.dp),
+      colors = ButtonDefaults.buttonColors(
+        backgroundColor = Color.Gray,
+        contentColor = Color.White
+      )
+    ) {
+      Text(
+        text = "Сбросить",
+        fontFamily = FontFamily.SansSerif,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.W400,
+        modifier = Modifier.padding(vertical = 8.dp)
+      )
     }
   }
 }
