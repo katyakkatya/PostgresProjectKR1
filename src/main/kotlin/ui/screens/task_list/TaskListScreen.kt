@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +27,8 @@ import ui.components.TaskList
 @Composable
 fun TaskListScreen(
   viewModel: TaskListViewModel,
-  onTaskClick: (Long) -> Unit
+  onTaskClick: (Long) -> Unit,
+  onLogsClicked: () -> Unit,
 ) {
   val tasks by viewModel.tasksListFlow.collectAsState(emptyList())
   var showDialog by remember { mutableStateOf(false) }
@@ -106,19 +108,35 @@ fun FilterStatusItem(
     )
   }
 }
+
 @Composable
 private fun TaskListTopBar(
   appliedFilters: Set<DbTaskStatus>,
   onFilterToggled: (DbTaskStatus) -> Unit,
   onFilterReset: () -> Unit
 ) {
-  var expanded by remember { mutableStateOf(false) }
+  var filterPopupOpened by remember { mutableStateOf(false) }
 
   TopAppBar(
     modifier = Modifier.height(70.dp),
     backgroundColor = Color.Gray,
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
+      Box(
+        modifier = Modifier.align(Alignment.CenterStart)
+      ) {
+        IconButton(
+          onClick = onLogsClicked
+        ) {
+          Icon(
+            imageVector = Icons.Outlined.List,
+            contentDescription = "Логи",
+            modifier = Modifier.size(48.dp),
+            tint = Color.White
+          )
+        }
+      }
+
       Text(
         text = "TODO",
         fontSize = 32.sp,
@@ -131,7 +149,7 @@ private fun TaskListTopBar(
         modifier = Modifier.align(Alignment.CenterEnd)
       ) {
         IconButton(
-          onClick = { expanded = true }
+          onClick = { filterPopupOpened = true }
         ) {
           Icon(
             imageVector = Icons.Outlined.FilterList,
@@ -142,8 +160,8 @@ private fun TaskListTopBar(
         }
 
         DropdownMenu(
-          expanded = expanded,
-          onDismissRequest = { expanded = false },
+          expanded = filterPopupOpened,
+          onDismissRequest = { filterPopupOpened = false },
           modifier = Modifier.width(380.dp).clip(RoundedCornerShape(8.dp))
         ) {
           FiltersPopupContent(
