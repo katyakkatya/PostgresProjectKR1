@@ -21,11 +21,10 @@ class TaskListViewModel(
     MutableStateFlow(TaskSelectWindowState.Closed)
   val taskSelectWindowState = _taskSelectWindowState
 
-  private val _statusFilterFlow = MutableStateFlow(
-    mutableSetOf(
-      DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW, DbTaskStatus.DONE, DbTaskStatus.DROPPED
-    )
+  private val initialFilters = mutableSetOf(
+    DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW, DbTaskStatus.DONE, DbTaskStatus.DROPPED
   )
+  private val _statusFilterFlow = MutableStateFlow(initialFilters)
   val statusFilterFlow = _statusFilterFlow
 
   init {
@@ -111,6 +110,10 @@ class TaskListViewModel(
     if (result.success) {
       closeNewTaskWindow()
     }
+  }
+
+  fun resetFilters() {
+    _statusFilterFlow.value = initialFilters
   }
 
   private fun validateNewTask(state: NewTaskWindowState.Opened): Boolean {

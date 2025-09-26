@@ -7,31 +7,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import database.model.DbTaskStatus
 import models.TaskItemModel
-import models.asTaskStatus
 import ui.components.TaskList
 
 @Composable
@@ -41,12 +30,13 @@ fun TaskListScreen(
 ) {
   val tasks by viewModel.tasksListFlow.collectAsState(emptyList())
   var showDialog by remember { mutableStateOf(false) }
-  var filtersModalOpened by remember { mutableStateOf(false) }
   val appliedFilters by viewModel.statusFilterFlow.collectAsState(emptySet())
 
   Scaffold(
     topBar = {
-      TaskListTopBar()
+      TaskListTopBar(appliedFilters) { status ->
+        viewModel.toggleStatusFilter(status)
+      }
     },
     floatingActionButton = {
       AddTaskFloatingButton(
@@ -115,9 +105,11 @@ fun FilterStatusItem(
   }
 }
 @Composable
-private fun TaskListTopBar() {
+private fun TaskListTopBar(
+  appliedFilters: Set<DbTaskStatus>,
+  onFilterToggled: (DbTaskStatus) -> Unit,
+) {
   var expanded by remember { mutableStateOf(false) }
-  var anchorBounds by remember { mutableStateOf<Rect?>(null) }
 
   TopAppBar(
     modifier = Modifier.height(70.dp),
@@ -136,10 +128,7 @@ private fun TaskListTopBar() {
         modifier = Modifier.align(Alignment.CenterEnd)
       ) {
         IconButton(
-          onClick = { expanded = true },
-          modifier = Modifier.onGloballyPositioned { coordinates ->
-            anchorBounds = coordinates.boundsInRoot()
-          }
+          onClick = { expanded = true }
         ) {
           Icon(
             imageVector = Icons.Outlined.FilterList,
@@ -154,7 +143,10 @@ private fun TaskListTopBar() {
           onDismissRequest = { expanded = false },
           modifier = Modifier.width(380.dp).clip(RoundedCornerShape(8.dp))
         ) {
-          FiltersPopupContent( onDismiss = { expanded = false })
+          FiltersPopupContent(
+            appliedFilters = appliedFilters,
+            onFilterToggled = onFilterToggled,
+          )
         }
       }
     }
@@ -163,7 +155,8 @@ private fun TaskListTopBar() {
 
 @Composable
 fun FiltersPopupContent(
-  onDismiss: () -> Unit
+  appliedFilters: Set<DbTaskStatus>,
+  onFilterToggled: (DbTaskStatus) -> Unit,
 ) {
   Column(
     modifier = Modifier.padding(8.dp)
@@ -185,9 +178,9 @@ fun FiltersPopupContent(
 
     statuses.forEach { status ->
       FilterStatusItem(
-        enabled = false,
+        enabled = (status in appliedFilters),
         status = status,
-        onClick = {}
+        onClick = { onFilterToggled(status) }
       )
     }
 
