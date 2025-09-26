@@ -10,10 +10,25 @@ import database.result.Result;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     private Optional<Connection> connection = Optional.empty();
+
+    private Consumer<String> consumerForStatement = System.out::println;
+    private Consumer<Exception> consumerForException = System.err::println;
+
+    public void setConsumers(Consumer<String> consumerForStatement,
+                             Consumer<Exception> consumerForException){
+        this.consumerForStatement = consumerForStatement;
+        this.consumerForException = consumerForException;
+    }
+
+    private <T> void pushToConsumer(Consumer<T> consumer, T ...elements){
+        for(T el : elements)
+            consumer.accept(el);
+    }
 
     private boolean isConnected(){
         return connection.isPresent();
@@ -35,7 +50,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             this.connection = Optional.of(conn);
             return true;
         } catch (SQLException e) {
-            System.err.printf("Coudn`t connect to database '%s'\n", request.url());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -57,7 +72,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             return createdTables.values().stream().allMatch(value -> value == true);
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -85,12 +100,14 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         "FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE,\n" +
                         "FOREIGN KEY (another_task_id) REFERENCES task (id) ON DELETE CASCADE);");
         try(Statement statement = this.connection.get().createStatement()){
-            for(String cmd : commands)
+            for(String cmd : commands) {
+                this.pushToConsumer(this.consumerForStatement, cmd);
                 statement.execute(cmd);
+            }
 
             return true;
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -112,6 +129,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
         try(Statement statement = this.connection.get().createStatement()){
             ResultSet resultSet = statement.executeQuery(builder.toString());
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
             List<DbTaskItem> dbTaskItems = new LinkedList<>();
 
             while(resultSet.next()){
@@ -125,7 +143,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             return new Result<>(dbTaskItems, "Success", true);
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return new Result<>(null, e.getMessage(), false);
         }
     }
@@ -156,6 +174,8 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             // THIS TASK
             statementForTask.setLong(1, taskId);
+            this.pushToConsumer(this.consumerForStatement,
+                    statementForTask.toString(), statementForConnected.toString());
             ResultSet resultForTask = statementForTask.executeQuery();
 
             DbTaskDetail dbTaskDetail = null;
@@ -173,7 +193,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             return new Result<>(dbTaskDetail, "Done", true);
 
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return new Result<>(null, e.getMessage(), false);
         }
 
@@ -187,9 +207,10 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         try(PreparedStatement statement = this.connection.get().prepareStatement("DELETE FROM task WHERE id = ?")){
             statement.setLong(1, taskId);
 
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
             return statement.executeQuery().rowDeleted();
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -211,7 +232,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             statement.setArray(4, this.connection.get().createArrayOf("BOOLEAN",
                     boolArr));
-
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
             long id = -1L;
 
             try(ResultSet res = statement.executeQuery();
@@ -223,6 +244,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                     for (long taskId : request.tasksId()) {
                         statementById.setLong(1, id);
                         statementById.setLong(2, taskId);
+                        this.pushToConsumer(this.consumerForStatement, statementById.toString());
                         statementById.executeUpdate();
                     }
 
@@ -236,7 +258,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             return new Result<>(id, "%sInserted".formatted(id != -1 ? "" : "Not "), id != -1);
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return new Result<Long>(-1L, e.getMessage(), false);
         }
     }
@@ -249,6 +271,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO connected_task VALUES (?, ?)")){
             statement.setLong(1, taskA);
             statement.setLong(2, taskB);
+            this.pushToConsumer(this.consumerForStatement,  statement.toString());
             int first = statement.executeUpdate();
 
             statement.setLong(2, taskA);
@@ -256,7 +279,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             return 2 == (first + statement.executeUpdate());
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -271,10 +294,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             statement.setLong(1, index + 1);
             statement.setLong(2, index + 1);
             statement.setLong(3, taskId);
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
 
             return statement.executeUpdate() == 1;
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -288,10 +312,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 .prepareStatement("UPDATE task SET subtasks = subtasks || ?, subtasks_status = subtasks_status || FALSE WHERE id = ?")){
             statement.setString(1, subtask);
             statement.setLong(2, taskId);
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
 
             return statement.executeUpdate() == 1;
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }
@@ -306,9 +331,10 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             statement.setString(1, status.getName());
             statement.setLong(2, taskId);
 
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
             return statement.executeUpdate() == 1;
         }catch (SQLException e){
-            System.err.println(e.getMessage());
+            this.pushToConsumer(this.consumerForException, e);
             return false;
         }
     }

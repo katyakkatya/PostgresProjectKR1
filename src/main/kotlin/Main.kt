@@ -12,6 +12,7 @@ import database.request.TaskListRequest
 import ui.AppNavigation
 import java.awt.Dimension
 import java.io.PrintStream
+import java.util.function.Consumer
 
 
 fun main() = application {
@@ -30,13 +31,12 @@ fun main() = application {
     test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf()));
     test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2)));
-    //test.changeSubtaskCompletion(1, 0);
-    //println(test.addSubtask(1L, "test"))
-    //println(test.createConnection(1L, 2L))
-    //test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
+    test.changeSubtaskCompletion(1, 0);
+    println(test.addSubtask(1L, "test"))
+    println(test.createConnection(1L, 2L))
+    test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
     test.getTaskDetail(1L).data?.relatedTasks()?.forEach { s -> println(s) }
-    //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
-
+    test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
 
     Window(
         onCloseRequest = ::exitApplication,
