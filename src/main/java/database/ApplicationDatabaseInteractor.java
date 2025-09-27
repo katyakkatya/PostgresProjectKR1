@@ -225,6 +225,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
         try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO task " +
                 "(title, date, subtasks, subtasks_status) VALUES (?, ?, ?, ?) RETURNING id")){
+            this.connection.get().setAutoCommit(false);
             statement.setString(1, request.title());
             statement.setDate(2, new java.sql.Date(System.currentTimeMillis()));
             statement.setArray(3,
@@ -238,31 +239,45 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             this.pushToConsumer(this.consumerForStatement, statement.toString());
             long id = -1L;
 
-            try(ResultSet res = statement.executeQuery();
-                PreparedStatement statementById = this.connection.get()
-                        .prepareStatement("INSERT INTO connected_task (task_id, another_task_id) VALUES (?, ?)")){
-                if(res.next()) {
-                    id = res.getLong("id");
+            if(!request.tasksId().isEmpty()){
+                try(ResultSet res = statement.executeQuery();
+                    PreparedStatement statementById = this.connection.get()
+                            .prepareStatement("INSERT INTO connected_task (task_id, another_task_id) VALUES (?, ?)")){
+                    if(res.next()) {
+                        id = res.getLong("id");
 
-                    for (long taskId : request.tasksId()) {
-                        statementById.setLong(1, id);
-                        statementById.setLong(2, taskId);
-                        this.pushToConsumer(this.consumerForStatement, statementById.toString());
-                        statementById.executeUpdate();
-                    }
+                        for (long taskId : request.tasksId()) {
+                            statementById.setLong(1, id);
+                            statementById.setLong(2, taskId);
+                            this.pushToConsumer(this.consumerForStatement, statementById.toString());
+                            statementById.addBatch();
 
-                    for(long taskId : request.tasksId()){
-                        statementById.setLong(1, taskId);
-                        statementById.setLong(2, id);
-                        statementById.executeUpdate();
+                            statementById.setLong(2, id);
+                            statementById.setLong(1, taskId);
+                            this.pushToConsumer(this.consumerForStatement, statementById.toString());
+                            statementById.addBatch();
+                        }
+                        statementById.executeBatch();
                     }
                 }
             }
-
+            this.connection.get().commit();
             return new Result<>(id, null, id != -1);
         }catch (SQLException e){
+                try{
+                    this.connection.get().rollback();
+                } catch (SQLException ex) {
+                    this.pushToConsumer(this.consumerForException, e);
+                    return new Result<Long>(-1L, null, false);
+                }
             this.pushToConsumer(this.consumerForException, e);
             return new Result<Long>(-1L, null, false);
+        }finally {
+            try {
+                this.connection.get().setAutoCommit(true);
+            } catch (SQLException e) {
+                this.pushToConsumer(this.consumerForException, e);
+            }
         }
     }
 
