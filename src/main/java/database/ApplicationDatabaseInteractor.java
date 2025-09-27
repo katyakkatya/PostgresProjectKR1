@@ -131,7 +131,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
         try(Statement statement = this.connection.get().createStatement()){
             ResultSet resultSet = statement.executeQuery(builder.toString());
-            this.pushToConsumer(this.consumerForStatement, statement.toString());
+            this.pushToConsumer(this.consumerForStatement, builder.toString());
             List<DbTaskItem> dbTaskItems = new LinkedList<>();
 
             while(resultSet.next()){
@@ -308,7 +308,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Boolean addSubtask(Long taskId, String subtask) { // DONE
-        if(!this.isConnected())
+        if(!this.isConnected() || subtask.isEmpty())
             return false;
 
         try(PreparedStatement statement = this.connection.get()
