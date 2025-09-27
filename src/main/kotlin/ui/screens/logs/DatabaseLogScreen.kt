@@ -7,7 +7,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,12 +29,17 @@ fun DatabaseLogScreen(
   onBack: () -> Unit,
 ) {
   val logs by viewModel.logsFlow.collectAsState(emptyList())
+  val showOnlyErrors by viewModel.onlyErrorsFlow.collectAsState(false)
   Scaffold(
     topBar = {
       DatabaseLogTopBar(onBack = onBack)
     }
   ) {
-    DatabaseLogContent(logs)
+    DatabaseLogContent(
+      logs = logs.filter { if (showOnlyErrors) it.type == LogType.ERROR else true },
+      showOnlyErrors = showOnlyErrors,
+      onOnlyErrorsToggled = { viewModel.toggleOnlyErrors() }
+    )
   }
 }
 
@@ -70,8 +77,11 @@ private fun DatabaseLogTopBar(onBack: () -> Unit){
 }
 
 @Composable
-private fun DatabaseLogContent(logs: List<LogModel>) {
-  var showOnlyErrors by remember { mutableStateOf(false) }
+private fun DatabaseLogContent(
+  logs: List<LogModel>,
+  showOnlyErrors: Boolean,
+  onOnlyErrorsToggled: () -> Unit,
+) {
 
   Column(
     modifier = Modifier
@@ -80,7 +90,7 @@ private fun DatabaseLogContent(logs: List<LogModel>) {
   ){
     LogHeader(
       checked = showOnlyErrors,
-      onCheckedChange = { showOnlyErrors = it }
+      onCheckedChange = onOnlyErrorsToggled
     )
     LogList(logs = logs)
   }
@@ -89,8 +99,8 @@ private fun DatabaseLogContent(logs: List<LogModel>) {
 @Preview
 @Composable
 private fun LogHeader(
-  checked: Boolean = false,
-  onCheckedChange: (Boolean) -> Unit = {}
+  checked: Boolean,
+  onCheckedChange: () -> Unit
 ){
   Row(
     modifier = Modifier
@@ -106,7 +116,7 @@ private fun LogHeader(
     )
     Checkbox(
       checked = checked,
-      onCheckedChange = onCheckedChange
+      onCheckedChange = { onCheckedChange() }
     )
   }
 }
