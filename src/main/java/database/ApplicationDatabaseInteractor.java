@@ -19,6 +19,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     private Consumer<String> consumerForStatement = System.out::println;
     private Consumer<Exception> consumerForException = System.err::println;
 
+    @Override
     public void setConsumers(Consumer<String> consumerForStatement,
                              Consumer<Exception> consumerForException){
         this.consumerForStatement = consumerForStatement;
@@ -36,10 +37,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Boolean tryConnect(ConnectionRequest request) { // DONE
-        /*
-        String url1 = "jdbc:postgresql://localhost:9876/postgres";
-        String user = "postgres";
-        String password = "postgres";
+        /**
+         jdbc:postgresql://localhost:9876/postgres
+         postgres
         * */
         if(this.connection.isPresent())
             return true;
@@ -115,7 +115,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) { // DONE
         if(!this.isConnected())
-            return new Result<>(null, "Not connected", false);
+            return new Result<>(null, null, false);
+        if (request.statuses().isEmpty())
+            return new Result<>(new ArrayList<>(), null, true);
 
         StringBuilder builder = new StringBuilder("SELECT * FROM task WHERE status IN ('");
         builder.append(request.statuses().getFirst().getName()).append("'");
@@ -141,17 +143,17 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 ));
             }
 
-            return new Result<>(dbTaskItems, "Success", true);
+            return new Result<>(dbTaskItems, null, true);
         }catch (SQLException e){
             this.pushToConsumer(this.consumerForException, e);
-            return new Result<>(null, e.getMessage(), false);
+            return new Result<>(null, null, false);
         }
     }
 
     @Override
     public Result<DbTaskDetail> getTaskDetail(Long taskId) { // DONE
         if(!this.isConnected())
-            return new Result<>(null, "Not connected", false);
+            return new Result<>(null, null, false);
 
         try(PreparedStatement statementForConnected = this.
                 connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, ct.task_id  \n" +
@@ -190,11 +192,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             }
 
 
-            return new Result<>(dbTaskDetail, "Done", true);
+            return new Result<>(dbTaskDetail, null, true);
 
         }catch (SQLException e){
             this.pushToConsumer(this.consumerForException, e);
-            return new Result<>(null, e.getMessage(), false);
+            return new Result<>(null, null, false);
         }
 
     }
@@ -208,7 +210,8 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             statement.setLong(1, taskId);
 
             this.pushToConsumer(this.consumerForStatement, statement.toString());
-            return statement.executeQuery().rowDeleted();
+            int rowsAffected = statement.executeUpdate();
+            return rowsAffected > 0;
         }catch (SQLException e){
             this.pushToConsumer(this.consumerForException, e);
             return false;
@@ -218,7 +221,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     @Override
     public Result<Long> createTask(CreateTaskRequest request) { // DONE
         if(!this.isConnected())
-            return new Result<>(-1L, "Not connected", false);
+            return new Result<>(-1L, null, false);
 
         try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO task " +
                 "(title, date, subtasks, subtasks_status) VALUES (?, ?, ?, ?) RETURNING id")){
@@ -256,10 +259,10 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 }
             }
 
-            return new Result<>(id, "%sInserted".formatted(id != -1 ? "" : "Not "), id != -1);
+            return new Result<>(id, null, id != -1);
         }catch (SQLException e){
             this.pushToConsumer(this.consumerForException, e);
-            return new Result<Long>(-1L, e.getMessage(), false);
+            return new Result<Long>(-1L, null, false);
         }
     }
 

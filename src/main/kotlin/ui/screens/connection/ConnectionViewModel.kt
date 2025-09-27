@@ -9,13 +9,13 @@ class ConnectionViewModel(
   private val databaseInteractor: DatabaseInteractor,
   private val todoRepository: TodoRepository,
 ) {
-  private val _urlFlow = MutableStateFlow("")
+  private val _urlFlow = MutableStateFlow("jdbc:postgresql://localhost:9876/postgres")
   val urlFlow = _urlFlow
 
-  private val _usernameFlow = MutableStateFlow("")
+  private val _usernameFlow = MutableStateFlow("postgres")
   val usernameFlow = _usernameFlow
 
-  private val _passwordFlow = MutableStateFlow("")
+  private val _passwordFlow = MutableStateFlow("postgres")
   val passwordFlow = _passwordFlow
 
   private val _isLoadingFlow = MutableStateFlow(false)

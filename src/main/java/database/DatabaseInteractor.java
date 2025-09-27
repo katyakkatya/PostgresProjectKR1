@@ -9,6 +9,7 @@ import database.request.TaskListRequest;
 import database.result.Result;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface DatabaseInteractor {
   /**
@@ -66,4 +67,10 @@ public interface DatabaseInteractor {
    * Changes task status and returns true on success
    */
   Boolean updateStatus(Long taskId, DbTaskStatus status);
+
+  /**
+   * Sets consumers for logs
+   */
+  void setConsumers(Consumer<String> consumerForStatement,
+                    Consumer<Exception> consumerForException);
 }

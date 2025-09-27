@@ -3,7 +3,6 @@ package ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,8 +15,7 @@ fun SubTaskList(
 ) {
   Column(
     modifier = Modifier
-      .fillMaxWidth()
-      .heightIn(max = 400.dp),
+      .fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     subtasks.forEachIndexed { index, subtask ->

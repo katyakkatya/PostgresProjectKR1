@@ -1,6 +1,7 @@
 // Navigation.kt
 package ui
 
+import DatabaseLogScreen
 import Globals
 import MainViewModel
 import androidx.compose.foundation.layout.Arrangement
@@ -57,7 +58,11 @@ fun AppNavigation(
       currentScreen = TaskList
     }
   }
+  val taskDetailsDeleter: (Long) -> Unit = { taskId ->
+    taskStack.removeIf { it == taskId }
+  }
   GlobalNavigator.handlerNavigateToListOrPreviousTask = onTaskDetailNavigateBack
+  GlobalNavigator.taskDetailsDeleter = taskDetailsDeleter
 
   when (val screen = currentScreen) {
     Screen.Connection -> {
@@ -69,12 +74,13 @@ fun AppNavigation(
 
     Screen.DatabaseCreation -> {
       DatabaseCreationScreen(
-        viewModel = Globals.databaseCreationViewModel,
+        viewModel = Globals.databaseCreationViewModel.apply { onInit() },
         onDatabaseCreated = { currentScreen = TaskList }
       )
     }
 
     is Screen.TaskList -> {
+      Globals.taskListViewModel.onInit()
       TaskListScreen(
         viewModel = Globals.taskListViewModel,
         onTaskClick = { id ->
@@ -86,7 +92,7 @@ fun AppNavigation(
     }
 
     is Screen.TaskDetail -> {
-      val viewModel = remember(screen.taskId) { Globals.taskDetailViewModelFactory(screen.taskId) }
+      val viewModel = remember(screen.taskId) { Globals.taskDetailViewModelFactory(screen.taskId).apply { onInit() } }
       TaskScreen(
         viewModel = viewModel,
         onBack = {
@@ -100,7 +106,12 @@ fun AppNavigation(
     }
 
     Screen.Logs -> {
-      // TODO: экран логов
+      DatabaseLogScreen(
+        viewModel = Globals.logsViewModel,
+        onBack = {
+          currentScreen = Screen.TaskList
+        }
+      )
     }
   }
 
@@ -159,8 +170,13 @@ fun AppNavigation(
 object GlobalNavigator {
 
   var handlerNavigateToListOrPreviousTask: () -> Unit = {}
+  var taskDetailsDeleter: (Long) -> Unit = {}
 
   fun navigateToListOrPreviousTask() {
     handlerNavigateToListOrPreviousTask()
+  }
+
+  fun clearTaskDetailFromStack(id: Long) {
+    taskDetailsDeleter(id)
   }
 }

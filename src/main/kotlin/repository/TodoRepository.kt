@@ -7,10 +7,7 @@ import database.request.TaskListRequest
 import database.result.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import models.TaskDetail
-import models.TaskItemModel
-import models.asTask
-import models.asTaskDetail
+import models.*
 
 class TodoRepository(
   private val interactor: DatabaseInteractor
@@ -21,6 +18,21 @@ class TodoRepository(
 
   private val _errorMessageFlow = MutableStateFlow<String?>(null)
   val errorMessageFlow: Flow<String?> = _errorMessageFlow
+
+  private val _logsFlow = MutableStateFlow(emptyList<LogModel>())
+  val logsFlow: Flow<List<LogModel>> = _logsFlow
+
+  init {
+    interactor.setConsumers(
+      { message ->
+        _logsFlow.value = _logsFlow.value + LogModel(LogType.INFO, message)
+      },
+      { exception ->
+        _logsFlow.value = _logsFlow.value + LogModel(LogType.ERROR, exception.message ?: "Unknown error occured")
+      }
+    )
+  }
+
   fun getTasksList(request: TaskListRequest) {
     val result = interactor.getTaskList(request)
     if (result.success) {

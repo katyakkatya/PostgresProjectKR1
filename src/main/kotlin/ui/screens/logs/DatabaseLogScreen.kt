@@ -1,31 +1,13 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,18 +17,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.screens.database_log.LogEntry
+import models.LogModel
+import models.LogType
+import ui.screens.logs.LogsViewModel
 
 @Composable
 fun DatabaseLogScreen(
-  onBack: () -> Unit = {} // Добавил параметр для навигации назад
-){
+  viewModel: LogsViewModel,
+  onBack: () -> Unit,
+) {
+  val logs by viewModel.logsFlow.collectAsState(emptyList())
   Scaffold(
     topBar = {
-      DatabaseLogTopBar(onBack = onBack) // Убрал лишний TopAppBar
+      DatabaseLogTopBar(onBack = onBack)
     }
-  ){ innerPadding ->
-    DatabaseLogContent(innerPadding = innerPadding)
+  ) {
+    DatabaseLogContent(logs)
   }
 }
 
@@ -84,39 +70,19 @@ private fun DatabaseLogTopBar(onBack: () -> Unit){
 }
 
 @Composable
-private fun DatabaseLogContent(innerPadding: PaddingValues){
+private fun DatabaseLogContent(logs: List<LogModel>) {
   var showOnlyErrors by remember { mutableStateOf(false) }
-
-  val testLogs = listOf(
-    LogEntry.fromString("2024-01-15 10:30:25 INFO: Application started successfully"),
-    LogEntry.fromString("2024-01-15 10:30:26 DEBUG: Database connection established"),
-    LogEntry.fromString("2024-01-15 10:30:27 INFO: User authentication successful"),
-    LogEntry.fromString("2024-01-15 10:30:28 WARN: Cache size approaching limit"),
-    LogEntry.fromString("2024-01-15 10:30:29 ERROR: Failed to load user preferences"),
-    LogEntry.fromString("2024-01-15 10:30:30 INFO: Task synchronization completed"),
-    LogEntry.fromString("2024-01-15 10:30:31 DEBUG: API request sent to server"),
-    LogEntry.fromString("2024-01-15 10:30:32 INFO: Received 15 tasks from server"),
-    LogEntry.fromString("2024-01-15 10:30:33 ERROR: Network timeout occurred"),
-    LogEntry.fromString("2024-01-15 10:30:34 INFO: Retrying connection attempt 1/3")
-  )
-
-  val filteredLogs = if (showOnlyErrors) {
-    testLogs.filter { it.isError }
-  } else {
-    testLogs
-  }
 
   Column(
     modifier = Modifier
       .fillMaxSize()
-      .padding(innerPadding)
       .background(color = Color.LightGray)
   ){
     LogHeader(
       checked = showOnlyErrors,
       onCheckedChange = { showOnlyErrors = it }
     )
-    LogList(logs = filteredLogs) // Используем отфильтрованные логи
+    LogList(logs = logs)
   }
 }
 
@@ -145,11 +111,9 @@ private fun LogHeader(
   }
 }
 
-// ОСТАВЛЯЕМ ТОЛЬКО ОДНУ ФУНКЦИЮ LogList (удаляем дубликат)
-
 @Composable
 private fun LogList(
-  logs: List<LogEntry>
+  logs: List<LogModel>
 ) {
   Column(
     modifier = Modifier
@@ -183,13 +147,11 @@ private fun LogList(
 
 @Composable
 private fun LogItem(
-  log: LogEntry,
+  log: LogModel,
   isLast: Boolean
 ) {
   val textColor = when {
-    log.isError -> Color.Red
-    log.message.contains("WARN", ignoreCase = true) -> Color(0xFFFFA500) // Orange
-    log.message.contains("DEBUG", ignoreCase = true) -> Color.Blue
+    log.type == LogType.ERROR -> Color.Red
     else -> Color.Black
   }
 

@@ -11,7 +11,7 @@ class DatabaseCreationViewModel(
   private val _stateFlow: MutableStateFlow<State> = MutableStateFlow(State.Loading)
   val stateFlow = _stateFlow
 
-  init {
+  fun onInit() {
     checkIfDatabaseExists()
   }
 

@@ -3,15 +3,26 @@ package models
 import database.model.DbTaskDetail
 import database.model.DbTaskItem
 import database.model.DbTaskStatus
-import java.time.ZoneId
+import java.time.LocalDate
+import java.util.*
+
 
 fun DbTaskItem.asTask(): TaskItemModel {
+  val calendar = Calendar.getInstance()
+  calendar.setTime(startedAt)
+
+  val localDate = LocalDate.of(
+    calendar.get(Calendar.YEAR),
+    calendar.get(Calendar.MONTH) + 1,
+    calendar.get(Calendar.DAY_OF_MONTH)
+  )
+  val progress = if (subtaskCount == 0) 0f else completedSubtasksCount.toFloat() / subtaskCount.toFloat()
   return TaskItemModel(
     id = id,
     title = title,
     status = status.asTaskStatus(),
-    date = startedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-    progress = completedSubtasksCount.toFloat() / subtaskCount.toFloat()
+    date = localDate,
+    progress = progress,
   )
 }
 
@@ -26,6 +37,17 @@ fun DbTaskStatus.asTaskStatus(): TaskStatus {
 }
 
 fun DbTaskDetail.asTaskDetail(): TaskDetail {
+  val calendar = Calendar.getInstance()
+  calendar.setTime(startedAt)
+
+  val localDate = LocalDate.of(
+    calendar.get(Calendar.YEAR),
+    calendar.get(Calendar.MONTH) + 1,
+    calendar.get(Calendar.DAY_OF_MONTH)
+  )
+
+  val completedSubtasksCount = subtaskStatus.count { it == true }
+  val progress = if (subtaskStatus.isEmpty()) 0f else completedSubtasksCount.toFloat() / subtaskStatus.count().toFloat()
   return TaskDetail(
     id = id,
     title = title,
@@ -34,7 +56,7 @@ fun DbTaskDetail.asTaskDetail(): TaskDetail {
       Subtask(title, subtaskStatus[index])
     },
     relatedTasks = relatedTasks.map { it.asTask() },
-    date = startedAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-    progress = subtaskStatus.count { it == true }.toFloat() / subtaskStatus.count()
+    date = localDate,
+    progress = progress
   )
 }

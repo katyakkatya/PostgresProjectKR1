@@ -295,7 +295,15 @@ private fun SubtasksSection(subtasks: List<Subtask>, onItemClick: (Int) -> Unit,
     fontFamily = FontFamily.Serif,
     modifier = Modifier.padding(vertical = 8.dp)
   )
-  SubTaskList(subtasks = subtasks, onItemClick = onItemClick)
+  if (subtasks.isNotEmpty()) {
+    SubTaskList(subtasks = subtasks, onItemClick = onItemClick)
+  } else {
+    Text(
+      text = "Нет подзадач",
+      fontSize = 20.sp,
+      textAlign = TextAlign.Center
+    )
+  }
   Button(
     onClick = onAddSubtaskClick,
     shape = RoundedCornerShape(16.dp),
@@ -323,17 +331,23 @@ private fun RelatedTasksSection(
   onRelatedTaskClick: (Long) -> Unit,
   onAddRelatedTaskClick: () -> Unit,
 ) {
+  Text(
+    text = "Связанные задачи:",
+    fontSize = 24.sp,
+    fontWeight = FontWeight.Bold,
+    fontFamily = FontFamily.Serif,
+    modifier = Modifier.padding(vertical = 16.dp)
+  )
   if (relatedTasks.isNotEmpty()) {
-    Text(
-      text = "Связные задачи:",
-      fontSize = 24.sp,
-      fontWeight = FontWeight.Bold,
-      fontFamily = FontFamily.Serif,
-      modifier = Modifier.padding(vertical = 16.dp)
-    )
     TaskList(
       tasks = relatedTasks,
-      onTaskClick = onRelatedTaskClick
+      onTaskClick = onRelatedTaskClick,
+    )
+  } else {
+    Text(
+      text = "Нет связанных задач",
+      textAlign = TextAlign.Center,
+      fontSize = 20.sp,
     )
   }
   Button(

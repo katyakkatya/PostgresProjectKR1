@@ -30,7 +30,7 @@ class TaskDetailViewModel(
     MutableStateFlow(NewRelatedTaskState.Closed)
   val relatedTasksStateFlow: Flow<NewRelatedTaskState> = _relatedTasksStateFlow
 
-  init {
+  fun onInit() {
     requestTaskDetail()
   }
 

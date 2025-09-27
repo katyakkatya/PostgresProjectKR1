@@ -39,7 +39,8 @@ fun TaskListScreen(
       TaskListTopBar(
         appliedFilters,
         onFilterToggled = {status -> viewModel.toggleStatusFilter(status)},
-        onFilterReset = { viewModel.resetFilters() }
+        onFilterReset = { viewModel.resetFilters() },
+        onLogsClicked = onLogsClicked
       )
     },
     floatingActionButton = {
@@ -113,7 +114,8 @@ fun FilterStatusItem(
 private fun TaskListTopBar(
   appliedFilters: Set<DbTaskStatus>,
   onFilterToggled: (DbTaskStatus) -> Unit,
-  onFilterReset: () -> Unit
+  onFilterReset: () -> Unit,
+  onLogsClicked: () -> Unit,
 ) {
   var filterPopupOpened by remember { mutableStateOf(false) }
 

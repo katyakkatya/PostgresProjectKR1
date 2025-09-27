@@ -27,7 +27,7 @@ class TaskListViewModel(
   private val _statusFilterFlow = MutableStateFlow(initialFilters)
   val statusFilterFlow = _statusFilterFlow
 
-  init {
+  fun onInit() {
     updateList()
   }
 
@@ -109,11 +109,13 @@ class TaskListViewModel(
     val result = todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id })
     if (result.success) {
       closeNewTaskWindow()
+      updateList()
     }
   }
 
   fun resetFilters() {
     _statusFilterFlow.value = initialFilters
+    updateList()
   }
 
   private fun validateNewTask(state: NewTaskWindowState.Opened): Boolean {
@@ -126,7 +128,7 @@ class TaskListViewModel(
         return false
       }
     }
-    if (state.taskName.trim().length < 3) {
+    if (state.taskName.trim().length < 1) {
       _newTaskWindowStateFlow.value = state.copy(error = "Название должно быть минимум 3 символа")
       return false
     } else if (state.taskName.trim().length >= 100) {

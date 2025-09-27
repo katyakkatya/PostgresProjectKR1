@@ -1,19 +1,9 @@
 package ui.screens.connection
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,7 +20,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 
 @Composable
 fun ConnectionScreen(
@@ -40,14 +29,12 @@ fun ConnectionScreen(
   val url by viewModel.urlFlow.collectAsState()
   val username by viewModel.usernameFlow.collectAsState()
   val password by viewModel.passwordFlow.collectAsState()
-  LaunchedEffect(Unit) {
-    delay(500)
-    onConnectionSuccess()
+  val successConnected by viewModel.successfulConnectionFlow.collectAsState()
+  LaunchedEffect(successConnected) {
+    if (successConnected) {
+      onConnectionSuccess()
+    }
   }
-  /**
-   * TODO: Когда идет подключение, нужно скрывать кнопкку и вместо нее писать текст загрузки
-   * Если подключился успешно, то показывать модалку с текстом "Подключение успешно" и кнопкой ок
-   */
   Column(
     modifier = Modifier
       .fillMaxSize()

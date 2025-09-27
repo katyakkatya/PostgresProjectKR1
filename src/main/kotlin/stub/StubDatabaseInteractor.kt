@@ -9,6 +9,7 @@ import database.request.CreateTaskRequest
 import database.request.TaskListRequest
 import database.result.Result
 import java.util.*
+import java.util.function.Consumer
 
 class StubDatabaseInteractor : DatabaseInteractor {
   override fun tryConnect(request: ConnectionRequest?): Boolean? {
@@ -108,5 +109,12 @@ class StubDatabaseInteractor : DatabaseInteractor {
   override fun updateStatus(taskId: Long?, status: DbTaskStatus?): Boolean? {
     println("StubDatabaseInteractor: updateStatus called with taskId: $taskId, status: $status")
     return true
+  }
+
+  override fun setConsumers(
+    consumerForStatement: Consumer<String?>?,
+    consumerForException: Consumer<Exception?>?
+  ) {
+
   }
 }
