@@ -265,6 +265,13 @@ private fun TaskListContent(
       .background(color = Color.LightGray)
       .padding(innerPadding)
   ) {
+    if (tasks.isEmpty()) {
+      Text(
+        text = "Вы еще не создали задач",
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
+      )
+    }
     TaskList(
       tasks = tasks,
       onTaskClick = onTaskClick

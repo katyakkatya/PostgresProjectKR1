@@ -243,7 +243,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             long id = res.next() ? res.getLong("id") : -1;
 
-
+            res.close();
             if(!request.tasksId().isEmpty()){
                 try(
                     PreparedStatement statementById = this.connection.get()

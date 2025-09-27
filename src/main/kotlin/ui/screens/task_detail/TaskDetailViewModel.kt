@@ -115,7 +115,7 @@ class TaskDetailViewModel(
 
 sealed interface NewSubtaskState {
   object Closed : NewSubtaskState
-  data class Opened(val subtask: String = "") : NewSubtaskState
+  data class Opened(val subtask: String = "", val error: String? = null) : NewSubtaskState
 }
 
 sealed interface NewRelatedTaskState {
