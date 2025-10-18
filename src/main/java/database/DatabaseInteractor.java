@@ -3,9 +3,8 @@ package database;
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.model.DbTaskStatus;
-import database.request.ConnectionRequest;
-import database.request.CreateTaskRequest;
-import database.request.TaskListRequest;
+import database.model.UserWithTaskCount;
+import database.request.*;
 import database.result.Result;
 
 import java.util.List;
@@ -73,4 +72,30 @@ public interface DatabaseInteractor {
    */
   void setConsumers(Consumer<String> consumerForStatement,
                     Consumer<Exception> consumerForException);
+
+  /**
+   * If true passed, sets unique constraint on task.title using alter table
+   */
+  Boolean setShouldForceUniqueName(boolean shouldForceUniqueName);
+
+  /**
+   * Sets minimal length task.title using alter table
+   */
+  Result<Boolean> setTaskTitleMinLength(int minLength);
+
+  /**
+   * Creates user and returns its id on success
+   */
+  Result<Long> createUser(CreateUserRequest request);
+
+  /**
+   * Adds user to task and returns true on success
+   */
+  Boolean addUserToTask(Long userId, Long taskId);
+
+  /**
+   * Searches for users by its name and filters.
+   * When search is empty, return all users
+   */
+  Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request);
 }

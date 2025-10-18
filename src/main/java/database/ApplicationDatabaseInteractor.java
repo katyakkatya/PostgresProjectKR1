@@ -77,6 +77,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    // TODO: Add user table and connect it to task table
     @Override
     public Boolean createDatabase() { // DONE
         if(!this.isConnected())
@@ -112,6 +113,8 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    // TODO: Add trim to task name
+    // TODO: support new options in [TaskListRequest]
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) { // DONE
         if(!this.isConnected())
