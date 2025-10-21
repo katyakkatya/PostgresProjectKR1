@@ -1,8 +1,10 @@
 package ui.screens.task_list
 
 import database.model.DbTaskStatus
+import database.request.FormattingOptions
 import database.request.TaskListRequest
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import models.TaskItemModel
@@ -12,6 +14,11 @@ class TaskListViewModel(
   private val todoRepository: TodoRepository,
 ) {
   val tasksListFlow = todoRepository.tasksListFlow
+
+  private val _expandedTopAppBarStateFlow: MutableStateFlow<ExpandedTopAppBarState> =
+    MutableStateFlow(ExpandedTopAppBarState.Closed)
+
+  val expandedTopAppBarStateFlow = _expandedTopAppBarStateFlow
 
   private val _newTaskWindowStateFlow: MutableStateFlow<NewTaskWindowState> =
     MutableStateFlow(NewTaskWindowState.Closed)
@@ -27,12 +34,20 @@ class TaskListViewModel(
   private val _statusFilterFlow = MutableStateFlow(initialFilters)
   val statusFilterFlow = _statusFilterFlow
 
+  fun openExpandedTopAppBar(){
+    _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Opened
+  }
+
+  fun closeExpandedTopAppBar(){
+    _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Closed
+  }
+
   fun onInit() {
     updateList()
   }
 
   private fun updateList() {
-    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList()))
+    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, FormattingOptions(false, false, false, false, false)))
   }
 
   fun toggleStatusFilter(status: DbTaskStatus) {
@@ -154,4 +169,9 @@ sealed interface TaskSelectWindowState {
   data class Opened(
     val tasks: List<TaskItemModel>,
   ) : TaskSelectWindowState
+}
+
+sealed interface ExpandedTopAppBarState{
+  object Closed : ExpandedTopAppBarState
+  object Opened : ExpandedTopAppBarState
 }

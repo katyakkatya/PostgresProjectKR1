@@ -9,6 +9,7 @@ import database.model.DbTaskStatus
 import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
 import database.request.TaskListRequest
+import theme.TodoAppTheme
 import ui.AppNavigation
 import java.awt.Dimension
 import java.io.PrintStream
@@ -58,6 +59,7 @@ fun main() = application {
         val minWidth = with(density) { 300.dp.toPx().toInt() }
         val minHeight = with(density) { 500.dp.toPx().toInt() }
         window.minimumSize = Dimension(minWidth, minHeight)
-        AppNavigation(Globals.mainViewModel)
+
+        TodoAppTheme { AppNavigation(Globals.mainViewModel) }
     }
 }

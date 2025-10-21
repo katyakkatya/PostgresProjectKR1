@@ -4,8 +4,11 @@ import database.DatabaseInteractor
 import database.model.DbTaskDetail
 import database.model.DbTaskItem
 import database.model.DbTaskStatus
+import database.model.UserWithTaskCount
 import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
+import database.request.CreateUserRequest
+import database.request.GetUsersWithTasksRequest
 import database.request.TaskListRequest
 import database.result.Result
 import java.util.*
@@ -116,5 +119,25 @@ class StubDatabaseInteractor : DatabaseInteractor {
     consumerForException: Consumer<Exception?>?
   ) {
 
+  }
+
+  override fun setShouldForceUniqueName(shouldForceUniqueName: Boolean): Boolean? {
+    return true
+  }
+
+  override fun setTaskTitleMinLength(minLength: Int): Result<Boolean?>? {
+    return Result(true, null, true)
+  }
+
+  override fun createUser(request: CreateUserRequest?): Result<Long?>? {
+    return Result(1L, null, true)
+  }
+
+  override fun addUserToTask(userId: Long?, taskId: Long?): Boolean? {
+    return true
+  }
+
+  override fun getUsersWithTasks(request: GetUsersWithTasksRequest?): Result<List<UserWithTaskCount?>?>? {
+    return Result(listOf(), null, true)
   }
 }

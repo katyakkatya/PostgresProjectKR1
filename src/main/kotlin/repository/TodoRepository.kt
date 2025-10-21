@@ -109,7 +109,8 @@ class TodoRepository(
   }
 
   fun saveNewTask(title: String, subtasks: List<String>, connectedTasks: List<Long>): Result<Long> {
-    val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks))
+    val userId = 1
+    val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks, 1))
     if (result.success == false) {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании новой задачи")
     }

@@ -12,9 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,7 +41,8 @@ fun NewTaskDialog(
             .width(600.dp)
             .height(600.dp),
           shape = RoundedCornerShape(16.dp),
-          elevation = 8.dp
+          elevation = 8.dp,
+          color = MaterialTheme.colors.surface
         ) {
           Column(
             modifier = Modifier
@@ -55,18 +54,24 @@ fun NewTaskDialog(
               modifier = Modifier
                 .padding(24.dp),
               text = "Добавление задания",
-              style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
-              )
+              style = MaterialTheme.typography.h4.copy(
+                fontWeight = FontWeight.Bold
+              ),
+              color = MaterialTheme.colors.onSurface
             )
             TextField(
               value = state.taskName,
               onValueChange = onTaskNameChanged,
-              placeholder = { Text("Например: Помыть посуду", fontSize = 24.sp) },
+              placeholder = {
+                Text(
+                  "Например: Помыть посуду",
+                  fontSize = 24.sp,
+                  color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                )
+              },
               textStyle = LocalTextStyle.current.copy(
                 fontSize = 24.sp,
-                color = Color.Black
+                color = MaterialTheme.colors.onSurface
               ),
               modifier = Modifier
                 .fillMaxWidth()
@@ -74,10 +79,11 @@ fun NewTaskDialog(
                 .height(60.dp)
                 .padding(horizontal = 24.dp),
               colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.White,
-                textColor = Color.Black,
-                focusedIndicatorColor = Color.DarkGray,
-                unfocusedIndicatorColor = Color.Gray
+                backgroundColor = MaterialTheme.colors.surface,
+                textColor = MaterialTheme.colors.onSurface,
+                focusedIndicatorColor = MaterialTheme.colors.primary,
+                unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+                cursorColor = MaterialTheme.colors.primary
               )
             )
             Text(
@@ -85,10 +91,10 @@ fun NewTaskDialog(
               modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
-              style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-              )
+              style = MaterialTheme.typography.h5.copy(
+                fontWeight = FontWeight.Bold
+              ),
+              color = MaterialTheme.colors.onSurface
             )
             state.subtasks.forEachIndexed { index, subtask ->
               Row(
@@ -100,10 +106,16 @@ fun NewTaskDialog(
                   onValueChange = {
                     onSubtaskChanged(index, it)
                   },
-                  placeholder = { Text("Например: Помыть посуду", fontSize = 24.sp) },
+                  placeholder = {
+                    Text(
+                      "Например: Помыть посуду",
+                      fontSize = 24.sp,
+                      color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    )
+                  },
                   textStyle = LocalTextStyle.current.copy(
                     fontSize = 24.sp,
-                    color = Color.Black
+                    color = MaterialTheme.colors.onSurface
                   ),
                   modifier = Modifier
                     .fillMaxWidth()
@@ -111,10 +123,11 @@ fun NewTaskDialog(
                     .height(60.dp)
                     .padding(horizontal = 24.dp),
                   colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = Color.White,
-                    textColor = Color.Black,
-                    focusedIndicatorColor = Color.DarkGray,
-                    unfocusedIndicatorColor = Color.Gray
+                    backgroundColor = MaterialTheme.colors.surface,
+                    textColor = MaterialTheme.colors.onSurface,
+                    focusedIndicatorColor = MaterialTheme.colors.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+                    cursorColor = MaterialTheme.colors.primary
                   )
                 )
                 Spacer(modifier = Modifier.width(16.dp))
@@ -126,9 +139,9 @@ fun NewTaskDialog(
                 ) {
                   Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = null,
+                    contentDescription = "Удалить подзадачу",
                     modifier = Modifier.size(48.dp),
-                    tint = Color.White
+                    tint = MaterialTheme.colors.error
                   )
                 }
               }
@@ -140,24 +153,26 @@ fun NewTaskDialog(
                 .clickable {
                   onSubtaskAdded()
                 },
-              elevation = 16.dp,
+              elevation = 8.dp,
+              backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f)
             ) {
               Row(
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp)
               ) {
                 Icon(
                   Icons.Default.Add,
-                  contentDescription = null,
-                  modifier = Modifier.size(64.dp),
-                  tint = Color.Black
+                  contentDescription = "Добавить подзадачу",
+                  modifier = Modifier.size(48.dp),
+                  tint = MaterialTheme.colors.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                   text = "Добавить подзадачу",
-                  style = LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    color = Color.Black
-                  )
+                  style = MaterialTheme.typography.body1.copy(
+                    fontSize = 20.sp
+                  ),
+                  color = MaterialTheme.colors.primary
                 )
               }
             }
@@ -166,10 +181,10 @@ fun NewTaskDialog(
               modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
-              style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-              )
+              style = MaterialTheme.typography.h5.copy(
+                fontWeight = FontWeight.Bold
+              ),
+              color = MaterialTheme.colors.onSurface
             )
             state.connectedTasks.forEachIndexed { index, task ->
               TaskItem(task, onTaskDeleted = { onConnectedTaskDeleted(index) })
@@ -181,24 +196,26 @@ fun NewTaskDialog(
                 .clickable {
                   onTaskSelectWindowOpened()
                 },
-              elevation = 16.dp,
+              elevation = 8.dp,
+              backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f)
             ) {
               Row(
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp)
               ) {
                 Icon(
                   Icons.Default.Add,
-                  contentDescription = null,
-                  modifier = Modifier.size(64.dp),
-                  tint = Color.Black
+                  contentDescription = "Добавить связанную задачу",
+                  modifier = Modifier.size(48.dp),
+                  tint = MaterialTheme.colors.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                  text = "Добавить связаную задачу",
-                  style = LocalTextStyle.current.copy(
-                    fontSize = 24.sp,
-                    color = Color.Black
-                  )
+                  text = "Добавить связанную задачу",
+                  style = MaterialTheme.typography.body1.copy(
+                    fontSize = 20.sp
+                  ),
+                  color = MaterialTheme.colors.primary
                 )
               }
             }
@@ -206,10 +223,10 @@ fun NewTaskDialog(
             if (state.error != null) {
               Text(
                 text = state.error,
-                style = LocalTextStyle.current.copy(
-                  fontSize = 18.sp,
-                  color = Color.Red
+                style = MaterialTheme.typography.body2.copy(
+                  fontSize = 18.sp
                 ),
+                color = MaterialTheme.colors.error,
                 modifier = Modifier.padding(24.dp)
               )
               Spacer(modifier = Modifier.height(16.dp))
@@ -221,16 +238,16 @@ fun NewTaskDialog(
                   .padding(24.dp).weight(1f),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                  backgroundColor = Color.Gray,
-                  contentColor = Color.White
+                  backgroundColor = MaterialTheme.colors.secondary,
+                  contentColor = MaterialTheme.colors.onSecondary
                 )
               ) {
                 Text(
                   text = "Отмена",
-                  fontFamily = FontFamily.SansSerif,
                   fontSize = 22.sp,
                   fontWeight = FontWeight.W400,
-                  modifier = Modifier.padding(vertical = 12.dp)
+                  modifier = Modifier.padding(vertical = 12.dp),
+                  style = MaterialTheme.typography.button
                 )
               }
               Spacer(modifier = Modifier.width(16.dp))
@@ -240,16 +257,16 @@ fun NewTaskDialog(
                   .padding(24.dp).weight(1f),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                  backgroundColor = Color.Green,
-                  contentColor = Color.White
+                  backgroundColor = MaterialTheme.colors.primary,
+                  contentColor = MaterialTheme.colors.onPrimary
                 )
               ) {
                 Text(
                   text = "Сохранить",
-                  fontFamily = FontFamily.SansSerif,
                   fontSize = 22.sp,
                   fontWeight = FontWeight.W400,
-                  modifier = Modifier.padding(vertical = 12.dp)
+                  modifier = Modifier.padding(vertical = 12.dp),
+                  style = MaterialTheme.typography.button
                 )
               }
             }
@@ -271,8 +288,9 @@ fun TaskItem(
       .padding(horizontal = 24.dp)
       .padding(vertical = 16.dp),
     shape = RoundedCornerShape(8.dp),
-    border = BorderStroke(1.dp, Color.LightGray),
-    elevation = 4.dp
+    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
+    elevation = 4.dp,
+    backgroundColor = MaterialTheme.colors.surface
   ) {
     Row(
       modifier = Modifier.padding(24.dp),
@@ -290,23 +308,26 @@ fun TaskItem(
           .weight(1f)
           .padding(start = 16.dp),
         fontSize = 28.sp,
-        fontFamily = FontFamily.Serif,
+        fontFamily = MaterialTheme.typography.h6.fontFamily,
         fontWeight = FontWeight.W400,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.h6
       )
       CircularProgressIndicator(
         progress = task.progress,
         modifier = Modifier.padding(end = 24.dp),
-        color = Color.DarkGray,
-        backgroundColor = Color.LightGray,
+        color = MaterialTheme.colors.primary,
+        backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
         strokeWidth = 5.dp
       )
       IconButton(onClick = onTaskDeleted) {
         Icon(
           modifier = Modifier.size(36.dp),
           imageVector = Icons.Default.Delete,
-          contentDescription = ""
+          contentDescription = "Удалить задачу",
+          tint = MaterialTheme.colors.error //
         )
       }
     }
