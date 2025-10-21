@@ -3,9 +3,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import database.model.DbTaskStatus
 import models.TaskDetail
@@ -23,7 +23,7 @@ fun TaskScreenContent(
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
-      .background(color = Color.LightGray)
+      .background(color = MaterialTheme.colors.background)
       .padding(innerPadding)
       .padding(horizontal = 24.dp)
   ) {

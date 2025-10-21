@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import database.model.DbTaskStatus
@@ -31,7 +31,9 @@ fun FilterStatusItem(
   ) {
     Text(
       text = status.name.replace("_", " ").replaceFirstChar { it.uppercase() },
-      fontSize = 20.sp
+      fontSize = 20.sp,
+      color = MaterialTheme.colors.onSurface,
+      style = MaterialTheme.typography.body1
     )
 
     Checkbox(
@@ -39,8 +41,9 @@ fun FilterStatusItem(
       onCheckedChange = { onClick() },
       modifier = Modifier.size(36.dp),
       colors = CheckboxDefaults.colors(
-        checkedColor = Color.DarkGray,
-        uncheckedColor = Color.Gray
+        checkedColor = MaterialTheme.colors.secondary,
+        uncheckedColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+        checkmarkColor = MaterialTheme.colors.onSecondary
       )
     )
   }

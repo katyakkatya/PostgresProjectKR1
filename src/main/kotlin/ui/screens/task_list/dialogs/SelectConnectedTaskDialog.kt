@@ -11,9 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,7 +34,8 @@ fun SelectConnectedTaskDialog(
             .width(600.dp)
             .height(800.dp),
           shape = RoundedCornerShape(16.dp),
-          elevation = 8.dp
+          elevation = 8.dp,
+          color = MaterialTheme.colors.surface
         ) {
           Column(
             modifier = Modifier
@@ -49,10 +47,10 @@ fun SelectConnectedTaskDialog(
               modifier = Modifier
                 .padding(24.dp),
               text = "Выбор задания",
-              style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
-              )
+              style = MaterialTheme.typography.h4.copy(
+                fontWeight = FontWeight.Bold
+              ),
+              color = MaterialTheme.colors.onSurface
             )
             if (state.tasks.isEmpty()) {
               Spacer(modifier = Modifier.height(16.dp))
@@ -60,6 +58,8 @@ fun SelectConnectedTaskDialog(
                 text = "Нет заданий для добавления",
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.body1
               )
             }
             LazyColumn(
@@ -80,22 +80,21 @@ fun SelectConnectedTaskDialog(
                 .padding(24.dp),
               shape = RoundedCornerShape(16.dp),
               colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Gray,
-                contentColor = Color.White
+                backgroundColor = MaterialTheme.colors.secondary,
+                contentColor = MaterialTheme.colors.onSecondary
               )
             ) {
               Text(
                 text = "Отмена",
-                fontFamily = FontFamily.SansSerif,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.W400,
-                modifier = Modifier.padding(vertical = 12.dp, horizontal = 48.dp)
+                modifier = Modifier.padding(vertical = 12.dp, horizontal = 48.dp),
+                style = MaterialTheme.typography.button
               )
             }
           }
         }
       }
-
     }
   }
 }
@@ -113,8 +112,9 @@ fun TaskItemClickable(
         onTaskClicked()
       },
     shape = RoundedCornerShape(8.dp),
-    border = BorderStroke(1.dp, Color.LightGray),
-    elevation = 4.dp
+    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
+    elevation = 4.dp,
+    backgroundColor = MaterialTheme.colors.surface
   ) {
     Row(
       modifier = Modifier.padding(24.dp),
@@ -132,16 +132,18 @@ fun TaskItemClickable(
           .weight(1f)
           .padding(start = 16.dp),
         fontSize = 28.sp,
-        fontFamily = FontFamily.Serif,
+        fontFamily = MaterialTheme.typography.h6.fontFamily,
         fontWeight = FontWeight.W400,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.h6
       )
       CircularProgressIndicator(
         progress = task.progress,
         modifier = Modifier.padding(end = 24.dp),
-        color = Color.DarkGray,
-        backgroundColor = Color.LightGray,
+        color = MaterialTheme.colors.primary,
+        backgroundColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
         strokeWidth = 5.dp
       )
     }

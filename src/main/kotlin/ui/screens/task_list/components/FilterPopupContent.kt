@@ -5,17 +5,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import database.model.DbTaskStatus
-import ui.screens.task_list.FilterStatusItem
 
 @Composable
 fun FiltersPopupContent(
@@ -31,10 +29,15 @@ fun FiltersPopupContent(
       fontSize = 28.sp,
       fontWeight = FontWeight.W500,
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
+      color = MaterialTheme.colors.onSurface,
+      style = MaterialTheme.typography.h5
     )
 
-    Divider(modifier = Modifier.padding(bottom = 8.dp))
+    Divider(
+      modifier = Modifier.padding(bottom = 8.dp),
+      color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+    )
 
     val statuses = listOf(
       DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW,
@@ -49,23 +52,28 @@ fun FiltersPopupContent(
       )
     }
 
-    Divider(modifier = Modifier.padding(top = 8.dp))
+    Divider(
+      modifier = Modifier.padding(top = 8.dp),
+      color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+    )
+
     Button(
-      onClick = {onFilterReset()},
+      onClick = { onFilterReset() },
       modifier = Modifier
-        .fillMaxWidth().padding(12.dp),
+        .fillMaxWidth()
+        .padding(12.dp),
       shape = RoundedCornerShape(16.dp),
       colors = ButtonDefaults.buttonColors(
-        backgroundColor = Color.Gray,
-        contentColor = Color.White
+        backgroundColor = MaterialTheme.colors.secondary,
+        contentColor = MaterialTheme.colors.onSecondary
       )
     ) {
       Text(
         text = "Сбросить",
-        fontFamily = FontFamily.SansSerif,
         fontSize = 16.sp,
         fontWeight = FontWeight.W400,
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp),
+        style = MaterialTheme.typography.button
       )
     }
   }

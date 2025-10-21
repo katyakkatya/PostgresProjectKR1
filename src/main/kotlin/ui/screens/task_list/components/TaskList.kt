@@ -1,4 +1,4 @@
-package ui.components
+package ui.screens.task_list.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

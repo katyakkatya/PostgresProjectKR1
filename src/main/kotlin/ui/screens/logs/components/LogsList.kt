@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,7 +26,7 @@ fun LogsList(
       .padding(horizontal = 32.dp)
       .padding(bottom = 40.dp)
       .clip(RoundedCornerShape(24.dp))
-      .background(color = Color.White)
+      .background(color = MaterialTheme.colors.surface)
       .verticalScroll(rememberScrollState())
   ) {
     if (logs.isEmpty()) {
@@ -36,8 +36,9 @@ fun LogsList(
           .fillMaxWidth()
           .padding(16.dp),
         fontSize = 16.sp,
-        color = Color.Gray,
-        textAlign = TextAlign.Center
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.body2
       )
     } else {
       logs.forEachIndexed { index, log ->

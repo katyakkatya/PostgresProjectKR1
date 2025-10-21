@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +32,7 @@ fun TaskTopAppBar(
   Column(
     modifier = Modifier
       .fillMaxWidth()
-      .background(Color.Gray)
+      .background(MaterialTheme.colors.primary)
   ) {
     Row(
       modifier = Modifier
@@ -47,7 +47,7 @@ fun TaskTopAppBar(
           imageVector = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = "Назад",
           modifier = Modifier.size(48.dp),
-          tint = Color.White
+          tint = MaterialTheme.colors.onPrimary
         )
       }
 
@@ -57,7 +57,8 @@ fun TaskTopAppBar(
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.weight(1f),
         textAlign = TextAlign.Center,
-        color = Color.White
+        color = MaterialTheme.colors.onPrimary,
+        style = MaterialTheme.typography.h4
       )
 
       IconButton(
@@ -66,9 +67,9 @@ fun TaskTopAppBar(
       ) {
         Icon(
           imageVector = Icons.Default.Delete,
-          contentDescription = null,
+          contentDescription = "Удалить задачу",
           modifier = Modifier.size(48.dp),
-          tint = Color.White
+          tint = MaterialTheme.colors.onPrimary
         )
       }
     }
@@ -78,8 +79,8 @@ fun TaskTopAppBar(
       modifier = Modifier
         .fillMaxWidth()
         .height(6.dp),
-      color = Color(0xFF3498DB),
-      backgroundColor = Color.DarkGray.copy(alpha = 0.3f)
+      color = MaterialTheme.colors.secondary,
+      backgroundColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.3f)
     )
   }
 }

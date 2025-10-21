@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,13 +39,14 @@ fun DefaultTopAppBar(
 
   TopAppBar(
     modifier = Modifier.height(70.dp),
-    backgroundColor = Color.Gray,
+    backgroundColor = MaterialTheme.colors.primary,
     title = {
       Text(
         text = "TODO",
         fontSize = 32.sp,
         fontWeight = FontWeight.SemiBold,
-        color = Color.White,
+        color = MaterialTheme.colors.onPrimary,
+        style = MaterialTheme.typography.h4
       )
     },
     navigationIcon = {
@@ -55,7 +55,7 @@ fun DefaultTopAppBar(
           imageVector = Icons.Filled.Settings,
           contentDescription = "Настройки",
           modifier = Modifier.size(48.dp),
-          tint = Color.White
+          tint = MaterialTheme.colors.onPrimary
         )
       }
     },
@@ -64,7 +64,7 @@ fun DefaultTopAppBar(
         Icon(
           Icons.Filled.Search,
           contentDescription = "Поиск",
-          tint = Color.White
+          tint = MaterialTheme.colors.onPrimary
         )
       }
 
@@ -73,7 +73,7 @@ fun DefaultTopAppBar(
           imageVector = Icons.Outlined.List,
           contentDescription = "Логи",
           modifier = Modifier.size(48.dp),
-          tint = Color.White
+          tint = MaterialTheme.colors.onPrimary
         )
       }
 
@@ -85,7 +85,7 @@ fun DefaultTopAppBar(
             imageVector = Icons.Outlined.FilterList,
             contentDescription = "Фильтр",
             modifier = Modifier.size(48.dp),
-            tint = Color.White
+            tint = MaterialTheme.colors.onPrimary
           )
         }
 

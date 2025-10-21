@@ -4,13 +4,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import models.TaskItemModel
-import ui.components.TaskList
+import ui.screens.task_list.components.TaskList
 
 @Composable
 fun TaskListContent(
@@ -23,14 +23,16 @@ fun TaskListContent(
   Box(
     modifier = Modifier
       .fillMaxSize()
-      .background(color = Color.LightGray)
+      .background(color = MaterialTheme.colors.background)
       .padding(innerPadding)
   ) {
     if (tasks.isEmpty()) {
       Text(
         text = "Вы еще не создали задач",
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+        style = MaterialTheme.typography.body1
       )
     }
     TaskList(

@@ -31,9 +31,9 @@ fun ExpandedTopAppBar(
   focusRequester: FocusRequester
 ) {
   TopAppBar(
-    backgroundColor = MaterialTheme.colors.onBackground,
+    backgroundColor = MaterialTheme.colors.primary,
     elevation = 4.dp,
-    contentColor = MaterialTheme.colors.primary // Устанавливаем цвет контента
+    contentColor = MaterialTheme.colors.onPrimary
   ) {
     Row(
       modifier = Modifier
@@ -48,7 +48,7 @@ fun ExpandedTopAppBar(
         Icon(
           Icons.Filled.ArrowBack,
           contentDescription = "Close search",
-          tint = MaterialTheme.colors.onPrimary // Используем цвет из темы
+          tint = MaterialTheme.colors.onPrimary
         )
       }
 
@@ -59,10 +59,10 @@ fun ExpandedTopAppBar(
           .weight(1f)
           .focusRequester(focusRequester),
         textStyle = TextStyle(
-          color = MaterialTheme.colors.onPrimary, // Цвет текста из темы
+          color = MaterialTheme.colors.onPrimary,
           fontSize = MaterialTheme.typography.h6.fontSize
         ),
-        cursorBrush = SolidColor(MaterialTheme.colors.onPrimary), // Цвет курсора
+        cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
         singleLine = true,
         decorationBox = { innerTextField ->
           Box(
@@ -73,7 +73,7 @@ fun ExpandedTopAppBar(
               Text(
                 "Поиск...",
                 style = MaterialTheme.typography.h6.copy(
-                  color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f) // Полупрозрачный цвет
+                  color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f)
                 )
               )
             }
@@ -90,7 +90,7 @@ fun ExpandedTopAppBar(
           Icon(
             Icons.Filled.Close,
             contentDescription = "Clear search",
-            tint = MaterialTheme.colors.onPrimary // Цвет из темы
+            tint = MaterialTheme.colors.onPrimary
           )
         }
       }

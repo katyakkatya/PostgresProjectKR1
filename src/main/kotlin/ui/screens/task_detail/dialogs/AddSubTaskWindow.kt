@@ -8,12 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,9 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,7 +34,8 @@ fun AddSubtaskWindow(
       modifier = Modifier
         .wrapContentHeight(),
       shape = RoundedCornerShape(16.dp),
-      elevation = 8.dp
+      elevation = 8.dp,
+      color = MaterialTheme.colors.surface
     ) {
       Column(
         modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
@@ -52,9 +46,10 @@ fun AddSubtaskWindow(
           text = "Добавление подзадачи",
           fontSize = 32.sp,
           fontWeight = FontWeight.Bold,
-          fontFamily = FontFamily.SansSerif,
-          color = Color.DarkGray,
-          modifier = Modifier.padding(vertical = 32.dp)
+          fontFamily = MaterialTheme.typography.h4.fontFamily,
+          color = MaterialTheme.colors.onSurface,
+          modifier = Modifier.padding(vertical = 32.dp),
+          style = MaterialTheme.typography.h4
         )
 
         TextField(
@@ -67,10 +62,11 @@ fun AddSubtaskWindow(
             Text(
               text = "Введите название подзадачи",
               textAlign = TextAlign.Start,
-              color = Color.Gray,
-              fontFamily = FontFamily.SansSerif,
+              color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+              fontFamily = MaterialTheme.typography.body1.fontFamily,
               fontSize = 24.sp,
-              fontWeight = FontWeight.W400
+              fontWeight = FontWeight.W400,
+              style = MaterialTheme.typography.body1
             )
           },
           modifier = Modifier
@@ -80,15 +76,17 @@ fun AddSubtaskWindow(
             .wrapContentHeight(Alignment.CenterVertically),
           shape = RoundedCornerShape(16.dp),
           colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = Color.DarkGray,
-            unfocusedBorderColor = Color.Gray,
-            cursorColor = Color.DarkGray
+            focusedBorderColor = MaterialTheme.colors.primary,
+            unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+            cursorColor = MaterialTheme.colors.primary,
+            textColor = MaterialTheme.colors.onSurface,
+            backgroundColor = MaterialTheme.colors.surface
           ),
           textStyle = TextStyle(
             fontSize = 28.sp,
-            fontFamily = FontFamily.SansSerif,
+            fontFamily = MaterialTheme.typography.h6.fontFamily,
             fontWeight = FontWeight.W400,
-            color = Color.DarkGray,
+            color = MaterialTheme.colors.onSurface,
             textAlign = TextAlign.Start
           ),
           singleLine = true,
@@ -101,16 +99,16 @@ fun AddSubtaskWindow(
               .padding(24.dp).weight(1f),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-              backgroundColor = Color.Gray,
-              contentColor = Color.White
+              backgroundColor = MaterialTheme.colors.secondary,
+              contentColor = MaterialTheme.colors.onSecondary
             )
           ) {
             Text(
               text = "Отмена",
-              fontFamily = FontFamily.SansSerif,
               fontSize = 22.sp,
               fontWeight = FontWeight.W400,
-              modifier = Modifier.padding(vertical = 12.dp)
+              modifier = Modifier.padding(vertical = 12.dp),
+              style = MaterialTheme.typography.button
             )
           }
           Spacer(modifier = Modifier.width(16.dp))
@@ -120,16 +118,16 @@ fun AddSubtaskWindow(
               .padding(24.dp).weight(1f),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-              backgroundColor = Color.Green,
-              contentColor = Color.White
+              backgroundColor = MaterialTheme.colors.primary,
+              contentColor = MaterialTheme.colors.onPrimary
             )
           ) {
             Text(
               text = "Добавить",
-              fontFamily = FontFamily.SansSerif,
               fontSize = 22.sp,
               fontWeight = FontWeight.W400,
-              modifier = Modifier.padding(vertical = 12.dp)
+              modifier = Modifier.padding(vertical = 12.dp),
+              style = MaterialTheme.typography.button
             )
           }
         }
