@@ -3,9 +3,8 @@ package database;
 import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.model.DbTaskStatus;
-import database.request.ConnectionRequest;
-import database.request.CreateTaskRequest;
-import database.request.TaskListRequest;
+import database.model.UserWithTaskCount;
+import database.request.*;
 import database.result.Result;
 
 import java.sql.*;
@@ -363,5 +362,30 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             this.pushToConsumer(this.consumerForException, e);
             return false;
         }
+    }
+
+    @Override
+    public Boolean setShouldForceUniqueName(boolean shouldForceUniqueName) {
+        return null;
+    }
+
+    @Override
+    public Result<Boolean> setTaskTitleMinLength(int minLength) {
+        return null;
+    }
+
+    @Override
+    public Result<Long> createUser(CreateUserRequest request) {
+        return null;
+    }
+
+    @Override
+    public Boolean addUserToTask(Long userId, Long taskId) {
+        return null;
+    }
+
+    @Override
+    public Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request) {
+        return null;
     }
 }

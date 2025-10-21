@@ -1,6 +1,7 @@
 package ui.screens.task_list
 
 import database.model.DbTaskStatus
+import database.request.FormattingOptions
 import database.request.TaskListRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.drop
@@ -46,7 +47,7 @@ class TaskListViewModel(
   }
 
   private fun updateList() {
-    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList()))
+    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, FormattingOptions(false, false, false, false, false)))
   }
 
   fun toggleStatusFilter(status: DbTaskStatus) {

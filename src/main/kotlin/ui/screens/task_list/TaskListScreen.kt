@@ -17,14 +17,21 @@ fun TaskListScreen(
 ) {
   val tasks by viewModel.tasksListFlow.collectAsState(emptyList())
   var showDialog by remember { mutableStateOf(false) }
-  var isSearchExpanded by remember { mutableStateOf(false) }
+  val expandedTopAppBarState by viewModel.expandedTopAppBarStateFlow.collectAsState(false)
   var searchQuery by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
   val appliedFilters by viewModel.statusFilterFlow.collectAsState(emptySet())
 
   Scaffold(
     topBar = {
-      if (isSearchExpanded){
+      if (expandedTopAppBarState == ExpandedTopAppBarState.Opened){
+        ExpandedTopAppBar(
+          searchQuery = searchQuery,
+          onSearchQueryChanged = { searchQuery = it },
+          focusRequester = focusRequester,
+          onClose = {viewModel.closeExpandedTopAppBar()}
+        )
+      } else{
         DefaultTopAppBar(
           appliedFilters,
           onFilterToggled = {status -> viewModel.toggleStatusFilter(status)},
@@ -32,13 +39,6 @@ fun TaskListScreen(
           onLogsClicked = onLogsClicked,
           onSearchClicked = {viewModel.openExpandedTopAppBar()},
           onSettingsClicked = onSettingsClick
-        )
-      } else{
-        ExpandedTopAppBar(
-          searchQuery = searchQuery,
-          onSearchQueryChanged = { searchQuery = it },
-          focusRequester = focusRequester,
-          onClose = {viewModel.closeExpandedTopAppBar()}
         )
       }
     },
