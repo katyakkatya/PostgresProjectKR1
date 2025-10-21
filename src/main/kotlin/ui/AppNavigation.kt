@@ -4,6 +4,7 @@ package ui
 import DatabaseLogScreen
 import Globals
 import MainViewModel
+import SettingsScreen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ sealed interface Screen {
   object TaskList : Screen
   data class TaskDetail(val taskId: Long) : Screen
   object Logs : Screen
+  object Settings : Screen
 }
 
 @Composable
@@ -87,7 +89,8 @@ fun AppNavigation(
           taskStack.add(id)
           currentScreen = TaskDetail(id)
         },
-        onLogsClicked = { currentScreen = Screen.Logs }
+        onLogsClicked = { currentScreen = Screen.Logs },
+        onSettingsClick = { currentScreen = Screen.Settings }
       )
     }
 
@@ -108,6 +111,14 @@ fun AppNavigation(
     Screen.Logs -> {
       DatabaseLogScreen(
         viewModel = Globals.logsViewModel,
+        onBack = {
+          currentScreen = Screen.TaskList
+        }
+      )
+    }
+
+    is Screen.Settings -> {
+      SettingsScreen(
         onBack = {
           currentScreen = Screen.TaskList
         }
