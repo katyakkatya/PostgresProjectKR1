@@ -388,4 +388,24 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     public Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request) {
         return null;
     }
+
+    @Override
+    public boolean getForceUniqueTaskTitle() {
+        return false;
+    }
+
+    @Override
+    public int getMinTaskTitleLength() {
+        return 10;
+    }
+
+    @Override
+    public Result<Boolean> setTaskTitleMaxLength(int maxLength) {
+        return null;
+    }
+
+    @Override
+    public int getMaxTaskTitleLength() {
+        return 110;
+    }
 }

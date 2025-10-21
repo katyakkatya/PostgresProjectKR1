@@ -3,17 +3,22 @@ package ui.screens.task_list
 import database.model.DbTaskStatus
 import database.request.FormattingOptions
 import database.request.TaskListRequest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import models.TaskItemModel
+import repository.Settings
 import repository.TodoRepository
 
 class TaskListViewModel(
   private val todoRepository: TodoRepository,
 ) {
   val tasksListFlow = todoRepository.tasksListFlow
+
+  private var settings = Settings.DEFAULT
 
   private val _expandedTopAppBarStateFlow: MutableStateFlow<ExpandedTopAppBarState> =
     MutableStateFlow(ExpandedTopAppBarState.Closed)
@@ -44,10 +49,17 @@ class TaskListViewModel(
 
   fun onInit() {
     updateList()
+    updateSettings()
   }
 
   private fun updateList() {
     todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, FormattingOptions(false, false, false, false, false)))
+  }
+
+  private fun updateSettings() {
+    CoroutineScope(Dispatchers.IO).launch {
+      settings = todoRepository.settingsFlow.first()
+    }
   }
 
   fun toggleStatusFilter(status: DbTaskStatus) {
@@ -135,19 +147,19 @@ class TaskListViewModel(
 
   private fun validateNewTask(state: NewTaskWindowState.Opened): Boolean {
     state.subtasks.forEach { subtask ->
-      if (subtask.trim().length < 3) {
-        _newTaskWindowStateFlow.value = state.copy(error = "Подзача должна быть минимум 3 символа")
+      if (subtask.trim().length < settings.minTaskTitleLength) {
+        _newTaskWindowStateFlow.value = state.copy(error = "Минимальная длина ${settings.minTaskTitleLength}")
         return false
-      } else if (subtask.trim().length >= 100) {
-        _newTaskWindowStateFlow.value = state.copy(error = "Подзача должна быть максимум 100 символов")
+      } else if (subtask.trim().length > settings.maxTaskTitleLength) {
+        _newTaskWindowStateFlow.value = state.copy(error = "Максимальная длина ${settings.maxTaskTitleLength}")
         return false
       }
     }
-    if (state.taskName.trim().length < 1) {
-      _newTaskWindowStateFlow.value = state.copy(error = "Название должно быть минимум 3 символа")
+    if (state.taskName.trim().length < settings.minTaskTitleLength) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Минимальная длина ${settings.minTaskTitleLength}")
       return false
-    } else if (state.taskName.trim().length >= 100) {
-      _newTaskWindowStateFlow.value = state.copy(error = "Название должно быть максимум 100 символов")
+    } else if (state.taskName.trim().length > settings.maxTaskTitleLength) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Максимальная длина ${settings.maxTaskTitleLength}")
       return false
     }
     return true
