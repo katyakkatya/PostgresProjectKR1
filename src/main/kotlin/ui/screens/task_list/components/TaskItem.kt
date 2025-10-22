@@ -35,6 +35,7 @@ fun TaskItem(
   Card(
     modifier = Modifier
       .fillMaxWidth()
+      .padding(horizontal = 16.dp)
       .clickable { onTaskClick(task) },
     shape = RoundedCornerShape(8.dp),
     border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),

@@ -3,10 +3,15 @@ package ui.screens.task_list
 import AddTaskFloatingButton
 import DefaultTopAppBar
 import ExpandedTopAppBar
+import FiltersSidebar
 import TaskListContent
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun TaskListScreen(
@@ -16,47 +21,91 @@ fun TaskListScreen(
   onLogsClicked: () -> Unit,
 ) {
   val tasks by viewModel.tasksListFlow.collectAsState(emptyList())
-  var showDialog by remember { mutableStateOf(false) }
   val expandedTopAppBarState by viewModel.expandedTopAppBarStateFlow.collectAsState(false)
   var searchQuery by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
   val appliedFilters by viewModel.statusFilterFlow.collectAsState(emptySet())
 
-  Scaffold(
-    topBar = {
-      if (expandedTopAppBarState == ExpandedTopAppBarState.Opened){
-        ExpandedTopAppBar(
-          searchQuery = searchQuery,
-          onSearchQueryChanged = { searchQuery = it },
-          focusRequester = focusRequester,
-          onClose = {viewModel.closeExpandedTopAppBar()}
-        )
-      } else{
-        DefaultTopAppBar(
-          appliedFilters,
-          onFilterToggled = {status -> viewModel.toggleStatusFilter(status)},
-          onFilterReset = { viewModel.resetFilters() },
-          onLogsClicked = onLogsClicked,
-          onSearchClicked = {viewModel.openExpandedTopAppBar()},
-          onSettingsClicked = onSettingsClick
-        )
-      }
-    },
-    floatingActionButton = {
-      AddTaskFloatingButton(
-        onClick = { viewModel.openNewTaskWindow() }
-      )
-    }
-  ) { innerPadding ->
-    TaskListContent(
-      innerPadding = innerPadding,
-      tasks = tasks,
-      onTaskClick = onTaskClick,
-      showDialog = showDialog,
-      onDismissDialog = { }
-    )
-  }
+  BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    val isFullScreen = maxWidth >= 1200.dp
 
+    var showFiltersSidebar by remember { mutableStateOf(isFullScreen) }
+
+    LaunchedEffect(isFullScreen) {
+      showFiltersSidebar = isFullScreen
+    }
+
+    Scaffold(
+      topBar = {
+        if (expandedTopAppBarState == ExpandedTopAppBarState.Opened) {
+          ExpandedTopAppBar(
+            searchQuery = searchQuery,
+            onSearchQueryChanged = { searchQuery = it },
+            focusRequester = focusRequester,
+            onClose = { viewModel.closeExpandedTopAppBar() }
+          )
+        } else {
+          DefaultTopAppBar(
+            appliedFilters,
+            onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
+            onFilterReset = { viewModel.resetFilters() },
+            onLogsClicked = onLogsClicked,
+            onSearchClicked = { viewModel.openExpandedTopAppBar() },
+            onSettingsClicked = onSettingsClick,
+            onFiltersSidebarToggle = {
+              if (!isFullScreen) {
+                showFiltersSidebar = !showFiltersSidebar
+              }
+            }
+          )
+        }
+      },
+    ) { paddingValues ->
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(paddingValues)
+      ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+
+          Box(
+            modifier = Modifier
+              .weight(if (showFiltersSidebar) 3f else 1f)
+              .fillMaxHeight()
+          ) {
+            TaskListContent(
+              innerPadding = PaddingValues(0.dp),
+              tasks = tasks,
+              onTaskClick = onTaskClick,
+            )
+
+            Box(
+              modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+              contentAlignment = Alignment.BottomEnd
+            ) {
+              AddTaskFloatingButton(
+                onClick = { viewModel.openNewTaskWindow() }
+              )
+            }
+          }
+
+          if (showFiltersSidebar) {
+            FiltersSidebar(
+              onClose = {
+                if (!isFullScreen) {
+                  showFiltersSidebar = false
+                }
+              },
+              modifier = Modifier.weight(1.5f),
+              isPermanent = isFullScreen
+            )
+          }
+        }
+      }
+    }
+  }
   val newTaskState by viewModel.newTaskWindowStateFlow.collectAsState()
   NewTaskDialog(
     newTaskState,
@@ -77,3 +126,4 @@ fun TaskListScreen(
     onTaskSelected = viewModel::addConnectedTask,
   )
 }
+
