@@ -10,30 +10,23 @@ import database.result.Result;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     private Optional<Connection> connection = Optional.empty();
 
-    private final int maxTaskTitleLength = 110;
-
     private Consumer<String> consumerForStatement = System.out::println;
     private Consumer<Exception> consumerForException = System.err::println;
+
+    private Pattern numberPattern = Pattern.compile("\\d+");
 
     @Override
     public void setConsumers(Consumer<String> consumerForStatement,
                              Consumer<Exception> consumerForException){
         this.consumerForStatement = consumerForStatement;
         this.consumerForException = consumerForException;
-    }
-
-    private <T> void pushToConsumer(Consumer<T> consumer, T ...elements){
-        for(T el : elements)
-            consumer.accept(el);
-    }
-
-    private boolean isConnected(){
-        return connection.isPresent();
     }
 
     @Override
@@ -100,33 +93,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         } catch (SQLException e) {
             this.pushToConsumer(this.consumerForException, e);
             return false;
-        }
-    }
-
-    private void createTables(Statement statement) throws SQLException{
-        List<String> createCommands = List.of("CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
-                "CREATE TABLE IF NOT EXISTS users (\n" +
-                        "id SERIAL PRIMARY KEY,\n" +
-                        "name VARCHAR(100) NOT NULL CHECK (LENGTH(name) > 0)\n" +
-                        ");",
-                "CREATE TABLE IF NOT EXISTS task (\n" +
-                        "id SERIAL PRIMARY KEY,\n" +
-                        "title VARCHAR(100) NOT NULL,\n" +
-                        "date DATE,\n" +
-                        "status state DEFAULT 'Бэклог',\n" +
-                        "subtasks VARCHAR(100)[],\n" +
-                        "subtasks_status BOOLEAN[],\n" +
-                        "author_id INTEGER," +
-                        "FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE SET NULL);",
-                "CREATE TABLE IF NOT EXISTS connected_task (\n" +
-                        "task_id INTEGER NOT NULL,\n" +
-                        "another_task_id INTEGER NOT NULL,\n" +
-                        "PRIMARY KEY (task_id, another_task_id),\n" +
-                        "FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE,\n" +
-                        "FOREIGN KEY (another_task_id) REFERENCES task (id) ON DELETE CASCADE);");
-        for(String create : createCommands){
-            this.pushToConsumer(this.consumerForStatement, create);
-            statement.execute(create);
         }
     }
 
@@ -402,16 +368,40 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
-    private void alterStatement(String query) throws SQLException {
-        Statement s = this.connection.get().createStatement();
-        s.execute(query);
-        this.pushToConsumer(this.consumerForStatement, query);
-        s.close();
-    }
-
     @Override
-    public Result<Boolean> setTaskTitleMinLength(int minLength) {
-        return null;
+    public Result<Boolean> setTaskTitleMinLength(int minLength) { // DONE
+        if(!this.isConnected())
+            return new Result<>(false, "not connected", false);
+
+        try{
+            this.connection.get().setAutoCommit(false); // начало транзакции
+
+            PreparedStatement deleteStatement = this.connection.get().prepareStatement("DELETE FROM task WHERE LENGTH(title) < ?");
+            deleteStatement.setLong(1, minLength);
+            deleteStatement.executeUpdate();
+            deleteStatement.close();
+
+            alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS min_length");
+            alterStatement("ALTER TABLE task ADD CONSTRAINT min_length CHECK(LENGTH(title) >= %d)".formatted(minLength));
+
+            this.connection.get().commit(); // все ок - коммитим
+
+            return new Result<>(true, "done", true);
+        } catch (SQLException e) {
+            try {
+                this.connection.get().rollback(); // откатываем транзакицию в случае ошибки
+            } catch (SQLException ex) {
+                this.pushToConsumer(consumerForException, ex);
+            }
+            this.pushToConsumer(consumerForException, e);
+            return new Result<>(false, e.getMessage(), false);
+        }finally {
+            try {
+                this.connection.get().setAutoCommit(true); // завершаем транзакцию
+            } catch (SQLException e) {
+                this.pushToConsumer(consumerForException, e);
+            }
+        }
     }
 
     @Override
@@ -460,17 +450,97 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public int getMinTaskTitleLength() {
-        return 10;
+    public int getMinTaskTitleLength() { // DONE
+        try {
+            Optional<String> constraintContent = this.getConstraintContent("min_length");
+            return constraintContent.map(s ->
+                    Integer.parseInt(this.getNumberFromConstraint(s, numberPattern))).orElse(0);
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return 0;
+        }
     }
 
     @Override
     public Result<Boolean> setTaskTitleMaxLength(int maxLength) {
-        return null;
+        return new Result<>(null, null, false);
     }
 
     @Override
     public int getMaxTaskTitleLength() {
-        return maxTaskTitleLength;
+        return 100;
+    }
+
+    /** Использование ALTER в Query
+     * @param query Выражение
+     * */
+    private void alterStatement(String query) throws SQLException {
+        Statement s = this.connection.get().createStatement();
+        s.execute(query);
+        this.pushToConsumer(this.consumerForStatement, query);
+        s.close();
+    }
+
+    /** Использование системной таблицы для получение содержимого ограничения
+     * @param constraintName Название ограничения
+     * @return Optional<String> - содержимое ограничения
+     * */
+    private Optional<String> getConstraintContent(String constraintName) throws SQLException {
+        try(PreparedStatement statement = this.connection.get().prepareStatement("SELECT cc.check_clause FROM information_schema.table_constraints tc " +
+                "JOIN information_schema.check_constraints cc ON tc.constraint_name = cc.constraint_name " +
+                "WHERE tc.constraint_name = ?")) {
+            statement.setString(1, constraintName);
+            ResultSet resultSet = statement.executeQuery();
+
+            return Optional.ofNullable(resultSet.next() ? resultSet.getString("check_clause") : null);
+        }
+    }
+
+    private <T> void pushToConsumer(Consumer<T> consumer, T ...elements){
+        for(T el : elements)
+            consumer.accept(el);
+    }
+
+    private boolean isConnected(){
+        return connection.isPresent();
+    }
+
+    private void createTables(Statement statement) throws SQLException{
+        List<String> createCommands = List.of("CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
+                "CREATE TABLE IF NOT EXISTS users (\n" +
+                        "id SERIAL PRIMARY KEY,\n" +
+                        "name VARCHAR(100) NOT NULL CHECK (LENGTH(name) > 0)\n" +
+                        ");",
+                "CREATE TABLE IF NOT EXISTS task (\n" +
+                        "id SERIAL PRIMARY KEY,\n" +
+                        "title VARCHAR(100) NOT NULL,\n" +
+                        "date DATE,\n" +
+                        "status state DEFAULT 'Бэклог',\n" +
+                        "subtasks VARCHAR(100)[],\n" +
+                        "subtasks_status BOOLEAN[],\n" +
+                        "author_id INTEGER," +
+                        "FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE SET NULL);",
+                "CREATE TABLE IF NOT EXISTS connected_task (\n" +
+                        "task_id INTEGER NOT NULL,\n" +
+                        "another_task_id INTEGER NOT NULL,\n" +
+                        "PRIMARY KEY (task_id, another_task_id),\n" +
+                        "FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE,\n" +
+                        "FOREIGN KEY (another_task_id) REFERENCES task (id) ON DELETE CASCADE);");
+        for(String create : createCommands){
+            this.pushToConsumer(this.consumerForStatement, create);
+            statement.execute(create);
+        }
+    }
+
+    /** Возвращает число, которое заложено в ограничении
+     * @param constraintContent Содержимое ограничения
+     * @param pattern regex-выражение
+     * @return Строка - число
+     * */
+    private String getNumberFromConstraint(String constraintContent, Pattern pattern){
+        Matcher matcher = pattern.matcher(constraintContent);
+        if(matcher.find())
+            return matcher.group();
+        throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
     }
 }

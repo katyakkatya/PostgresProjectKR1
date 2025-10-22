@@ -16,38 +16,40 @@ import java.io.PrintStream
 
 
 fun main() = application {
-//    try {
-//        System.setOut(PrintStream(System.out, true, "UTF-8"))
-//        System.setErr(PrintStream(System.err, true, "UTF-8"))
-//    } catch (e: Exception) {
-//        e.printStackTrace()
-//    }
-//    println(1)
-//    var test  = ApplicationDatabaseInteractor()
-//    println(1)
-//    test.tryConnect(
-//        ConnectionRequest(
-//            "jdbc:postgresql://localhost:9876/postgres",
-//            "postgres", "postgres"
-//        )
-//    )
-//    println(1)
-//    test.createDatabase();
-//    println(1)
-//
-//    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
-//    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
-//    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
-//    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
-//    test.changeSubtaskCompletion(1, 0);
-//    println(test.addSubtask(1L, "test"))
-//    println(test.createConnection(1L, 2L))
-//    test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
-//    test.getTaskDetail(1L).data?.relatedTasks()?.forEach { s -> println(s) }
-//    println(123123123)
-//    test.deleteTask(1L)
-//    test.getTaskDetail(4L).data?.relatedTasks()?.forEach { s -> println(s) }
-//    test.addUserToTask(1,1)
+    try {
+        System.setOut(PrintStream(System.out, true, "UTF-8"))
+        System.setErr(PrintStream(System.err, true, "UTF-8"))
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    println(1)
+    var test  = ApplicationDatabaseInteractor()
+    println(1)
+    test.tryConnect(
+        ConnectionRequest(
+            "jdbc:postgresql://localhost:9876/postgres",
+            "postgres", "postgres"
+        )
+    )
+    println(1)
+    test.createDatabase();
+    println(1)
+
+    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
+    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
+    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
+    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
+    test.changeSubtaskCompletion(1, 0);
+    println(test.addSubtask(1L, "test"))
+    println(test.createConnection(1L, 2L))
+    test.updateStatus(1L, DbTaskStatus.IN_REVIEW);
+    test.getTaskDetail(1L).data?.relatedTasks()?.forEach { s -> println(s) }
+    println(123123123)
+    test.deleteTask(1L)
+    test.getTaskDetail(4L).data?.relatedTasks()?.forEach { s -> println(s) }
+    test.addUserToTask(1,1)
+    test.setTaskTitleMinLength(10);
+    println(test.minTaskTitleLength)
     //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
 
     Window(
