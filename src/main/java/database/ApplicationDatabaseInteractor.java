@@ -15,6 +15,8 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     private Optional<Connection> connection = Optional.empty();
 
+    private final int maxTaskTitleLength = 110;
+
     private Consumer<String> consumerForStatement = System.out::println;
     private Consumer<Exception> consumerForException = System.err::println;
 
@@ -76,7 +78,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
-    // TODO: Add user table and connect it to task table
     @Override
     public Boolean createDatabase() { // DONE
         if(!this.isConnected())
@@ -84,31 +85,46 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         List<String> commands = List.of(
                 "DROP TABLE IF EXISTS connected_task",
                 "DROP TABLE IF EXISTS task",
-                "DROP TYPE IF EXISTS state CASCADE;", // FOR TEST
-                "CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
+                "DROP TYPE IF EXISTS state CASCADE;");
+        try(Statement statement = this.connection.get().createStatement()){
+            for(String cmd : commands){
+                this.pushToConsumer(this.consumerForStatement, cmd);
+                statement.execute(cmd);
+            }
+            createTables(statement);
+            this.createUser(new CreateUserRequest("admin"));
+
+            return true;
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return false;
+        }
+    }
+
+    private void createTables(Statement statement) throws SQLException{
+        List<String> createCommands = List.of("CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
+                "CREATE TABLE IF NOT EXISTS users (\n" +
+                        "id SERIAL PRIMARY KEY,\n" +
+                        "name VARCHAR(100) NOT NULL CHECK (LENGHT(name) > 0)\n" +
+                        ");",
                 "CREATE TABLE IF NOT EXISTS task (\n" +
                         "id SERIAL PRIMARY KEY,\n" +
-                  "title VARCHAR(100) NOT NULL UNIQUE CHECK (LENGTH(title) > 2),\n" +
+                        "title VARCHAR(100) NOT NULL UNIQUE CHECK (LENGTH(title) > 2),\n" +
                         "date DATE,\n" +
                         "status state DEFAULT 'Бэклог',\n" +
                         "subtasks VARCHAR(100)[],\n" +
-                        "subtasks_status BOOLEAN[]);",
+                        "subtasks_status BOOLEAN[],\n" +
+                        "author_id INTEGER," +
+                        "FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE SET NULL);",
                 "CREATE TABLE IF NOT EXISTS connected_task (\n" +
                         "task_id INTEGER NOT NULL,\n" +
                         "another_task_id INTEGER NOT NULL,\n" +
                         "PRIMARY KEY (task_id, another_task_id),\n" +
                         "FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE,\n" +
                         "FOREIGN KEY (another_task_id) REFERENCES task (id) ON DELETE CASCADE);");
-        try(Statement statement = this.connection.get().createStatement()){
-            for(String cmd : commands) {
-                this.pushToConsumer(this.consumerForStatement, cmd);
-                statement.execute(cmd);
-            }
-
-            return true;
-        } catch (SQLException e) {
-            this.pushToConsumer(this.consumerForException, e);
-            return false;
+        for(String create : createCommands){
+            this.pushToConsumer(this.consumerForStatement, create);
+            statement.execute(create);
         }
     }
 
@@ -226,7 +242,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             return new Result<>(-1L, null, false);
 
         try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO task " +
-                "(title, date, subtasks, subtasks_status) VALUES (?, ?, ?, ?) RETURNING id")){
+                "(title, date, subtasks, subtasks_status, author_id) VALUES (?, ?, ?, ?, ?) RETURNING id")){
             this.connection.get().setAutoCommit(false);
 
             statement.setString(1, request.title());
@@ -237,9 +253,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             Boolean[] boolArr = new Boolean[request.subtasks().size()];
             Arrays.fill(boolArr, false);
 
-
             statement.setArray(4, this.connection.get().createArrayOf("BOOLEAN",
                     boolArr));
+            statement.setLong(5, request.authorId());
             this.pushToConsumer(this.consumerForStatement, statement.toString());
             ResultSet res = statement.executeQuery();
 
@@ -376,7 +392,21 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Result<Long> createUser(CreateUserRequest request) {
-        return null;
+        if(!this.isConnected())
+            return new Result<>(null, "Not connected", false);
+
+        try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO users(name) VALUES(?) RETURNING id")){
+            statement.setString(1, request.name());
+
+            ResultSet resultSet = statement.executeQuery();
+
+            long id = resultSet.next() ? resultSet.getLong("id") : -1;
+
+            return new Result<>(id, "", id != -1);
+        }catch (SQLException e){
+            this.pushToConsumer(this.consumerForException, e);
+            return new Result<>(null, e.getMessage(), false);
+        }
     }
 
     @Override
@@ -406,6 +436,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public int getMaxTaskTitleLength() {
-        return 110;
+        return maxTaskTitleLength;
     }
 }
