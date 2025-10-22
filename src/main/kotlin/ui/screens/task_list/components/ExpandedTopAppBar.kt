@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -60,19 +61,19 @@ fun ExpandedTopAppBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        // Кнопка назад
+        Spacer(modifier = Modifier.width(16.dp))
         IconButton(
           onClick = onClose,
           modifier = Modifier.size(48.dp)
         ) {
           Icon(
-            imageVector = Icons.Filled.ArrowBack,
-            contentDescription = "Закрыть поиск",
-            tint = MaterialTheme.colors.onPrimary
+            Icons.Default.ArrowBack,
+            "Закрыть поиск",
+            tint = MaterialTheme.colors.onPrimary,
+            modifier = Modifier.size(48.dp)
           )
         }
-
-        // Поле поиска
+        Spacer(modifier = Modifier.width(16.dp))
         BasicTextField(
           value = searchQuery,
           onValueChange = onSearchQueryChanged,
@@ -81,7 +82,7 @@ fun ExpandedTopAppBar(
             .focusRequester(focusRequester),
           textStyle = TextStyle(
             color = MaterialTheme.colors.onPrimary,
-            fontSize = 18.sp,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Normal
           ),
           cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
@@ -96,7 +97,7 @@ fun ExpandedTopAppBar(
                   "Поиск...",
                   style = TextStyle(
                     color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
-                    fontSize = 18.sp
+                    fontSize = 32.sp
                   )
                 )
               }

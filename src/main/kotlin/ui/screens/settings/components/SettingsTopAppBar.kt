@@ -43,7 +43,6 @@ fun SettingsTopAppBar(
       modifier = Modifier.height(calculatedHeight),
       backgroundColor = MaterialTheme.colors.primary,
       title = {
-        //todo: поменять отступы
         Spacer(modifier = Modifier.width(16.dp))
         Text(
           "Настройки",

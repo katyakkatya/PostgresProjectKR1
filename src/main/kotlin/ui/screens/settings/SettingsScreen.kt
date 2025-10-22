@@ -6,7 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,12 +33,10 @@ fun SettingsScreen(
       modifier = Modifier
         .padding(padding)
         .fillMaxSize()
-        .padding(24.dp)
+        .padding(24.dp),
     ) {
       Text(
         text = "Минимальная длина названия задачи",
-        modifier = Modifier
-          .padding(start = 16.dp),
         fontSize = 28.sp,
         fontFamily = MaterialTheme.typography.h6.fontFamily,
         fontWeight = FontWeight.W400,
@@ -70,8 +67,11 @@ fun SettingsScreen(
 
       Text(
         text = "Максимальная длина названия задачи",
-        style = MaterialTheme.typography.h5,
-        color = MaterialTheme.colors.onSurface
+        fontSize = 28.sp,
+        fontFamily = MaterialTheme.typography.h6.fontFamily,
+        fontWeight = FontWeight.W400,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.h6
       )
 
       Spacer(modifier = Modifier.height(12.dp))
@@ -97,13 +97,16 @@ fun SettingsScreen(
 
       Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
         Text(
           text = "Уникальные названия задач",
-          style = MaterialTheme.typography.h5,
-          color = MaterialTheme.colors.onSurface
+          fontSize = 28.sp,
+          fontFamily = MaterialTheme.typography.h6.fontFamily,
+          fontWeight = FontWeight.W400,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.h6
         )
 
         Checkbox(
@@ -122,7 +125,10 @@ fun SettingsScreen(
 
       Text(
         text = "Внимание: при применении нового значения удалятся все задачи, не соответствующие новому значению",
-        style = MaterialTheme.typography.body2,
+        fontSize = 16.sp,
+        fontFamily = MaterialTheme.typography.h6.fontFamily,
+        fontWeight = FontWeight.W400,
+        style = MaterialTheme.typography.h6,
         color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
       )
 
@@ -141,6 +147,7 @@ fun SettingsScreen(
       ) {
         Text(
           text = "Применить",
+          fontSize = 24.sp,
           style = MaterialTheme.typography.button
         )
       }
