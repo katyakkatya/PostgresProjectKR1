@@ -18,7 +18,7 @@ fun TaskHeader(task: TaskDetail) {
   Row(
     modifier = Modifier
       .fillMaxWidth()
-      .padding(bottom = 16.dp),
+      .padding(top = 16.dp),
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically
   ) {
