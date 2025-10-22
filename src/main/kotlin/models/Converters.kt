@@ -3,6 +3,7 @@ package models
 import database.model.DbTaskDetail
 import database.model.DbTaskItem
 import database.model.DbTaskStatus
+import database.model.UserWithTaskCount
 import java.time.LocalDate
 import java.util.*
 
@@ -58,5 +59,13 @@ fun DbTaskDetail.asTaskDetail(): TaskDetail {
     relatedTasks = relatedTasks.map { it.asTask() },
     date = localDate,
     progress = progress
+  )
+}
+
+fun UserWithTaskCount.asUserWithTasks(): UserWithTasksModel {
+  return UserWithTasksModel(
+    id = user.id,
+    name = user.name,
+    taskCount = tasksCount,
   )
 }

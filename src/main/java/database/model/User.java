@@ -1,4 +1,4 @@
 package database.model;
 
-public record User(String name) {
+public record User(Long id, String name) {
 }

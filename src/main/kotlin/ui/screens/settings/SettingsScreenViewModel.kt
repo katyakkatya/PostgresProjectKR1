@@ -28,6 +28,7 @@ class SettingsScreenViewModel(
 
   fun onInit() {
     CoroutineScope(Dispatchers.IO).launch {
+      todoRepository.loadSettings()
       val settings = todoRepository.settingsFlow.first()
       _minLengthInputFlow.value = settings.minTaskTitleLength.toString()
       _maxLengthInputFlow.value = settings.maxTaskTitleLength.toString()

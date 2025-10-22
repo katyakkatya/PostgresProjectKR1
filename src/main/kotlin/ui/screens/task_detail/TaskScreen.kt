@@ -4,8 +4,10 @@ import AddSubtaskWindow
 import DeletionWindow
 import TaskScreenContent
 import TaskTopAppBar
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 @Composable
 fun TaskScreen(
@@ -14,13 +16,16 @@ fun TaskScreen(
   onRelatedTaskClick: (Long) -> Unit
 ) {
   val task by viewModel.taskFlow.collectAsState(null)
-
-  task?.let { task ->
-    Scaffold(
-      topBar = {
-        TaskTopAppBar(task = task, onDeleteClicked = { viewModel.openDeletionWindow() }, onBack = onBack)
-      }
-    ) { innerPadding ->
+  Scaffold(
+    topBar = {
+      TaskTopAppBar(
+        taskProgress = task?.progress ?: 0f,
+        onDeleteClicked = { viewModel.openDeletionWindow() },
+        onBack = onBack
+      )
+    }
+  ) { innerPadding ->
+    task?.let { task ->
       TaskScreenContent(
         innerPadding = innerPadding,
         task = task,
