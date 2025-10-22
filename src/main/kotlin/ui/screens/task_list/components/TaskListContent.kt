@@ -17,8 +17,6 @@ fun TaskListContent(
   innerPadding: PaddingValues,
   tasks: List<TaskItemModel>,
   onTaskClick: (Long) -> Unit,
-  showDialog: Boolean,
-  onDismissDialog: () -> Unit
 ) {
   Box(
     modifier = Modifier
@@ -39,13 +37,5 @@ fun TaskListContent(
       tasks = tasks,
       onTaskClick = onTaskClick
     )
-
-    if (showDialog) {
-      AddTaskDialog(
-        showDialog = showDialog,
-        onDismiss = onDismissDialog,
-        onConfirm = { /* TODO: Handle task creation */ }
-      )
-    }
   }
 }

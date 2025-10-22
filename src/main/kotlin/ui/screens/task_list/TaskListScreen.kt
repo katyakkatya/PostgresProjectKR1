@@ -16,7 +16,6 @@ fun TaskListScreen(
   onLogsClicked: () -> Unit,
 ) {
   val tasks by viewModel.tasksListFlow.collectAsState(emptyList())
-  var showDialog by remember { mutableStateOf(false) }
   val expandedTopAppBarState by viewModel.expandedTopAppBarStateFlow.collectAsState(false)
   var searchQuery by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
@@ -52,8 +51,6 @@ fun TaskListScreen(
       innerPadding = innerPadding,
       tasks = tasks,
       onTaskClick = onTaskClick,
-      showDialog = showDialog,
-      onDismissDialog = { }
     )
   }
 
