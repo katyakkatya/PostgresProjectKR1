@@ -1,32 +1,14 @@
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +26,7 @@ fun DefaultTopAppBar(
   onLogsClicked: () -> Unit,
   onSearchClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
+  onUsersClicked: () -> Unit,
   onFiltersSidebarToggle: () -> Unit = {}
 ) {
   var filterPopupOpened by remember { mutableStateOf(false) }
@@ -87,7 +70,7 @@ fun DefaultTopAppBar(
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(
-          text = "TODO",
+          text = "Трекер задач",
           fontSize = 32.sp,
           fontWeight = FontWeight.SemiBold,
           modifier = Modifier.weight(1f),
@@ -106,6 +89,17 @@ fun DefaultTopAppBar(
               )
           }
         }
+        Spacer(modifier = Modifier.width(16.dp))
+
+          IconButton(onClick = onUsersClicked) {
+            Icon(
+              imageVector = Icons.Default.Person,
+              contentDescription = "Пользователи",
+              modifier = Modifier.size(36.dp),
+              tint = MaterialTheme.colors.onPrimary
+            )
+          }
+
         Spacer(modifier = Modifier.width(16.dp))
 
         IconButton(onClick = onSearchClicked) {

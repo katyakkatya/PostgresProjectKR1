@@ -3,6 +3,7 @@ package repository
 import database.DatabaseInteractor
 import database.model.DbTaskStatus
 import database.request.CreateTaskRequest
+import database.request.GetUsersWithTasksRequest
 import database.request.TaskListRequest
 import database.result.Result
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +16,12 @@ class TodoRepository(
 
   private val _tasksListFlow = MutableStateFlow(emptyList<TaskItemModel>())
   val tasksListFlow: Flow<List<TaskItemModel>> = _tasksListFlow
+
+  private val _usersListFlow = MutableStateFlow(emptyList<UserModel>())
+  val usersListFlow: Flow<List<UserModel>> = _usersListFlow
+
+  private val _usersWithTasksListFlow = MutableStateFlow(emptyList<UserWithTasksModel>())
+  val usersWithTasksListFlow: Flow<List<UserWithTasksModel>> = _usersWithTasksListFlow
 
   private val _errorMessageFlow = MutableStateFlow<String?>(null)
   val errorMessageFlow: Flow<String?> = _errorMessageFlow
@@ -120,7 +127,7 @@ class TodoRepository(
     return result
   }
 
-  fun updateSettings() {
+  fun loadSettings() {
     _settingsFlow.value = Settings(
       forceUniqueTaskTitle = interactor.getForceUniqueTaskTitle(),
       minTaskTitleLength = interactor.getMinTaskTitleLength(),
@@ -131,6 +138,16 @@ class TodoRepository(
   fun applySettings(settings: Settings) {
     interactor.setShouldForceUniqueName(settings.forceUniqueTaskTitle)
     interactor.setTaskTitleMinLength(settings.minTaskTitleLength)
+    interactor.setTaskTitleMaxLength(settings.maxTaskTitleLength)
+  }
+
+  fun getUsersWithTasksList(request: GetUsersWithTasksRequest) {
+    val result = interactor.getUsersWithTasks(request)
+    if (result.success) {
+      _usersWithTasksListFlow.value = result.data!!.map { it.asUserWithTasks() }
+    } else {
+      showErrorMessage(result.errorMessage ?: "Произошла ошибка при получении списка задач")
+    }
   }
 }
 

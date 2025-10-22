@@ -6,7 +6,7 @@ import ExpandedTopAppBar
 import FiltersSidebar
 import TaskListContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +19,7 @@ fun TaskListScreen(
   onSettingsClick: () -> Unit,
   onTaskClick: (Long) -> Unit,
   onLogsClicked: () -> Unit,
+  onUsersClicked: () -> Unit,
 ) {
   val tasks by viewModel.tasksListFlow.collectAsState(emptyList())
   val expandedTopAppBarState by viewModel.expandedTopAppBarStateFlow.collectAsState(false)
@@ -56,7 +57,8 @@ fun TaskListScreen(
               if (!isFullScreen) {
                 showFiltersSidebar = !showFiltersSidebar
               }
-            }
+            },
+            onUsersClicked = onUsersClicked,
           )
         }
       },

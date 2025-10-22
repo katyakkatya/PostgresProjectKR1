@@ -7,6 +7,7 @@ import ui.screens.logs.LogsViewModel
 import ui.screens.settings.SettingsScreenViewModel
 import ui.screens.task_detail.TaskDetailViewModel
 import ui.screens.task_list.TaskListViewModel
+import ui.screens.users.UsersScreenViewModel
 
 object Globals {
   val databaseInteractor: DatabaseInteractor = StubDatabaseInteractor()
@@ -19,4 +20,5 @@ object Globals {
   val logsViewModel: LogsViewModel = LogsViewModel(todoRepository)
   val taskDetailViewModelFactory: (Long) -> TaskDetailViewModel = { id -> TaskDetailViewModel(id, todoRepository) }
   val settingsViewModel: SettingsScreenViewModel = SettingsScreenViewModel(todoRepository)
+  val usersViewModel: UsersScreenViewModel = UsersScreenViewModel(todoRepository)
 }
