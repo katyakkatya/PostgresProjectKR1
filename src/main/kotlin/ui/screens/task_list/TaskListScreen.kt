@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
+import models.FormattingOptionsModel
+import ui.screens.task_list.components.FormattingOptionsPayload
 
 @Composable
 fun TaskListScreen(
@@ -26,6 +28,7 @@ fun TaskListScreen(
   var searchQuery by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
   val appliedFilters by viewModel.statusFilterFlow.collectAsState(emptySet())
+  val formattingOptionsModel by viewModel.formattingOptionsModelFlow.collectAsState(FormattingOptionsModel())
 
   BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val isFullScreen = maxWidth >= 1200.dp
@@ -101,7 +104,17 @@ fun TaskListScreen(
                 }
               },
               modifier = Modifier.weight(1.5f),
-              isPermanent = isFullScreen
+              isPermanent = isFullScreen,
+              appliedFilters = appliedFilters,
+              onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
+              onFilterReset = { viewModel.resetFilters() },
+              formattingOptionsPayload = FormattingOptionsPayload(
+                onHeightTransformationClicked = { viewModel.setHeightTransformation(it) },
+                formattingOptionsModel = formattingOptionsModel,
+                onShowShortClicked = { viewModel.onShowShortToggled() },
+                onDisplayIdClicked = { viewModel.onDisplayIdToggled() },
+                onDisplayFullStatusClicked = { viewModel.onDisplayFullStatusToggled() },
+              )
             )
           }
         }

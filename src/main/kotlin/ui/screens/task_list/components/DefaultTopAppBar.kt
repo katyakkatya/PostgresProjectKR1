@@ -145,7 +145,7 @@ fun DefaultTopAppBar(
                 .width(380.dp)
                 .clip(RoundedCornerShape(8.dp))
             ) {
-              FiltersPopupContent(
+              StatusesFilterContent(
                 appliedFilters = appliedFilters,
                 onFilterToggled = onFilterToggled,
                 onFilterReset = onFilterReset

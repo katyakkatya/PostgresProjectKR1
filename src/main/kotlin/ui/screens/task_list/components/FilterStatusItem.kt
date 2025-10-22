@@ -1,9 +1,5 @@
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
@@ -21,6 +17,20 @@ fun FilterStatusItem(
   status: DbTaskStatus,
   onClick: () -> Unit
 ) {
+  val text = status.name.replace("_", " ").replaceFirstChar { it.uppercase() }
+  FilterStatusItem(
+    enabled = enabled,
+    text = text,
+    onClick = onClick
+  )
+}
+
+@Composable
+fun FilterStatusItem(
+  enabled: Boolean,
+  text: String,
+  onClick: () -> Unit
+) {
   Row(
     modifier = Modifier
       .fillMaxWidth()
@@ -30,7 +40,7 @@ fun FilterStatusItem(
     horizontalArrangement = Arrangement.SpaceBetween
   ) {
     Text(
-      text = status.name.replace("_", " ").replaceFirstChar { it.uppercase() },
+      text = text,
       fontSize = 20.sp,
       color = MaterialTheme.colors.onSurface,
       style = MaterialTheme.typography.body1

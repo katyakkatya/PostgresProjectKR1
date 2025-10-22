@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import models.FormattingOptionsModel
+import models.HeightTransformation
 import models.TaskItemModel
 import repository.Settings
 import repository.TodoRepository
@@ -39,6 +41,9 @@ class TaskListViewModel(
   private val _statusFilterFlow = MutableStateFlow(initialFilters)
   val statusFilterFlow = _statusFilterFlow
 
+  private val _formattingOptionsModelFlow = MutableStateFlow(FormattingOptionsModel())
+  val formattingOptionsModelFlow = _formattingOptionsModelFlow
+
   fun openExpandedTopAppBar(){
     _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Opened
   }
@@ -53,7 +58,14 @@ class TaskListViewModel(
   }
 
   private fun updateList() {
-    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, FormattingOptions(false, false, false, false, false)))
+    val formattingOptionsModel = FormattingOptions(
+      _formattingOptionsModelFlow.value.heightTransformation == HeightTransformation.UPPERCASE,
+      _formattingOptionsModelFlow.value.heightTransformation == HeightTransformation.LOWERCASE,
+      _formattingOptionsModelFlow.value.showShort,
+      _formattingOptionsModelFlow.value.displayId,
+      _formattingOptionsModelFlow.value.displayFullStatus
+    )
+    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, formattingOptionsModel))
   }
 
   private fun updateSettings() {
@@ -163,6 +175,26 @@ class TaskListViewModel(
       return false
     }
     return true
+  }
+
+  fun setHeightTransformation(heightTransformation: HeightTransformation) {
+    _formattingOptionsModelFlow.value =
+      _formattingOptionsModelFlow.value.copy(heightTransformation = heightTransformation)
+  }
+
+  fun onShowShortToggled() {
+    _formattingOptionsModelFlow.value =
+      _formattingOptionsModelFlow.value.copy(showShort = !_formattingOptionsModelFlow.value.showShort)
+  }
+
+  fun onDisplayIdToggled() {
+    _formattingOptionsModelFlow.value =
+      _formattingOptionsModelFlow.value.copy(displayId = !_formattingOptionsModelFlow.value.displayId)
+  }
+
+  fun onDisplayFullStatusToggled() {
+    _formattingOptionsModelFlow.value =
+      _formattingOptionsModelFlow.value.copy(displayFullStatus = !_formattingOptionsModelFlow.value.displayFullStatus)
   }
 }
 

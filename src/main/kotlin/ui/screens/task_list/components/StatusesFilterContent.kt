@@ -2,11 +2,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -16,7 +12,7 @@ import androidx.compose.ui.unit.sp
 import database.model.DbTaskStatus
 
 @Composable
-fun FiltersPopupContent(
+fun StatusesFilterContent(
   appliedFilters: Set<DbTaskStatus>,
   onFilterToggled: (DbTaskStatus) -> Unit,
   onFilterReset: () -> Unit
