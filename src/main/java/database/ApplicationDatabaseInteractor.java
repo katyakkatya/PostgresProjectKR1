@@ -381,8 +381,26 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean setShouldForceUniqueName(boolean shouldForceUniqueName) {
-        return null;
+    public Boolean setShouldForceUniqueName(boolean shouldForceUniqueName) { // DONE
+        if(!this.isConnected())
+            return false;
+        try{
+            alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS title_unique;");
+            if(shouldForceUniqueName) {
+                alterStatement("ALTER TABLE task ADD CONSTRAINT title_unique UNIQUE (title);");
+            }
+            return true;
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return false;
+        }
+    }
+
+    private void alterStatement(String query) throws SQLException {
+        Statement s = this.connection.get().createStatement();
+        s.execute(query);
+        this.pushToConsumer(this.consumerForStatement, query);
+        s.close();
     }
 
     @Override
