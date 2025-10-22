@@ -60,10 +60,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     public Boolean databaseExists() { // DONE
         if(!this.isConnected())
             return false;
-        Map<String, Boolean> createdTables = new HashMap<>(2);
+        Map<String, Boolean> createdTables = new HashMap<>(3);
 
         createdTables.put("task", false);
         createdTables.put("connected_task", false);
+        createdTables.put("users", false);
 
         try(Statement statement = this.connection.get().createStatement()){
             ResultSet set = statement.executeQuery("SELECT * FROM pg_tables WHERE schemaname = 'public'");
@@ -85,6 +86,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         List<String> commands = List.of(
                 "DROP TABLE IF EXISTS connected_task",
                 "DROP TABLE IF EXISTS task",
+                "DROP TABLE IF EXISTS users",
                 "DROP TYPE IF EXISTS state CASCADE;");
         try(Statement statement = this.connection.get().createStatement()){
             for(String cmd : commands){
@@ -105,11 +107,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         List<String> createCommands = List.of("CREATE TYPE state AS enum ('Бэклог', 'В процессе', 'На проверке', 'Выполненное', 'Отменено')",
                 "CREATE TABLE IF NOT EXISTS users (\n" +
                         "id SERIAL PRIMARY KEY,\n" +
-                        "name VARCHAR(100) NOT NULL CHECK (LENGHT(name) > 0)\n" +
+                        "name VARCHAR(100) NOT NULL CHECK (LENGTH(name) > 0)\n" +
                         ");",
                 "CREATE TABLE IF NOT EXISTS task (\n" +
                         "id SERIAL PRIMARY KEY,\n" +
-                        "title VARCHAR(100) NOT NULL UNIQUE CHECK (LENGTH(title) > 2),\n" +
+                        "title VARCHAR(100) NOT NULL,\n" +
                         "date DATE,\n" +
                         "status state DEFAULT 'Бэклог',\n" +
                         "subtasks VARCHAR(100)[],\n" +
@@ -255,7 +257,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
             statement.setArray(4, this.connection.get().createArrayOf("BOOLEAN",
                     boolArr));
-            statement.setLong(5, request.authorId());
+            if(request.authorId() != null)
+                statement.setLong(5, request.authorId());
+            else
+                statement.setNull(5, Types.INTEGER);
+
             this.pushToConsumer(this.consumerForStatement, statement.toString());
             ResultSet res = statement.executeQuery();
 
@@ -291,10 +297,10 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                     this.connection.get().rollback();
                 } catch (SQLException ex) {
                     this.pushToConsumer(this.consumerForException, e);
-                    return new Result<Long>(-1L, null, false);
+                    return new Result<>(-1L, null, false);
                 }
             this.pushToConsumer(this.consumerForException, e);
-            return new Result<Long>(-1L, null, false);
+            return new Result<>(-1L, null, false);
         }finally {
             try {
                 this.connection.get().setAutoCommit(true);
@@ -386,9 +392,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             return false;
         try{
             alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS title_unique;");
-            if(shouldForceUniqueName) {
+            if(shouldForceUniqueName)
                 alterStatement("ALTER TABLE task ADD CONSTRAINT title_unique UNIQUE (title);");
-            }
+
             return true;
         } catch (SQLException e) {
             this.pushToConsumer(this.consumerForException, e);
@@ -409,7 +415,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Result<Long> createUser(CreateUserRequest request) {
+    public Result<Long> createUser(CreateUserRequest request) { // DONE
         if(!this.isConnected())
             return new Result<>(null, "Not connected", false);
 
@@ -419,7 +425,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             ResultSet resultSet = statement.executeQuery();
 
             long id = resultSet.next() ? resultSet.getLong("id") : -1;
-
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
             return new Result<>(id, "", id != -1);
         }catch (SQLException e){
             this.pushToConsumer(this.consumerForException, e);
@@ -428,8 +434,19 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean addUserToTask(Long userId, Long taskId) {
-        return null;
+    public Boolean addUserToTask(Long userId, Long taskId) { // DONE
+        if(!this.isConnected())
+            return false;
+        try(PreparedStatement statement = this.connection.get().prepareStatement("UPDATE task SET author_id = ? WHERE id = ?")){
+            statement.setLong(1, userId);
+            statement.setLong(2, taskId);
+
+            this.pushToConsumer(this.consumerForStatement, statement.toString());
+            return statement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return false;
+        }
     }
 
     @Override
