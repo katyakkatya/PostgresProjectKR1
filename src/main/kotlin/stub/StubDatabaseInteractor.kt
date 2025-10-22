@@ -5,11 +5,7 @@ import database.model.DbTaskDetail
 import database.model.DbTaskItem
 import database.model.DbTaskStatus
 import database.model.UserWithTaskCount
-import database.request.ConnectionRequest
-import database.request.CreateTaskRequest
-import database.request.CreateUserRequest
-import database.request.GetUsersWithTasksRequest
-import database.request.TaskListRequest
+import database.request.*
 import database.result.Result
 import java.util.*
 import java.util.function.Consumer
@@ -139,5 +135,21 @@ class StubDatabaseInteractor : DatabaseInteractor {
 
   override fun getUsersWithTasks(request: GetUsersWithTasksRequest?): Result<List<UserWithTaskCount?>?>? {
     return Result(listOf(), null, true)
+  }
+
+  override fun getForceUniqueTaskTitle(): Boolean {
+    return false
+  }
+
+  override fun getMinTaskTitleLength(): Int {
+    return 5
+  }
+
+  override fun setTaskTitleMaxLength(maxLength: Int): Result<Boolean?>? {
+    return Result(true, null, true)
+  }
+
+  override fun getMaxTaskTitleLength(): Int {
+    return 10
   }
 }

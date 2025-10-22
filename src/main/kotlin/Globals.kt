@@ -1,10 +1,10 @@
-import database.ApplicationDatabaseInteractor
 import database.DatabaseInteractor
 import repository.TodoRepository
 import stub.StubDatabaseInteractor
 import ui.screens.connection.ConnectionViewModel
 import ui.screens.database_creation.DatabaseCreationViewModel
 import ui.screens.logs.LogsViewModel
+import ui.screens.settings.SettingsScreenViewModel
 import ui.screens.task_detail.TaskDetailViewModel
 import ui.screens.task_list.TaskListViewModel
 
@@ -18,4 +18,5 @@ object Globals {
     DatabaseCreationViewModel(databaseInteractor, todoRepository)
   val logsViewModel: LogsViewModel = LogsViewModel(todoRepository)
   val taskDetailViewModelFactory: (Long) -> TaskDetailViewModel = { id -> TaskDetailViewModel(id, todoRepository) }
+  val settingsViewModel: SettingsScreenViewModel = SettingsScreenViewModel(todoRepository)
 }

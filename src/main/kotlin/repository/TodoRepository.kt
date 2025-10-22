@@ -22,6 +22,9 @@ class TodoRepository(
   private val _logsFlow = MutableStateFlow(emptyList<LogModel>())
   val logsFlow: Flow<List<LogModel>> = _logsFlow
 
+  private val _settingsFlow = MutableStateFlow(Settings.DEFAULT)
+  val settingsFlow: Flow<Settings> = _settingsFlow
+
   init {
     interactor.setConsumers(
       { message ->
@@ -115,5 +118,28 @@ class TodoRepository(
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании новой задачи")
     }
     return result
+  }
+
+  fun updateSettings() {
+    _settingsFlow.value = Settings(
+      forceUniqueTaskTitle = interactor.getForceUniqueTaskTitle(),
+      minTaskTitleLength = interactor.getMinTaskTitleLength(),
+      maxTaskTitleLength = interactor.getMaxTaskTitleLength(),
+    )
+  }
+
+  fun applySettings(settings: Settings) {
+    interactor.setShouldForceUniqueName(settings.forceUniqueTaskTitle)
+    interactor.setTaskTitleMinLength(settings.minTaskTitleLength)
+  }
+}
+
+data class Settings(
+  val forceUniqueTaskTitle: Boolean,
+  val minTaskTitleLength: Int,
+  val maxTaskTitleLength: Int,
+) {
+  companion object {
+    val DEFAULT = Settings(false, 0, 10)
   }
 }

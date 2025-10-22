@@ -84,6 +84,11 @@ public interface DatabaseInteractor {
   Result<Boolean> setTaskTitleMinLength(int minLength);
 
   /**
+   * Sets maximum length task.title using alter table
+   */
+  Result<Boolean> setTaskTitleMaxLength(int maxLength);
+
+  /**
    * Creates user and returns its id on success
    */
   Result<Long> createUser(CreateUserRequest request);
@@ -98,4 +103,10 @@ public interface DatabaseInteractor {
    * When search is empty, return all users
    */
   Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request);
+
+  boolean getForceUniqueTaskTitle();
+
+  int getMinTaskTitleLength();
+
+  int getMaxTaskTitleLength();
 }

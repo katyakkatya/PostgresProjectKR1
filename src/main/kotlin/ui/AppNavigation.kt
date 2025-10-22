@@ -118,7 +118,9 @@ fun AppNavigation(
     }
 
     is Screen.Settings -> {
+      Globals.settingsViewModel.onInit()
       SettingsScreen(
+        viewModel = Globals.settingsViewModel,
         onBack = {
           currentScreen = Screen.TaskList
         }
