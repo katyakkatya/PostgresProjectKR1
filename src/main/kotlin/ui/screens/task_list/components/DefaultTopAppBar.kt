@@ -95,7 +95,7 @@ fun DefaultTopAppBar(
             Icon(
               imageVector = Icons.Default.Person,
               contentDescription = "Пользователи",
-              modifier = Modifier.size(36.dp),
+              modifier = Modifier.size(48.dp),
               tint = MaterialTheme.colors.onPrimary
             )
           }

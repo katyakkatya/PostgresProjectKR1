@@ -33,65 +33,82 @@ fun SettingsScreen(
       modifier = Modifier
         .padding(padding)
         .fillMaxSize()
-        .padding(24.dp),
+        .padding(horizontal = 32.dp, vertical = 32.dp),
     ) {
-      Text(
-        text = "Минимальная длина названия задачи",
-        fontSize = 28.sp,
-        fontFamily = MaterialTheme.typography.h6.fontFamily,
-        fontWeight = FontWeight.W400,
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h6
-      )
+      Row(
+        verticalAlignment = Alignment.CenterVertically
+      ){
+        Text(
+          text = "Минимальная длина названия задачи",
+          fontSize = 32.sp,
+          fontFamily = MaterialTheme.typography.h6.fontFamily,
+          fontWeight = FontWeight.W400,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.h6,
+          modifier = Modifier.weight(2f)
+        )
 
-      Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-      TextField(
-        value = minimumTaskTitleField,
-        onValueChange = viewModel::setMinLengthInput,
-        textStyle = MaterialTheme.typography.body1,
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(56.dp),
-        colors = TextFieldDefaults.textFieldColors(
-          backgroundColor = MaterialTheme.colors.surface,
-          textColor = MaterialTheme.colors.onSurface,
-          focusedIndicatorColor = MaterialTheme.colors.primary,
-          unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
-          cursorColor = MaterialTheme.colors.primary
-        ),
-        singleLine = true
-      )
+        TextField(
+          value = minimumTaskTitleField,
+          onValueChange = viewModel::setMinLengthInput,
+          textStyle = MaterialTheme.typography.body1.copy(fontSize = 32.sp),
+          modifier = Modifier
+            .weight(1f)
+            .padding(vertical = 24.dp),
+          colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = MaterialTheme.colors.surface,
+            textColor = MaterialTheme.colors.onSurface,
+            focusedIndicatorColor = MaterialTheme.colors.primary,
+            unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+            cursorColor = MaterialTheme.colors.primary
+          ),
+          shape = RoundedCornerShape(16.dp),
+          singleLine = true
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+      }
+
 
       Spacer(modifier = Modifier.height(24.dp))
 
-      Text(
-        text = "Максимальная длина названия задачи",
-        fontSize = 28.sp,
-        fontFamily = MaterialTheme.typography.h6.fontFamily,
-        fontWeight = FontWeight.W400,
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h6
-      )
+      Row(
+        verticalAlignment = Alignment.CenterVertically
+      ){
+        Text(
+          text = "Максимальная длина названия задачи",
+          fontSize = 32.sp,
+          fontFamily = MaterialTheme.typography.h6.fontFamily,
+          fontWeight = FontWeight.W400,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.h6,
+          modifier = Modifier.weight(2f)
+        )
 
-      Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-      TextField(
-        value = maximumTaskTitleField,
-        onValueChange = viewModel::setMaxLengthInput,
-        textStyle = MaterialTheme.typography.body1,
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(56.dp),
-        colors = TextFieldDefaults.textFieldColors(
-          backgroundColor = MaterialTheme.colors.surface,
-          textColor = MaterialTheme.colors.onSurface,
-          focusedIndicatorColor = MaterialTheme.colors.primary,
-          unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
-          cursorColor = MaterialTheme.colors.primary
-        ),
-        singleLine = true
-      )
+        TextField(
+          value = maximumTaskTitleField,
+          onValueChange = viewModel::setMaxLengthInput,
+          textStyle = MaterialTheme.typography.body1.copy(fontSize = 32.sp),
+          modifier = Modifier
+            .weight(1f)
+            .padding(vertical = 24.dp),
+          colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = MaterialTheme.colors.surface,
+            textColor = MaterialTheme.colors.onSurface,
+            focusedIndicatorColor = MaterialTheme.colors.primary,
+            unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+            cursorColor = MaterialTheme.colors.primary
+          ),
+          shape = RoundedCornerShape(16.dp),
+          singleLine = true
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+      }
 
       Spacer(modifier = Modifier.height(24.dp))
 
@@ -102,11 +119,11 @@ fun SettingsScreen(
       ) {
         Text(
           text = "Уникальные названия задач",
-          fontSize = 28.sp,
+          fontSize = 32.sp,
           fontFamily = MaterialTheme.typography.h6.fontFamily,
           fontWeight = FontWeight.W400,
           color = MaterialTheme.colors.onSurface,
-          style = MaterialTheme.typography.h6
+          style = MaterialTheme.typography.h6,
         )
 
         Checkbox(
@@ -125,7 +142,7 @@ fun SettingsScreen(
 
       Text(
         text = "Внимание: при применении нового значения удалятся все задачи, не соответствующие новому значению",
-        fontSize = 16.sp,
+        fontSize = 24.sp,
         fontFamily = MaterialTheme.typography.h6.fontFamily,
         fontWeight = FontWeight.W400,
         style = MaterialTheme.typography.h6,
@@ -136,10 +153,8 @@ fun SettingsScreen(
 
       Button(
         onClick = viewModel::applySettings,
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(56.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
           backgroundColor = MaterialTheme.colors.primary,
           contentColor = MaterialTheme.colors.onPrimary
@@ -147,12 +162,14 @@ fun SettingsScreen(
       ) {
         Text(
           text = "Применить",
-          fontSize = 24.sp,
+          modifier = Modifier
+            .padding(vertical = 16.dp) ,
+          fontSize = 32.sp,
           style = MaterialTheme.typography.button
         )
       }
 
-      Spacer(modifier = Modifier.height(20.dp))
+      Spacer(modifier = Modifier.height(32.dp))
 
       error?.let {
         Text(
@@ -164,7 +181,7 @@ fun SettingsScreen(
       if (success) {
         Text(
           text = "Настройки успешно применены",
-          style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.primary)
+          style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.primary, fontSize = 32.sp)
         )
       }
     }

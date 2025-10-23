@@ -1,5 +1,6 @@
 package ui.screens.task_detail.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +28,9 @@ fun SubTaskCard(
       .fillMaxWidth()
       .clip(RoundedCornerShape(4.dp))
       .clickable { onClick() },
-    shape = RoundedCornerShape(4.dp),
+    shape = RoundedCornerShape(8.dp),
     elevation = 2.dp,
+    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
     backgroundColor = if (subtask.isCompleted)
       MaterialTheme.colors.primary.copy(alpha = 0.1f)
     else
@@ -53,7 +55,7 @@ fun SubTaskCard(
         modifier = Modifier
           .weight(1f)
           .padding(start = 16.dp),
-        fontSize = 28.sp,
+        fontSize = 32.sp,
         fontWeight = FontWeight.Normal,
         fontFamily = MaterialTheme.typography.h6.fontFamily,
         color = if (subtask.isCompleted)

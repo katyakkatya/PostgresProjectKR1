@@ -1,3 +1,4 @@
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -31,21 +33,24 @@ fun TaskStatusInfo(
   task: TaskDetail,
   onStatusChangeClicked: (status: DbTaskStatus) -> Unit,
 ) {
+  Spacer(modifier = Modifier.height(32.dp))
   Text(
     text = "Статус: ${getStatusName(task.status)}",
     fontFamily = MaterialTheme.typography.h6.fontFamily,
-    fontSize = 20.sp,
-    modifier = Modifier.padding(bottom = 16.dp),
+    fontSize = 24.sp,
     color = MaterialTheme.colors.onSurface,
     style = MaterialTheme.typography.h6
   )
+  Spacer(modifier = Modifier.height(24.dp))
   val buttons = StatusUpdateButton.buttonMappings[task.status]!!
   buttons.forEachIndexed { index, button ->
     Card(
       modifier = Modifier
-        .clip(RoundedCornerShape(4.dp))
+        .padding(horizontal = 24.dp)
+        .clip(RoundedCornerShape(8.dp))
         .clickable { onStatusChangeClicked(button.toStatus) },
-      shape = RoundedCornerShape(4.dp),
+      shape = RoundedCornerShape(8.dp),
+      border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
       elevation = 8.dp,
       backgroundColor = MaterialTheme.colors.surface
     ) {
@@ -59,11 +64,11 @@ fun TaskStatusInfo(
             .clip(CircleShape)
             .background(button.color)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         Text(
           text = button.text,
           modifier = Modifier,
-          fontSize = 20.sp,
+          fontSize = 24.sp,
           fontWeight = FontWeight.Normal,
           fontFamily = MaterialTheme.typography.body1.fontFamily,
           color = MaterialTheme.colors.onSurface,
@@ -73,7 +78,7 @@ fun TaskStatusInfo(
       }
     }
     if (index < buttons.size - 1) {
-      Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(16.dp))
     }
   }
 }
