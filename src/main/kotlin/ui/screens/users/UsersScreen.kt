@@ -50,7 +50,6 @@ fun UsersScreenContent(
       .fillMaxSize()
       .padding(24.dp)
   ) {
-    // Заголовок экрана
     Text(
       text = "Пользователи и задачи",
       style = MaterialTheme.typography.h4,
@@ -61,7 +60,6 @@ fun UsersScreenContent(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    // Поле для regex фильтра
     Column(
       modifier = Modifier.fillMaxWidth()
     ) {
@@ -100,7 +98,6 @@ fun UsersScreenContent(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    // Поле для минимального количества задач
     Column(
       modifier = Modifier.fillMaxWidth()
     ) {
@@ -157,9 +154,7 @@ fun UsersScreenContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // Список пользователей
     if (usersList.isEmpty()) {
-      // Сообщение при пустом списке
       Box(
         modifier = Modifier
           .fillMaxWidth()
