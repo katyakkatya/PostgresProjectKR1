@@ -20,16 +20,12 @@ import database.model.DbTaskStatus
 
 @Composable
 fun DefaultTopAppBar(
-  appliedFilters: Set<DbTaskStatus>,
-  onFilterToggled: (DbTaskStatus) -> Unit,
-  onFilterReset: () -> Unit,
   onLogsClicked: () -> Unit,
   onSearchClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
   onUsersClicked: () -> Unit,
   onFiltersSidebarToggle: () -> Unit = {}
 ) {
-  var filterPopupOpened by remember { mutableStateOf(false) }
 
   BoxWithConstraints(
     modifier = Modifier.fillMaxWidth()

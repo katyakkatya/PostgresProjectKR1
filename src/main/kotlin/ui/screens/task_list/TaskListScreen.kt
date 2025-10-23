@@ -50,9 +50,6 @@ fun TaskListScreen(
           )
         } else {
           DefaultTopAppBar(
-            appliedFilters,
-            onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
-            onFilterReset = { viewModel.resetFilters() },
             onLogsClicked = onLogsClicked,
             onSearchClicked = { viewModel.openExpandedTopAppBar() },
             onSettingsClicked = onSettingsClick,
@@ -101,8 +98,8 @@ fun TaskListScreen(
             },
             modifier = Modifier
               .fillMaxHeight()
-              .widthIn(max = 600.dp) // Ограничиваем максимальную ширину
-              .align(Alignment.TopEnd), // Выравниваем по правому краю
+              .widthIn(max = 600.dp)
+              .align(Alignment.TopEnd),
             isPermanent = false,
             appliedFilters = appliedFilters,
             onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
@@ -117,7 +114,6 @@ fun TaskListScreen(
           )
         }
 
-        // Для больших экранов оставляем обычную боковую панель
         if (showFiltersSidebar && isFullScreen) {
           Row(modifier = Modifier.fillMaxSize()) {
             Box(
@@ -144,7 +140,7 @@ fun TaskListScreen(
             }
 
             FiltersSidebar(
-              onClose = { /* На больших экранах не закрываем */ },
+              onClose = { },
               modifier = Modifier.weight(1.5f),
               isPermanent = true,
               appliedFilters = appliedFilters,
