@@ -118,8 +118,8 @@ class StubDatabaseInteractor : DatabaseInteractor {
     return true
   }
 
-  override fun setTaskTitleMinLength(minLength: Int): Result<Boolean?>? {
-    return Result(true, null, true)
+  override fun setTaskTitleMinLength(minLength: Int): Boolean? {
+    return false;
   }
 
   override fun createUser(request: CreateUserRequest?): Result<Long?>? {
@@ -150,8 +150,8 @@ class StubDatabaseInteractor : DatabaseInteractor {
     return 5
   }
 
-  override fun setTaskTitleMaxLength(maxLength: Int): Result<Boolean?>? {
-    return Result(true, null, true)
+  override fun setTaskTitleMaxLength(maxLength: Int): Boolean? {
+    return false;
   }
 
   override fun getMaxTaskTitleLength(): Int {

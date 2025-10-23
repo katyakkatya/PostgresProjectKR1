@@ -53,31 +53,36 @@ fun main() = application {
     test.deleteTask(1L)
     test.getTaskDetail(4L).data?.relatedTasks()?.forEach { s -> println(s) }
     test.addUserToTask(1,1)
-    test.setTaskTitleMinLength(10);
+    //test.setTaskTitleMinLength(1);
+    //test.setTaskTitleMaxLength(3);
+    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
     println(test.minTaskTitleLength)
+    println(test.getForceUniqueTaskTitle())
+    test.setShouldForceUniqueName(true)
+    println("111 " + test.getForceUniqueTaskTitle())
     //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "ToDo App",
-        state = WindowState(
-            size = DpSize(
-                width = 800.dp,
-                height = 1200.dp
-            ),
-        ),
-    ) {
-        val density = LocalDensity.current
-        val minWidth = with(density) { 300.dp.toPx().toInt() }
-        val minHeight = with(density) { 500.dp.toPx().toInt() }
-        window.minimumSize = Dimension(minWidth, minHeight)
-
-        TodoAppTheme {
-            Surface(
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
-            ) {
-                AppNavigation(Globals.mainViewModel)
-            }
-        }
-    }
+//    Window(
+//        onCloseRequest = ::exitApplication,
+//        title = "ToDo App",
+//        state = WindowState(
+//            size = DpSize(
+//                width = 800.dp,
+//                height = 1200.dp
+//            ),
+//        ),
+//    ) {
+//        val density = LocalDensity.current
+//        val minWidth = with(density) { 300.dp.toPx().toInt() }
+//        val minHeight = with(density) { 500.dp.toPx().toInt() }
+//        window.minimumSize = Dimension(minWidth, minHeight)
+//
+//        TodoAppTheme {
+//            Surface(
+//                modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
+//            ) {
+//                AppNavigation(Globals.mainViewModel)
+//            }
+//        }
+//    }
 }
