@@ -23,21 +23,21 @@ import java.io.PrintStream
 
 
 fun main() = application {
-    try {
-        System.setOut(PrintStream(System.out, true, "UTF-8"))
-        System.setErr(PrintStream(System.err, true, "UTF-8"))
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    var test  = ApplicationDatabaseInteractor()
-    test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres", "postgres", "postgres"))
-    test.createDatabase();
-
-    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
-    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
-    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
-    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
-    test.createUser(CreateUserRequest("user1"))
+//    try {
+//        System.setOut(PrintStream(System.out, true, "UTF-8"))
+//        System.setErr(PrintStream(System.err, true, "UTF-8"))
+//    } catch (e: Exception) {
+//        e.printStackTrace()
+//    }
+//    var test  = ApplicationDatabaseInteractor()
+//    test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres", "postgres", "postgres"))
+//    test.createDatabase();
+//
+//    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
+//    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
+//    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
+//    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
+//    test.createUser(CreateUserRequest("user1"))
 //    test.changeSubtaskCompletion(1, 0);
 //    println(test.addSubtask(1L, "test"))
 //    println(test.createConnection(1L, 2L))
