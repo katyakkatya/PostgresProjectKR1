@@ -28,6 +28,7 @@ import ui.screens.connection.ConnectionScreen
 import ui.screens.database_creation.DatabaseCreationScreen
 import ui.screens.task_detail.TaskScreen
 import ui.screens.task_list.TaskListScreen
+import ui.screens.users.UsersScreen
 
 
 sealed interface Screen {
@@ -37,6 +38,7 @@ sealed interface Screen {
   data class TaskDetail(val taskId: Long) : Screen
   object Logs : Screen
   object Settings : Screen
+  object Users : Screen
 }
 
 @Composable
@@ -90,7 +92,8 @@ fun AppNavigation(
           currentScreen = TaskDetail(id)
         },
         onLogsClicked = { currentScreen = Screen.Logs },
-        onSettingsClick = { currentScreen = Screen.Settings }
+        onSettingsClick = { currentScreen = Screen.Settings },
+        onUsersClicked = { currentScreen = Screen.Users }
       )
     }
 
@@ -121,6 +124,16 @@ fun AppNavigation(
       Globals.settingsViewModel.onInit()
       SettingsScreen(
         viewModel = Globals.settingsViewModel,
+        onBack = {
+          currentScreen = Screen.TaskList
+        }
+      )
+    }
+
+    Screen.Users -> {
+      Globals.usersViewModel.onInit()
+      UsersScreen(
+        viewModel = Globals.usersViewModel,
         onBack = {
           currentScreen = Screen.TaskList
         }

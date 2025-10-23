@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import database.model.DbTaskStatus
 
 @Composable
-fun SettingsTopAppBar(
+fun UsersTopAppBar(
   onBack: () -> Unit
 ) {
   BoxWithConstraints(
@@ -45,7 +45,7 @@ fun SettingsTopAppBar(
       title = {
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-          "Настройки",
+          "Пользователи",
           fontSize = 32.sp,
           fontWeight = FontWeight.SemiBold,
           textAlign = TextAlign.Left,

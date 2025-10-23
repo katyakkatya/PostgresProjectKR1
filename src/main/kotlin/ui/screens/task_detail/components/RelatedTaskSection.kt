@@ -1,3 +1,8 @@
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -21,10 +26,9 @@ fun RelatedTasksSection(
 ) {
   Text(
     text = "Связанные задачи:",
-    fontSize = 24.sp,
+    fontSize = 32.sp,
     fontWeight = FontWeight.Bold,
     fontFamily = MaterialTheme.typography.h5.fontFamily,
-    modifier = Modifier.padding(vertical = 16.dp),
     color = MaterialTheme.colors.onSurface,
     style = MaterialTheme.typography.h5
   )
@@ -37,30 +41,35 @@ fun RelatedTasksSection(
     Text(
       text = "Нет связанных задач",
       textAlign = TextAlign.Center,
-      fontSize = 20.sp,
+      fontSize = 24.sp,
       color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
       style = MaterialTheme.typography.body1
     )
   }
-  Button(
-    onClick = onAddRelatedTaskClick,
-    shape = RoundedCornerShape(16.dp),
-    modifier = Modifier.padding(24.dp),
-    colors = ButtonDefaults.buttonColors(
-      backgroundColor = MaterialTheme.colors.secondary,
-      contentColor = MaterialTheme.colors.onSecondary
-    ),
-    elevation = ButtonDefaults.elevation(
-      defaultElevation = 4.dp,
-      pressedElevation = 8.dp
-    )
-  ) {
-    Text(
-      text = "Добавить связанную задачу",
-      fontSize = 24.sp,
-      fontWeight = FontWeight.W500,
-      modifier = Modifier.padding(vertical = 12.dp, horizontal = 24.dp),
-      style = MaterialTheme.typography.button
-    )
+  Row(
+    modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+    horizontalArrangement = Arrangement.End
+  ){
+    Button(
+      onClick = onAddRelatedTaskClick,
+      shape = RoundedCornerShape(16.dp),
+      modifier = Modifier.padding(24.dp),
+      colors = ButtonDefaults.buttonColors(
+        backgroundColor = MaterialTheme.colors.primary,
+        contentColor = MaterialTheme.colors.onPrimary
+      ),
+      elevation = ButtonDefaults.elevation(
+        defaultElevation = 4.dp,
+        pressedElevation = 8.dp
+      )
+    ) {
+      Text(
+        text = "Добавить связанную задачу",
+        fontSize = 32.sp,
+        fontWeight = FontWeight.W500,
+        modifier = Modifier.padding(vertical = 12.dp, horizontal = 24.dp),
+        style = MaterialTheme.typography.button
+      )
+    }
   }
 }

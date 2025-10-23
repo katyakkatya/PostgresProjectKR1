@@ -1,10 +1,7 @@
 package stub
 
 import database.DatabaseInteractor
-import database.model.DbTaskDetail
-import database.model.DbTaskItem
-import database.model.DbTaskStatus
-import database.model.UserWithTaskCount
+import database.model.*
 import database.request.*
 import database.result.Result
 import java.util.*
@@ -18,7 +15,7 @@ class StubDatabaseInteractor : DatabaseInteractor {
 
   override fun databaseExists(): Boolean {
     println("StubDatabaseInteractor: databaseExists called")
-    return false
+    return true
   }
 
   override fun createDatabase(): Boolean {
@@ -134,7 +131,15 @@ class StubDatabaseInteractor : DatabaseInteractor {
   }
 
   override fun getUsersWithTasks(request: GetUsersWithTasksRequest?): Result<List<UserWithTaskCount?>?>? {
-    return Result(listOf(), null, true)
+    return Result(
+      listOfNotNull(
+        UserWithTaskCount(User(1, "Артем"), 5),
+        UserWithTaskCount(User(2, "Артем"), 5),
+        UserWithTaskCount(User(3, "Артем"), 5),
+        UserWithTaskCount(User(4, "Артем"), 5),
+        if (request!!.regexQuery != "") UserWithTaskCount(User(5, "Артем 2"), 0) else null
+      ), null, true
+    )
   }
 
   override fun getForceUniqueTaskTitle(): Boolean {

@@ -25,7 +25,7 @@ fun TaskScreenContent(
       .fillMaxSize()
       .background(color = MaterialTheme.colors.background)
       .padding(innerPadding)
-      .padding(horizontal = 24.dp)
+      .padding(horizontal = 32.dp, vertical = 24.dp)
   ) {
     item {
       TaskHeader(task = task)
