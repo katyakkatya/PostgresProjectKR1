@@ -6,6 +6,7 @@ import database.model.DbTaskStatus;
 import database.model.UserWithTaskCount;
 import database.request.*;
 import database.result.Result;
+import jdk.jfr.Unsigned;
 
 import java.sql.*;
 import java.util.*;
@@ -373,35 +374,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if(!this.isConnected())
             return new Result<>(false, "not connected", false);
 
-        try{
-            this.connection.get().setAutoCommit(false); // начало транзакции
+        boolean transactionResult = setConstraintsAndDelete(List.of("DELETE FROM task WHERE LENGTH(title) < %d".formatted(minLength)),
+                List.of("ALTER TABLE task DROP CONSTRAINT IF EXISTS min_length",
+                        "ALTER TABLE task ADD CONSTRAINT min_length CHECK(LENGTH(title) >= %d)".formatted(minLength)));
 
-            PreparedStatement deleteStatement = this.connection.get().prepareStatement("DELETE FROM task WHERE LENGTH(title) < ?");
-            deleteStatement.setLong(1, minLength);
-            deleteStatement.executeUpdate();
-            deleteStatement.close();
-
-            alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS min_length");
-            alterStatement("ALTER TABLE task ADD CONSTRAINT min_length CHECK(LENGTH(title) >= %d)".formatted(minLength));
-
-            this.connection.get().commit(); // все ок - коммитим
-
-            return new Result<>(true, "done", true);
-        } catch (SQLException e) {
-            try {
-                this.connection.get().rollback(); // откатываем транзакицию в случае ошибки
-            } catch (SQLException ex) {
-                this.pushToConsumer(consumerForException, ex);
-            }
-            this.pushToConsumer(consumerForException, e);
-            return new Result<>(false, e.getMessage(), false);
-        }finally {
-            try {
-                this.connection.get().setAutoCommit(true); // завершаем транзакцию
-            } catch (SQLException e) {
-                this.pushToConsumer(consumerForException, e);
-            }
-        }
+        return new Result<>(transactionResult, null, transactionResult);
     }
 
     @Override
@@ -463,12 +440,67 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     @Override
     public Result<Boolean> setTaskTitleMaxLength(int maxLength) {
-        return new Result<>(null, null, false);
+        if(!this.isConnected())
+            return new Result<>(false, "not connected", false);
+
+        boolean transactionResult = setConstraintsAndDelete(List.of("DELETE FROM task WHERE LENGTH(title) > %d".formatted(maxLength)),
+                List.of("ALTER TABLE task DROP CONSTRAINT IF EXISTS max_length",
+                        "ALTER TABLE task ADD CONSTRAINT max_length CHECK(LENGTH(title) <= %d)".formatted(maxLength)));
+
+        return new Result<>(transactionResult, null, transactionResult);
     }
 
     @Override
     public int getMaxTaskTitleLength() {
-        return 100;
+        try {
+            Optional<String> constraintContent = this.getConstraintContent("max_length");
+            return constraintContent.map(s ->
+                    Integer.parseInt(this.getNumberFromConstraint(s, numberPattern))).orElse(100);
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return 100;
+        }
+    }
+
+    /** Установка ограничений и удаление записей, которые под них не попадают
+     * @param deleteRegexes Выражения, которые содержат в себе команду DELETE
+     * @param alterRegexes Вырежения, которые содержат в себе команду ALTER
+     * @return boolean - успешность транзакции
+     * */
+    public boolean setConstraintsAndDelete(List<String> deleteRegexes, List<String> alterRegexes){
+        try{
+            this.connection.get().setAutoCommit(false); // начало транзакции
+
+            Statement statement = this.connection.get().createStatement();
+            for(String deleteRegex : deleteRegexes){ // сначала выполняются команды удаления
+                statement.executeUpdate(deleteRegex);
+                this.pushToConsumer(this.consumerForStatement, deleteRegex);
+            }
+            statement.close();
+
+
+            for(String alterRegex : alterRegexes){ // только после удаления уже ставятся изменения
+                alterStatement(alterRegex);
+            }
+
+            this.connection.get().commit(); // все ок - коммитим
+
+            return true;
+        } catch (SQLException e) {
+            try {
+                this.connection.get().rollback(); // откатываем транзакицию в случае ошибки
+            } catch (SQLException ex) {
+                this.pushToConsumer(consumerForException, ex);
+            }
+            this.pushToConsumer(consumerForException, e);
+            return false;
+        }finally {
+            try {
+                this.connection.get().setAutoCommit(true); // завершаем транзакцию
+            } catch (SQLException e) {
+                this.pushToConsumer(consumerForException, e);
+            }
+        }
     }
 
     /** Использование ALTER в Query
@@ -481,7 +513,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         s.close();
     }
 
-    /** Использование системной таблицы для получение содержимого ограничения
+    /** Использование системной таблицы для получения содержимого ограничения
      * @param constraintName Название ограничения
      * @return Optional<String> - содержимое ограничения
      * */
