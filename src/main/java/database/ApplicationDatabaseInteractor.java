@@ -3,7 +3,6 @@ package database;
 import database.model.*;
 import database.request.*;
 import database.result.Result;
-import jdk.jfr.Unsigned;
 
 import java.sql.*;
 import java.util.*;
@@ -172,7 +171,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         DbTaskStatus.converter(resultForTask.getString("status")),
                         List.of((String[]) resultForTask.getArray("subtasks").getArray()),
                         List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
-                        dbTaskItems);
+                  dbTaskItems,
+                  // TODO: добавить пользователя
+                  new User(1L, "123"));
             }
 
 
@@ -633,5 +634,10 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if(matcher.find())
             return matcher.group();
         throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
+    }
+
+    @Override
+    public Result<List<User>> getAllUsers() {
+        return new Result<>(new ArrayList<>(), null, true);
     }
 }

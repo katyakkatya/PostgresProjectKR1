@@ -53,7 +53,8 @@ class StubDatabaseInteractor : DatabaseInteractor {
           listOf(false, false, false),
           listOf(
             DbTaskItem(2, "Тестовая таска 2", Date.from(java.time.Instant.now()), DbTaskStatus.BACKLOG, 2, 1)
-          )
+          ),
+          User(1, "Денис")
         ),
         null,
         true
@@ -69,7 +70,8 @@ class StubDatabaseInteractor : DatabaseInteractor {
           listOf(true, false),
           listOf(
             DbTaskItem(1, "Тестовая таска 1", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 3, 0)
-          )
+          ),
+          null
         ),
         null,
         true
@@ -156,5 +158,14 @@ class StubDatabaseInteractor : DatabaseInteractor {
 
   override fun getMaxTaskTitleLength(): Int {
     return 10
+  }
+
+  override fun getAllUsers(): Result<List<User>> {
+    return Result(
+      listOf(
+        User(1, "Артем"),
+        User(2, "idfjs")
+      ), null, true
+    )
   }
 }

@@ -1,9 +1,6 @@
 package database;
 
-import database.model.DbTaskDetail;
-import database.model.DbTaskItem;
-import database.model.DbTaskStatus;
-import database.model.UserWithTaskCount;
+import database.model.*;
 import database.request.*;
 import database.result.Result;
 
@@ -103,6 +100,11 @@ public interface DatabaseInteractor {
    * When search is empty, return all users
    */
   Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request);
+
+  /**
+   * Gets all users
+   */
+  Result<List<User>> getAllUsers();
 
   boolean getForceUniqueTaskTitle();
 

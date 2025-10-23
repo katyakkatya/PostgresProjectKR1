@@ -1,6 +1,6 @@
 package models
 
 data class UserModel(
-  val id: String,
+  val id: Long,
   val name: String,
 )

@@ -12,8 +12,10 @@ import kotlinx.coroutines.runBlocking
 import models.FormattingOptionsModel
 import models.HeightTransformation
 import models.TaskItemModel
+import models.UserModel
 import repository.Settings
 import repository.TodoRepository
+import ui.screens.common.dialogs.UserSelectDialogState
 
 class TaskListViewModel(
   private val todoRepository: TodoRepository,
@@ -43,6 +45,10 @@ class TaskListViewModel(
 
   private val _formattingOptionsModelFlow = MutableStateFlow(FormattingOptionsModel())
   val formattingOptionsModelFlow = _formattingOptionsModelFlow
+
+  private val _usersSelectDialogStateFlow: MutableStateFlow<UserSelectDialogState> =
+    MutableStateFlow(UserSelectDialogState.Closed)
+  val usersSelectDialogStateFlow = _usersSelectDialogStateFlow
 
   fun openExpandedTopAppBar(){
     _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Opened
@@ -90,6 +96,22 @@ class TaskListViewModel(
 
   fun closeNewTaskWindow() {
     _newTaskWindowStateFlow.value = NewTaskWindowState.Closed
+  }
+
+  fun openAuthorSelectDialog() {
+    todoRepository.getAllUsers()
+    CoroutineScope(Dispatchers.IO).launch {
+      val users = todoRepository.usersListFlow.first()
+      _usersSelectDialogStateFlow.value = UserSelectDialogState.Opened(users)
+    }
+  }
+
+  fun closeAuthorSelectDialog() {
+    _usersSelectDialogStateFlow.value = UserSelectDialogState.Closed
+  }
+
+  fun setNewTaskAuthor(author: UserModel) {
+    _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(author = author)
   }
 
   fun setNewTaskName(name: String) {
@@ -205,6 +227,7 @@ sealed interface NewTaskWindowState {
     val subtasks: List<String> = emptyList(),
     val connectedTasks: List<TaskItemModel> = emptyList(),
     val error: String? = null,
+    val author: UserModel? = null,
   ) : NewTaskWindowState
 }
 

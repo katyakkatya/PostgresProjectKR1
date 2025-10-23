@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import models.UserWithTasksModel
 import ui.screens.users.components.UserItem
 
 @Composable
@@ -139,7 +138,7 @@ fun UsersScreenContent(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    if (error.isNullOrEmpty()) {
+    if (error.isNullOrEmpty().not()) {
       Text(
         text = error!!,
         style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.error),

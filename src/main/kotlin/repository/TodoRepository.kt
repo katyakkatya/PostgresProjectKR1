@@ -62,6 +62,15 @@ class TodoRepository(
     }
   }
 
+  fun getAllUsers() {
+    val result = interactor.getAllUsers()
+    if (result.success) {
+      _usersListFlow.value = result.data!!.map { it.asUser() }
+    } else {
+      showErrorMessage(result.errorMessage ?: "Произошла ошибка при получении пользователь")
+    }
+  }
+
   fun showErrorMessage(message: String) {
     _errorMessageFlow.value = message
   }
