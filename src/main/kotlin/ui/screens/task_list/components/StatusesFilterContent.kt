@@ -7,9 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import database.model.DbTaskStatus
+import models.TaskStatus
 
 @Composable
 fun StatusesFilterContent(
@@ -22,12 +24,12 @@ fun StatusesFilterContent(
   ) {
     Text(
       text = "Фильтры по статусу",
-      fontSize = 28.sp,
+      fontSize = 32.sp,
       fontWeight = FontWeight.W500,
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-      textAlign = TextAlign.Center,
+      textAlign = TextAlign.Left,
       color = MaterialTheme.colors.onSurface,
-      style = MaterialTheme.typography.h5
+      style = MaterialTheme.typography.h5,
     )
 
     Divider(
@@ -66,7 +68,7 @@ fun StatusesFilterContent(
     ) {
       Text(
         text = "Сбросить",
-        fontSize = 16.sp,
+        fontSize = 24.sp,
         fontWeight = FontWeight.W400,
         modifier = Modifier.padding(vertical = 8.dp),
         style = MaterialTheme.typography.button

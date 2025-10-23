@@ -41,6 +41,7 @@ fun FiltersSidebar(
           onFilterToggled = onFilterToggled,
           onFilterReset = onFilterReset,
         )
+        Spacer(modifier = Modifier.height(16.dp))
         FormattionOptionsContent(
           payload = formattingOptionsPayload
         )
