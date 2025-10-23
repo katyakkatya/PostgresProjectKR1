@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import database.model.DbTaskStatus
 import ui.screens.task_list.components.FormattingOptionsPayload
@@ -25,7 +27,12 @@ fun FiltersSidebar(
 ) {
   Surface(
     modifier = modifier
-      .fillMaxHeight(),
+      .fillMaxHeight()
+      .shadow(
+        elevation = 16.dp,
+        shape = RectangleShape,
+        clip = false
+      ),
     elevation = 4.dp,
     color = MaterialTheme.colors.surface
   ) {
@@ -36,16 +43,6 @@ fun FiltersSidebar(
     ) {
       item {
         Spacer(modifier = Modifier.height(16.dp))
-        StatusesFilterContent(
-          appliedFilters = appliedFilters,
-          onFilterToggled = onFilterToggled,
-          onFilterReset = onFilterReset,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        FormattionOptionsContent(
-          payload = formattingOptionsPayload
-        )
-
         if (!isPermanent) {
           IconButton(onClick = onClose) {
             Icon(
@@ -55,8 +52,16 @@ fun FiltersSidebar(
             )
           }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
+        StatusesFilterContent(
+          appliedFilters = appliedFilters,
+          onFilterToggled = onFilterToggled,
+          onFilterReset = onFilterReset,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        FormattionOptionsContent(
+          payload = formattingOptionsPayload
+        )
       }
     }
   }

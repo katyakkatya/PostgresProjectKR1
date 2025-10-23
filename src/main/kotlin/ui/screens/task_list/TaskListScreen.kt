@@ -71,40 +71,82 @@ fun TaskListScreen(
           .fillMaxSize()
           .padding(paddingValues)
       ) {
-        Row(modifier = Modifier.fillMaxSize()) {
+        // Основной контент
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+        ) {
+          TaskListContent(
+            innerPadding = PaddingValues(0.dp),
+            tasks = tasks,
+            onTaskClick = onTaskClick,
+          )
 
           Box(
             modifier = Modifier
-              .weight(if (showFiltersSidebar) 3f else 1f)
-              .fillMaxHeight()
+              .fillMaxSize()
+              .padding(24.dp),
+            contentAlignment = Alignment.BottomEnd
           ) {
-            TaskListContent(
-              innerPadding = PaddingValues(0.dp),
-              tasks = tasks,
-              onTaskClick = onTaskClick,
+            AddTaskFloatingButton(
+              onClick = { viewModel.openNewTaskWindow() }
             )
+          }
+        }
 
+        if (showFiltersSidebar && !isFullScreen) {
+          FiltersSidebar(
+            onClose = {
+              showFiltersSidebar = false
+            },
+            modifier = Modifier
+              .fillMaxHeight()
+              .widthIn(max = 600.dp) // Ограничиваем максимальную ширину
+              .align(Alignment.TopEnd), // Выравниваем по правому краю
+            isPermanent = false,
+            appliedFilters = appliedFilters,
+            onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
+            onFilterReset = { viewModel.resetFilters() },
+            formattingOptionsPayload = FormattingOptionsPayload(
+              onHeightTransformationClicked = { viewModel.setHeightTransformation(it) },
+              formattingOptionsModel = formattingOptionsModel,
+              onShowShortClicked = { viewModel.onShowShortToggled() },
+              onDisplayIdClicked = { viewModel.onDisplayIdToggled() },
+              onDisplayFullStatusClicked = { viewModel.onDisplayFullStatusToggled() },
+            )
+          )
+        }
+
+        // Для больших экранов оставляем обычную боковую панель
+        if (showFiltersSidebar && isFullScreen) {
+          Row(modifier = Modifier.fillMaxSize()) {
             Box(
               modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-              contentAlignment = Alignment.BottomEnd
+                .weight(3f)
+                .fillMaxHeight()
             ) {
-              AddTaskFloatingButton(
-                onClick = { viewModel.openNewTaskWindow() }
+              TaskListContent(
+                innerPadding = PaddingValues(0.dp),
+                tasks = tasks,
+                onTaskClick = onTaskClick,
               )
-            }
-          }
 
-          if (showFiltersSidebar) {
+              Box(
+                modifier = Modifier
+                  .fillMaxSize()
+                  .padding(24.dp),
+                contentAlignment = Alignment.BottomEnd
+              ) {
+                AddTaskFloatingButton(
+                  onClick = { viewModel.openNewTaskWindow() }
+                )
+              }
+            }
+
             FiltersSidebar(
-              onClose = {
-                if (!isFullScreen) {
-                  showFiltersSidebar = false
-                }
-              },
+              onClose = { /* На больших экранах не закрываем */ },
               modifier = Modifier.weight(1.5f),
-              isPermanent = isFullScreen,
+              isPermanent = true,
               appliedFilters = appliedFilters,
               onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
               onFilterReset = { viewModel.resetFilters() },
@@ -141,4 +183,3 @@ fun TaskListScreen(
     onTaskSelected = viewModel::addConnectedTask,
   )
 }
-
