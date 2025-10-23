@@ -1,9 +1,6 @@
 package database;
 
-import database.model.DbTaskDetail;
-import database.model.DbTaskItem;
-import database.model.DbTaskStatus;
-import database.model.UserWithTaskCount;
+import database.model.*;
 import database.request.*;
 import database.result.Result;
 import jdk.jfr.Unsigned;
@@ -252,7 +249,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         statementById.setLong(2, id);
                         statementById.executeUpdate();
                     }
-
                 }
             }
             this.connection.get().commit();
@@ -438,8 +434,32 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request) {
-        return null;
+    public Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request) { // DONE
+        if(!this.isConnected())
+            return new Result<>(null, "not connected", false);
+
+        try(PreparedStatement statement = this.connection.get()
+                .prepareStatement("SELECT users.id, users.name, COUNT(title) AS tasks_number FROM task\n" +
+                "RIGHT JOIN users ON users.id = task.author_id\n" +
+                "WHERE users.name ILIKE ?\n" +
+                "GROUP BY users.id\n" +
+                "HAVING COUNT(*) > ?")){
+            statement.setString(1, request.regexQuery());
+            statement.setLong(2, request.minTasks());
+
+            ResultSet result = statement.executeQuery();
+            List<UserWithTaskCount> ans = new LinkedList<>();
+
+            while(result.next()){
+                ans.add(new UserWithTaskCount(
+                        new User(result.getLong("id"), result.getString("name")),
+                        result.getInt("tasks_number")));
+            }
+            return new Result<>(ans, null, true);
+        } catch (SQLException e) {
+            pushToConsumer(this.consumerForException, e);
+            return new Result<>(null, "exception", false);
+        }
     }
 
     @Override
