@@ -1,9 +1,6 @@
 package database;
 
-import database.model.DbTaskDetail;
-import database.model.DbTaskItem;
-import database.model.DbTaskStatus;
-import database.model.UserWithTaskCount;
+import database.model.*;
 import database.request.*;
 import database.result.Result;
 
@@ -174,7 +171,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         DbTaskStatus.converter(resultForTask.getString("status")),
                         List.of((String[]) resultForTask.getArray("subtasks").getArray()),
                         List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
-                        dbTaskItems);
+                  dbTaskItems,
+                  // TODO: добавить пользователя
+                  new User(1L, "123"));
             }
 
 
@@ -251,7 +250,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         statementById.setLong(2, id);
                         statementById.executeUpdate();
                     }
-
                 }
             }
             this.connection.get().commit();
@@ -358,50 +356,47 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             return false;
         try{
             alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS title_unique;");
-            if(shouldForceUniqueName)
+            if(shouldForceUniqueName){
+                this.connection.get().setAutoCommit(false);
+
+                Statement statement = this.connection.get().createStatement();
+                statement.executeUpdate("DELETE FROM task WHERE title IN \n" +
+                        "(SELECT title FROM task\n" +
+                        "EXCEPT ALL\n" +
+                        "SELECT DISTINCT title FROM task);");
+                statement.close();
+
                 alterStatement("ALTER TABLE task ADD CONSTRAINT title_unique UNIQUE (title);");
+
+                this.connection.get().commit();
+            }
 
             return true;
         } catch (SQLException e) {
+            try {
+                this.connection.get().rollback();
+            } catch (SQLException ex) {
+                pushToConsumer(this.consumerForException, ex);
+            }
             this.pushToConsumer(this.consumerForException, e);
             return false;
+        }finally {
+            try {
+                this.connection.get().setAutoCommit(true);
+            } catch (SQLException e) {
+                pushToConsumer(this.consumerForException, e);
+            }
         }
     }
 
     @Override
-    public Result<Boolean> setTaskTitleMinLength(int minLength) { // DONE
+    public Boolean setTaskTitleMinLength(int minLength) { // DONE
         if(!this.isConnected())
-            return new Result<>(false, "not connected", false);
+            return false;
 
-        try{
-            this.connection.get().setAutoCommit(false); // начало транзакции
-
-            PreparedStatement deleteStatement = this.connection.get().prepareStatement("DELETE FROM task WHERE LENGTH(title) < ?");
-            deleteStatement.setLong(1, minLength);
-            deleteStatement.executeUpdate();
-            deleteStatement.close();
-
-            alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS min_length");
-            alterStatement("ALTER TABLE task ADD CONSTRAINT min_length CHECK(LENGTH(title) >= %d)".formatted(minLength));
-
-            this.connection.get().commit(); // все ок - коммитим
-
-            return new Result<>(true, "done", true);
-        } catch (SQLException e) {
-            try {
-                this.connection.get().rollback(); // откатываем транзакицию в случае ошибки
-            } catch (SQLException ex) {
-                this.pushToConsumer(consumerForException, ex);
-            }
-            this.pushToConsumer(consumerForException, e);
-            return new Result<>(false, e.getMessage(), false);
-        }finally {
-            try {
-                this.connection.get().setAutoCommit(true); // завершаем транзакцию
-            } catch (SQLException e) {
-                this.pushToConsumer(consumerForException, e);
-            }
-        }
+        return setConstraintsAndDelete(List.of("DELETE FROM task WHERE LENGTH(title) < %d".formatted(minLength)),
+                List.of("ALTER TABLE task DROP CONSTRAINT IF EXISTS min_length",
+                        "ALTER TABLE task ADD CONSTRAINT min_length CHECK(LENGTH(title) >= %d)".formatted(minLength)));
     }
 
     @Override
@@ -440,13 +435,45 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request) {
-        return null;
+    public Result<List<UserWithTaskCount>> getUsersWithTasks(GetUsersWithTasksRequest request) { // DONE
+        if(!this.isConnected())
+            return new Result<>(null, "not connected", false);
+
+        try(PreparedStatement statement = this.connection.get()
+                .prepareStatement("SELECT users.id, users.name, COUNT(title) AS tasks_number FROM task\n" +
+                "RIGHT JOIN users ON users.id = task.author_id\n" +
+                "WHERE users.name ILIKE ?\n" +
+                "GROUP BY users.id\n" +
+                "HAVING COUNT(*) > ?")){
+            statement.setString(1, request.regexQuery());
+            statement.setLong(2, request.minTasks());
+
+            ResultSet result = statement.executeQuery();
+            List<UserWithTaskCount> ans = new LinkedList<>();
+
+            while(result.next()){
+                ans.add(new UserWithTaskCount(
+                        new User(result.getLong("id"), result.getString("name")),
+                        result.getInt("tasks_number")));
+            }
+            return new Result<>(ans, null, true);
+        } catch (SQLException e) {
+            pushToConsumer(this.consumerForException, e);
+            return new Result<>(null, "exception", false);
+        }
     }
 
     @Override
-    public boolean getForceUniqueTaskTitle() {
-        return false;
+    public boolean getForceUniqueTaskTitle() { // DONE
+        if(!this.isConnected())
+            return false;
+
+        try {
+            return isConstraintExists("title_unique");
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return false;
+        }
     }
 
     @Override
@@ -462,13 +489,64 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Result<Boolean> setTaskTitleMaxLength(int maxLength) {
-        return new Result<>(null, null, false);
+    public Boolean setTaskTitleMaxLength(int maxLength) { // DONE
+        if(!this.isConnected())
+            return false;
+
+        return setConstraintsAndDelete(List.of("DELETE FROM task WHERE LENGTH(title) > %d".formatted(maxLength)),
+                List.of("ALTER TABLE task DROP CONSTRAINT IF EXISTS max_length",
+                        "ALTER TABLE task ADD CONSTRAINT max_length CHECK(LENGTH(title) <= %d)".formatted(maxLength)));
     }
 
     @Override
-    public int getMaxTaskTitleLength() {
-        return 100;
+    public int getMaxTaskTitleLength() { // DONE
+        try {
+            Optional<String> constraintContent = this.getConstraintContent("max_length");
+            return constraintContent.map(s ->
+                    Integer.parseInt(this.getNumberFromConstraint(s, numberPattern))).orElse(100);
+        } catch (SQLException e) {
+            this.pushToConsumer(this.consumerForException, e);
+            return 100;
+        }
+    }
+
+    /** Установка ограничений и удаление записей, которые под них не попадают
+     * @param deleteRegexes Выражения, которые содержат в себе команду DELETE
+     * @param alterRegexes Вырежения, которые содержат в себе команду ALTER
+     * @return boolean - успешность транзакции
+     * */
+    public boolean setConstraintsAndDelete(List<String> deleteRegexes, List<String> alterRegexes){
+        try{
+            this.connection.get().setAutoCommit(false); // начало транзакции
+
+            Statement statement = this.connection.get().createStatement();
+            for(String deleteRegex : deleteRegexes){ // сначала выполняются команды удаления
+                statement.executeUpdate(deleteRegex);
+                this.pushToConsumer(this.consumerForStatement, deleteRegex);
+            }
+            statement.close();
+
+            for(String alterRegex : alterRegexes){ // только после удаления уже ставятся изменения
+                alterStatement(alterRegex);
+            }
+
+            this.connection.get().commit(); // все ок - коммитим
+            return true;
+        } catch (SQLException e) {
+            try {
+                this.connection.get().rollback(); // откатываем транзакицию в случае ошибки
+            } catch (SQLException ex) {
+                this.pushToConsumer(consumerForException, ex);
+            }
+            this.pushToConsumer(consumerForException, e);
+            return false;
+        }finally {
+            try {
+                this.connection.get().setAutoCommit(true); // завершаем транзакцию
+            } catch (SQLException e) {
+                this.pushToConsumer(consumerForException, e);
+            }
+        }
     }
 
     /** Использование ALTER в Query
@@ -481,7 +559,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         s.close();
     }
 
-    /** Использование системной таблицы для получение содержимого ограничения
+    /** Использование системной таблицы для получения содержимого ограничения
      * @param constraintName Название ограничения
      * @return Optional<String> - содержимое ограничения
      * */
@@ -493,6 +571,20 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             ResultSet resultSet = statement.executeQuery();
 
             return Optional.ofNullable(resultSet.next() ? resultSet.getString("check_clause") : null);
+        }
+    }
+
+    /** Использование системной таблицы для получения информации об ограничении типа UNIQUE/PRIMARY KEY
+     * @param constraintName Название ограничения
+     * @return boolean - содержится ли ограничение
+     * */
+    private boolean isConstraintExists(String constraintName) throws SQLException {
+        try(PreparedStatement statement = this.connection.get().prepareStatement("SELECT tc.table_name, tc.constraint_name, tc.constraint_type " +
+                "FROM information_schema.table_constraints tc " +
+                "WHERE  tc.constraint_name = ?;")) {
+            statement.setString(1, constraintName);
+
+            return statement.executeQuery().next();
         }
     }
 
@@ -542,5 +634,10 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if(matcher.find())
             return matcher.group();
         throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
+    }
+
+    @Override
+    public Result<List<User>> getAllUsers() {
+        return new Result<>(new ArrayList<>(), null, true);
     }
 }

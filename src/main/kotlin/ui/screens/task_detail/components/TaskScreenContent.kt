@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.model.DbTaskStatus
 import models.TaskDetail
+import ui.screens.task_detail.components.AuthorSection
 
 @Composable
 fun TaskScreenContent(
@@ -29,6 +30,7 @@ fun TaskScreenContent(
   ) {
     item {
       TaskHeader(task = task)
+      AuthorSection(user = task.author)
       TaskStatusInfo(task = task) { status ->
         onStatusChanged(status)
       }

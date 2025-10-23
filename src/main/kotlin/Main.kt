@@ -9,9 +9,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import database.ApplicationDatabaseInteractor
+import database.model.DbTaskStatus
+import database.request.ConnectionRequest
+import database.request.CreateTaskRequest
+import database.request.CreateUserRequest
+import database.request.GetUsersWithTasksRequest
+import database.request.TaskListRequest
 import theme.TodoAppTheme
 import ui.AppNavigation
 import java.awt.Dimension
+import java.io.PrintStream
 
 
 fun main() = application {
@@ -21,23 +29,15 @@ fun main() = application {
 //    } catch (e: Exception) {
 //        e.printStackTrace()
 //    }
-//    println(1)
 //    var test  = ApplicationDatabaseInteractor()
-//    println(1)
-//    test.tryConnect(
-//        ConnectionRequest(
-//            "jdbc:postgresql://localhost:9876/postgres",
-//            "postgres", "postgres"
-//        )
-//    )
-//    println(1)
+//    test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres", "postgres", "postgres"))
 //    test.createDatabase();
-//    println(1)
 //
 //    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
 //    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
 //    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
 //    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
+//    test.createUser(CreateUserRequest("user1"))
 //    test.changeSubtaskCompletion(1, 0);
 //    println(test.addSubtask(1L, "test"))
 //    println(test.createConnection(1L, 2L))
@@ -47,9 +47,14 @@ fun main() = application {
 //    test.deleteTask(1L)
 //    test.getTaskDetail(4L).data?.relatedTasks()?.forEach { s -> println(s) }
 //    test.addUserToTask(1,1)
-//    test.setTaskTitleMinLength(10);
+//    test.setTaskTitleMinLength(1);
+//    test.setTaskTitleMaxLength(3);
 //    println(test.minTaskTitleLength)
-    //test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
+//    println(test.getForceUniqueTaskTitle())
+//    test.setShouldForceUniqueName(true)
+//    println("111 " + test.getForceUniqueTaskTitle())
+//    test.getUsersWithTasks(GetUsersWithTasksRequest("%", 0)).data?.forEach{s -> println(s.toString())}
+//    test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
 
     Window(
         onCloseRequest = ::exitApplication,

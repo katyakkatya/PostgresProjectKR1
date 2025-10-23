@@ -8,17 +8,18 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import models.TaskItemModel
+import ui.screens.common.components.UserItem
 
 @Composable
 fun NewTaskDialog(
@@ -31,6 +32,7 @@ fun NewTaskDialog(
   onConnectedTaskDeleted: (Int) -> Unit,
   onNewTaskSaved: () -> Unit,
   onNewTaskClosed: () -> Unit,
+  onAuthorSelectWindowOpened: () -> Unit,
 ) {
   when (state) {
     NewTaskWindowState.Closed -> Unit
@@ -39,7 +41,7 @@ fun NewTaskDialog(
         Surface(
           modifier = Modifier
             .width(600.dp)
-            .height(600.dp),
+            .height(800.dp),
           shape = RoundedCornerShape(16.dp),
           elevation = 8.dp,
           color = MaterialTheme.colors.surface
@@ -86,6 +88,59 @@ fun NewTaskDialog(
                 cursorColor = MaterialTheme.colors.primary
               )
             )
+            Text(
+              text = "Автор",
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+              style = MaterialTheme.typography.h5.copy(
+                fontWeight = FontWeight.Bold
+              ),
+              color = MaterialTheme.colors.onSurface
+            )
+            state.author?.let { author ->
+              Column(
+                modifier = Modifier
+                  .padding(horizontal = 16.dp)
+              ) {
+                UserItem(
+                  user = author,
+                  onClick = {}
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+              }
+            }
+            Card(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .clickable {
+                  onAuthorSelectWindowOpened()
+                },
+              elevation = 8.dp,
+              backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f)
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp)
+              ) {
+                Icon(
+                  Icons.Default.Person,
+                  contentDescription = "Выбрать автора",
+                  modifier = Modifier.size(48.dp),
+                  tint = MaterialTheme.colors.primary
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                  text = "Выбрать автора",
+                  style = MaterialTheme.typography.body1.copy(
+                    fontSize = 20.sp
+                  ),
+                  color = MaterialTheme.colors.primary
+                )
+              }
+            }
+
             Text(
               text = "Подзадачи",
               modifier = Modifier
@@ -176,6 +231,7 @@ fun NewTaskDialog(
                 )
               }
             }
+
             Text(
               text = "Связанные задачи",
               modifier = Modifier

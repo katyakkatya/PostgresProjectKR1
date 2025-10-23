@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import models.FormattingOptionsModel
+import ui.screens.common.dialogs.UserSelectDialog
 import ui.screens.task_list.components.FormattingOptionsPayload
 
 @Composable
@@ -170,6 +171,7 @@ fun TaskListScreen(
     onConnectedTaskDeleted = viewModel::removeConnectedTask,
     onNewTaskSaved = viewModel::saveNewTask,
     onNewTaskClosed = viewModel::closeNewTaskWindow,
+    onAuthorSelectWindowOpened = viewModel::openAuthorSelectDialog,
   )
 
   val taskSelectionState by viewModel.taskSelectWindowState.collectAsState()
@@ -177,5 +179,11 @@ fun TaskListScreen(
     taskSelectionState,
     onWindowClosed = viewModel::closeTaskSelectWindow,
     onTaskSelected = viewModel::addConnectedTask,
+  )
+  val userSelectDialogState by viewModel.usersSelectDialogStateFlow.collectAsState()
+  UserSelectDialog(
+    state = userSelectDialogState,
+    onWindowClosed = viewModel::closeAuthorSelectDialog,
+    onUserClicked = viewModel::setNewTaskAuthor,
   )
 }
