@@ -10,10 +10,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.UserWithTasksModel
+import ui.screens.users.components.UserItem
 
 @Composable
 fun UsersScreen(
@@ -26,9 +27,10 @@ fun UsersScreen(
         onBack = onBack
       )
     }
-  ) {
+  ) { paddingValues ->
     UsersScreenContent(
       viewModel = viewModel,
+      modifier = Modifier.padding(paddingValues)
     )
   }
 }
@@ -36,89 +38,157 @@ fun UsersScreen(
 @Composable
 fun UsersScreenContent(
   viewModel: UsersScreenViewModel,
+  modifier: Modifier = Modifier
 ) {
   val usersList by viewModel.usersFlow.collectAsState(emptyList())
   val regexInput by viewModel.regexInputFlow.collectAsState("")
   val minTasksInput by viewModel.minTasksInputFlow.collectAsState("")
   val error by viewModel.errorFlow.collectAsState("")
-  Column {
-    TextField(
-      value = regexInput,
-      onValueChange = viewModel::updateRegex,
-      textStyle = LocalTextStyle.current.copy(
-        fontSize = 24.sp,
-        color = MaterialTheme.colors.onSurface
-      ),
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(bottom = 32.dp)
-        .height(60.dp)
-        .padding(horizontal = 24.dp),
-      colors = TextFieldDefaults.textFieldColors(
-        backgroundColor = MaterialTheme.colors.surface,
-        textColor = MaterialTheme.colors.onSurface,
-        focusedIndicatorColor = MaterialTheme.colors.primary,
-        unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
-        cursorColor = MaterialTheme.colors.primary
-      )
+
+  Column(
+    modifier = modifier
+      .fillMaxSize()
+      .padding(24.dp)
+  ) {
+    // Заголовок экрана
+    Text(
+      text = "Пользователи и задачи",
+      style = MaterialTheme.typography.h4,
+      color = MaterialTheme.colors.onSurface,
+      modifier = Modifier.fillMaxWidth(),
+      textAlign = TextAlign.Center
     )
 
-    Row(
-      verticalAlignment = Alignment.CenterVertically
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Поле для regex фильтра
+    Column(
+      modifier = Modifier.fillMaxWidth()
     ) {
       Text(
-        text = "Минимальное количество задач:",
-        fontSize = 32.sp,
-        fontFamily = FontFamily.SansSerif,
+        text = "Фильтр по имени (regex):",
+        style = MaterialTheme.typography.h6,
+        color = MaterialTheme.colors.onSurface
       )
-      Spacer(modifier = Modifier.width(32.dp))
+
+      Spacer(modifier = Modifier.height(8.dp))
+
       TextField(
-        value = minTasksInput,
-        onValueChange = viewModel::updateMinTasks,
-        textStyle = LocalTextStyle.current.copy(
-          fontSize = 24.sp,
-          color = MaterialTheme.colors.onSurface
-        ),
+        value = regexInput,
+        onValueChange = viewModel::updateRegex,
+        textStyle = MaterialTheme.typography.body1,
         modifier = Modifier
           .fillMaxWidth()
-          .padding(bottom = 32.dp)
-          .height(60.dp)
-          .padding(horizontal = 24.dp),
+          .height(56.dp),
         colors = TextFieldDefaults.textFieldColors(
           backgroundColor = MaterialTheme.colors.surface,
           textColor = MaterialTheme.colors.onSurface,
           focusedIndicatorColor = MaterialTheme.colors.primary,
           unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
           cursorColor = MaterialTheme.colors.primary
-        )
+        ),
+        singleLine = true,
+        placeholder = {
+          Text(
+            text = "Введите регулярное выражение",
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+          )
+        }
       )
     }
 
-    error?.let {
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // Поле для минимального количества задач
+    Column(
+      modifier = Modifier.fillMaxWidth()
+    ) {
       Text(
-        text = it,
-        style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.error)
+        text = "Минимальное количество задач:",
+        style = MaterialTheme.typography.h6,
+        color = MaterialTheme.colors.onSurface
+      )
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      TextField(
+        value = minTasksInput,
+        onValueChange = viewModel::updateMinTasks,
+        textStyle = MaterialTheme.typography.body1,
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(56.dp),
+        colors = TextFieldDefaults.textFieldColors(
+          backgroundColor = MaterialTheme.colors.surface,
+          textColor = MaterialTheme.colors.onSurface,
+          focusedIndicatorColor = MaterialTheme.colors.primary,
+          unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+          cursorColor = MaterialTheme.colors.primary
+        ),
+        singleLine = true,
+        placeholder = {
+          Text(
+            text = "Введите число",
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+          )
+        }
+      )
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    if (error.isNullOrEmpty()) {
+      Text(
+        text = error!!,
+        style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.error),
+        modifier = Modifier.fillMaxWidth()
       )
       Spacer(modifier = Modifier.height(16.dp))
     }
 
-    LazyColumn(
-      modifier = Modifier
-        .fillMaxWidth()
-        .weight(1f)
-    ) {
-      items(usersList) { user ->
-        UserItem(user)
+    Text(
+      text = "Найдено пользователей: ${usersList.size}",
+      style = MaterialTheme.typography.h6,
+      color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+      modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Список пользователей
+    if (usersList.isEmpty()) {
+      // Сообщение при пустом списке
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .weight(1f),
+        contentAlignment = Alignment.Center
+      ) {
+        Text(
+          text = if (regexInput.isNotEmpty() || minTasksInput.isNotEmpty()) {
+            "Пользователи не найдены\nПопробуйте изменить параметры фильтрации"
+          } else {
+            "Нет пользователей с задачами"
+          },
+          fontSize = 32.sp,
+          fontFamily = MaterialTheme.typography.body1.fontFamily,
+          color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f),
+          textAlign = TextAlign.Center
+        )
+      }
+    } else {
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxWidth()
+          .weight(1f),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+      ) {
+        items(usersList) { user ->
+          UserItem(user)
+        }
       }
     }
   }
-}
-
-@Composable
-fun UserItem(user: UserWithTasksModel) {
-  Text(
-    text = "${user.name} (${user.taskCount})",
-    fontSize = 24.sp,
-    fontFamily = FontFamily.SansSerif
-  )
 }
