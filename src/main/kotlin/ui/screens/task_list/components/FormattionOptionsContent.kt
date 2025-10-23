@@ -3,7 +3,9 @@ package ui.screens.task_list.components
 import FilterStatusItem
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Divider
@@ -30,16 +32,17 @@ fun FormattionOptionsContent(
   ) {
     Text(
       text = "Настройки форматирования",
-      fontSize = 28.sp,
+      fontSize = 32.sp,
       fontWeight = FontWeight.W500,
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-      textAlign = TextAlign.Center,
+      textAlign = TextAlign.Left,
       color = MaterialTheme.colors.onSurface,
-      style = MaterialTheme.typography.h5
+      style = MaterialTheme.typography.h5,
+      lineHeight = 32.sp
     )
 
     Divider(
-      modifier = Modifier.padding(bottom = 8.dp),
+      modifier = Modifier.padding(bottom = 16.dp),
       color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
     )
 
@@ -49,6 +52,8 @@ fun FormattionOptionsContent(
       selected = payload.formattingOptionsModel.heightTransformation == HeightTransformation.UPPERCASE
     )
 
+    Spacer(modifier = Modifier.height(16.dp))
+
     RadioButton(
       text = "В нижнем регистре",
       onClick = { payload.onHeightTransformationClicked(HeightTransformation.LOWERCASE) },
@@ -56,7 +61,7 @@ fun FormattionOptionsContent(
     )
 
     Divider(
-      modifier = Modifier.padding(bottom = 8.dp),
+      modifier = Modifier.padding(vertical = 16.dp),
       color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
     )
 
@@ -101,7 +106,12 @@ fun RadioButton(
     )
     Text(
       text = text,
-      modifier = Modifier.padding(start = 16.dp)
+      modifier = Modifier.padding(start = 16.dp).padding(vertical = 16.dp),
+      fontSize = 24.sp,
+      fontWeight = FontWeight.W500,
+      textAlign = TextAlign.Left,
+      color = MaterialTheme.colors.onSurface,
+      style = MaterialTheme.typography.h5,
     )
   }
 }

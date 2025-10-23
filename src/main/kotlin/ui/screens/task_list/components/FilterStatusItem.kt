@@ -17,10 +17,9 @@ fun FilterStatusItem(
   status: DbTaskStatus,
   onClick: () -> Unit
 ) {
-  val text = status.name.replace("_", " ").replaceFirstChar { it.uppercase() }
   FilterStatusItem(
     enabled = enabled,
-    text = text,
+    text = getStatusName(status),
     onClick = onClick
   )
 }
@@ -35,21 +34,22 @@ fun FilterStatusItem(
     modifier = Modifier
       .fillMaxWidth()
       .clickable { onClick() }
-      .padding(vertical = 12.dp, horizontal = 8.dp),
+      .padding(vertical = 16.dp, horizontal = 8.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween
   ) {
     Text(
       text = text,
-      fontSize = 20.sp,
+      fontSize = 24.sp,
       color = MaterialTheme.colors.onSurface,
-      style = MaterialTheme.typography.body1
+      style = MaterialTheme.typography.body1,
+      modifier = Modifier.weight(3f)
     )
 
     Checkbox(
       checked = enabled,
       onCheckedChange = { onClick() },
-      modifier = Modifier.size(36.dp),
+      modifier = Modifier.size(48.dp).weight(1f),
       colors = CheckboxDefaults.colors(
         checkedColor = MaterialTheme.colors.secondary,
         uncheckedColor = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
@@ -57,4 +57,12 @@ fun FilterStatusItem(
       )
     )
   }
+}
+
+private fun getStatusName(status: DbTaskStatus): String = when (status) {
+  DbTaskStatus.BACKLOG -> "В бэклоге"
+  DbTaskStatus.IN_PROGRESS -> "В процессе"
+  DbTaskStatus.IN_REVIEW -> "На проверке"
+  DbTaskStatus.DONE -> "Выполнено"
+  DbTaskStatus.DROPPED -> "Не будет выполнено"
 }

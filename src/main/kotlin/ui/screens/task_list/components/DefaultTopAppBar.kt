@@ -123,38 +123,6 @@ fun DefaultTopAppBar(
         }
 
         Spacer(modifier = Modifier.width(16.dp))
-
-
-        if(!isFullScreen){
-          Box {
-            IconButton(
-              onClick = { filterPopupOpened = !filterPopupOpened }
-            ) {
-              Icon(
-                imageVector = Icons.Outlined.Tune,
-                contentDescription = "Быстрые фильтры",
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colors.onPrimary
-              )
-            }
-
-            DropdownMenu(
-              expanded = filterPopupOpened,
-              onDismissRequest = { filterPopupOpened = false },
-              modifier = Modifier
-                .width(380.dp)
-                .clip(RoundedCornerShape(8.dp))
-            ) {
-              StatusesFilterContent(
-                appliedFilters = appliedFilters,
-                onFilterToggled = onFilterToggled,
-                onFilterReset = onFilterReset
-              )
-            }
-          }
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
       }
     }
   }
