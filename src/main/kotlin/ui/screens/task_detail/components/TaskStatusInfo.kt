@@ -1,3 +1,4 @@
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ fun TaskStatusInfo(
         .clip(RoundedCornerShape(8.dp))
         .clickable { onStatusChangeClicked(button.toStatus) },
       shape = RoundedCornerShape(8.dp),
+      border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
       elevation = 8.dp,
       backgroundColor = MaterialTheme.colors.surface
     ) {
