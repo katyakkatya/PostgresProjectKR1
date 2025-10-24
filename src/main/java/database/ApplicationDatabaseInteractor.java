@@ -167,7 +167,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         try(PreparedStatement statementForConnected = this.
                 connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, ct.task_id  \n" +
                         "FROM connected_task ct INNER JOIN task t ON ct.another_task_id = t.id WHERE ct.task_id = ?");
-            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT * FROM task WHERE id = ?")){
+            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT * FROM task\nLEFT JOIN users ON users.id = task.author_id\nWHERE task.id = ?")){
             // CONNECTED TASKS
             statementForConnected.setLong(1, taskId);
 
@@ -192,14 +192,15 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             DbTaskDetail dbTaskDetail = null;
 
             if(resultForTask.next()){
+
                 dbTaskDetail = new DbTaskDetail(resultForTask.getLong("id"),
                         resultForTask.getString("title"), resultForTask.getDate("date"),
                         DbTaskStatus.converter(resultForTask.getString("status")),
                         List.of((String[]) resultForTask.getArray("subtasks").getArray()),
                         List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
-                  dbTaskItems,
-                  // TODO: добавить пользователя
-                  new User(1L, "123"));
+                        dbTaskItems,
+                        resultForTask.getString("author_id") == null ? null :
+                                new User(resultForTask.getLong("author_id"), resultForTask.getString("name")));
             }
 
 
