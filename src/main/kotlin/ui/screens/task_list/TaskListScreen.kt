@@ -13,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import models.FormattingOptionsModel
+import models.OrderOptionsModel
 import ui.screens.common.dialogs.UserSelectDialog
 import ui.screens.task_list.components.FormattingOptionsPayload
+import ui.screens.task_list.components.OrderOptionsPayload
 
 @Composable
 fun TaskListScreen(
@@ -92,6 +94,8 @@ fun TaskListScreen(
           }
         }
 
+        val authorFilter by viewModel.authorFilterFlow.collectAsState(null)
+        val orderOptions by viewModel.orderOptionsFlow.collectAsState(OrderOptionsModel())
         if (showFiltersSidebar && !isFullScreen) {
           FiltersSidebar(
             onClose = {
@@ -105,6 +109,12 @@ fun TaskListScreen(
             appliedFilters = appliedFilters,
             onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
             onFilterReset = { viewModel.resetFilters() },
+            author = authorFilter,
+            orderOptionsPayload = OrderOptionsPayload(
+              orderOptionsModel = orderOptions,
+              onOrderSelected = viewModel::onOrderOptionSelected
+            ),
+            onOpenAuthorFilterSelectDialog = viewModel::openAuthorFilterSelectDialog,
             formattingOptionsPayload = FormattingOptionsPayload(
               onHeightTransformationClicked = { viewModel.setHeightTransformation(it) },
               formattingOptionsModel = formattingOptionsModel,
@@ -147,6 +157,12 @@ fun TaskListScreen(
               appliedFilters = appliedFilters,
               onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
               onFilterReset = { viewModel.resetFilters() },
+              author = authorFilter,
+              orderOptionsPayload = OrderOptionsPayload(
+                orderOptionsModel = orderOptions,
+                onOrderSelected = viewModel::onOrderOptionSelected
+              ),
+              onOpenAuthorFilterSelectDialog = viewModel::openAuthorFilterSelectDialog,
               formattingOptionsPayload = FormattingOptionsPayload(
                 onHeightTransformationClicked = { viewModel.setHeightTransformation(it) },
                 formattingOptionsModel = formattingOptionsModel,
@@ -185,5 +201,11 @@ fun TaskListScreen(
     state = userSelectDialogState,
     onWindowClosed = viewModel::closeAuthorSelectDialog,
     onUserClicked = viewModel::setNewTaskAuthor,
+  )
+  val authorSelectDialogState by viewModel.authorSelectDialogStateFlow.collectAsState()
+  UserSelectDialog(
+    state = authorSelectDialogState,
+    onWindowClosed = viewModel::closeAuthorFilterSelectDialog,
+    onUserClicked = viewModel::setAuthorFilter,
   )
 }

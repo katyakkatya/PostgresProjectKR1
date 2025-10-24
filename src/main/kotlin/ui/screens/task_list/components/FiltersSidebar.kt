@@ -12,8 +12,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import database.model.DbTaskStatus
-import ui.screens.task_list.components.FormattingOptionsPayload
-import ui.screens.task_list.components.FormattionOptionsContent
+import models.UserModel
+import ui.screens.task_list.components.*
 
 @Composable
 fun FiltersSidebar(
@@ -24,6 +24,9 @@ fun FiltersSidebar(
   modifier: Modifier = Modifier,
   isPermanent: Boolean = false,
   formattingOptionsPayload: FormattingOptionsPayload,
+  author: UserModel? = null,
+  onOpenAuthorFilterSelectDialog: () -> Unit,
+  orderOptionsPayload: OrderOptionsPayload,
 ) {
   Surface(
     modifier = modifier
@@ -57,6 +60,15 @@ fun FiltersSidebar(
           appliedFilters = appliedFilters,
           onFilterToggled = onFilterToggled,
           onFilterReset = onFilterReset,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        AuthorFilterContent(
+          author = author,
+          onOpenAuthorFilterSelectDialog = onOpenAuthorFilterSelectDialog,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        OrderOptionsContent(
+          payload = orderOptionsPayload
         )
         Spacer(modifier = Modifier.height(16.dp))
         FormattionOptionsContent(

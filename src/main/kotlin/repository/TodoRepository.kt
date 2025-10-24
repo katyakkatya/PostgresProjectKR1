@@ -3,6 +3,7 @@ package repository
 import database.DatabaseInteractor
 import database.model.DbTaskStatus
 import database.request.CreateTaskRequest
+import database.request.CreateUserRequest
 import database.request.GetUsersWithTasksRequest
 import database.request.TaskListRequest
 import database.result.Result
@@ -128,7 +129,7 @@ class TodoRepository(
   }
 
   fun saveNewTask(title: String, subtasks: List<String>, connectedTasks: List<Long>): Result<Long> {
-    val userId = 1
+    val userId = 1 // TODO: add author id
     val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks, 1))
     if (result.success == false) {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании новой задачи")
@@ -157,6 +158,14 @@ class TodoRepository(
     } else {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при получении списка задач")
     }
+  }
+
+  fun createUser(name: String): Result<Long> {
+    val result = interactor.createUser(CreateUserRequest(name))
+    if (result.success == false) {
+      showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании пользователя")
+    }
+    return result
   }
 }
 

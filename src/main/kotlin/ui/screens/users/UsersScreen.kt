@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ui.screens.common.dialogs.AddUserDialog
+import ui.screens.common.dialogs.AddUserDialogState
 import ui.screens.users.components.UserItem
 
 @Composable
@@ -23,7 +25,8 @@ fun UsersScreen(
   Scaffold(
     topBar = {
       UsersTopAppBar(
-        onBack = onBack
+        onBack = onBack,
+        onNewUserClicked = viewModel::openAddUserDialog
       )
     }
   ) { paddingValues ->
@@ -190,4 +193,13 @@ fun UsersScreenContent(
       }
     }
   }
+
+  val addUserDialogState by viewModel.addUserDialogStateFlow.collectAsState(AddUserDialogState.Closed)
+  AddUserDialog(
+    state = addUserDialogState,
+    onWindowClosed = viewModel::closeAddUserDialog,
+    onNameChanged = viewModel::onNewUserNameChanged,
+    onUserTryAdd = viewModel::tryAddNewUser
+  )
+
 }

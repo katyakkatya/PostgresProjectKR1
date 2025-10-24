@@ -9,10 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import models.FormattingOptionsModel
-import models.HeightTransformation
-import models.TaskItemModel
-import models.UserModel
+import models.*
 import repository.Settings
 import repository.TodoRepository
 import ui.screens.common.dialogs.UserSelectDialogState
@@ -43,18 +40,28 @@ class TaskListViewModel(
   private val _statusFilterFlow = MutableStateFlow(initialFilters)
   val statusFilterFlow = _statusFilterFlow
 
+  private val _authorFilterFlow = MutableStateFlow<UserModel?>(null)
+  val authorFilterFlow = _authorFilterFlow
+
+  private val _authorSelectDialogStateFlow: MutableStateFlow<UserSelectDialogState> =
+    MutableStateFlow(UserSelectDialogState.Closed)
+  val authorSelectDialogStateFlow = _authorSelectDialogStateFlow
+
   private val _formattingOptionsModelFlow = MutableStateFlow(FormattingOptionsModel())
   val formattingOptionsModelFlow = _formattingOptionsModelFlow
+
+  private val _orderOptionsFlow = MutableStateFlow(OrderOptionsModel())
+  val orderOptionsFlow = _orderOptionsFlow
 
   private val _usersSelectDialogStateFlow: MutableStateFlow<UserSelectDialogState> =
     MutableStateFlow(UserSelectDialogState.Closed)
   val usersSelectDialogStateFlow = _usersSelectDialogStateFlow
 
-  fun openExpandedTopAppBar(){
+  fun openExpandedTopAppBar() {
     _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Opened
   }
 
-  fun closeExpandedTopAppBar(){
+  fun closeExpandedTopAppBar() {
     _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Closed
   }
 
@@ -71,7 +78,14 @@ class TaskListViewModel(
       _formattingOptionsModelFlow.value.displayId,
       _formattingOptionsModelFlow.value.displayFullStatus
     )
-    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, formattingOptionsModel))
+    todoRepository.getTasksList(
+      TaskListRequest(
+        _statusFilterFlow.value.toList(),
+        _authorFilterFlow.value?.id,
+        null,
+        formattingOptionsModel
+      )
+    )
   }
 
   private fun updateSettings() {
@@ -112,6 +126,23 @@ class TaskListViewModel(
 
   fun setNewTaskAuthor(author: UserModel) {
     _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(author = author)
+  }
+
+  fun openAuthorFilterSelectDialog() {
+    todoRepository.getAllUsers()
+    CoroutineScope(Dispatchers.IO).launch {
+      val users = todoRepository.usersListFlow.first()
+      _authorSelectDialogStateFlow.value = UserSelectDialogState.Opened(users)
+    }
+  }
+
+  fun closeAuthorFilterSelectDialog() {
+    _authorSelectDialogStateFlow.value = UserSelectDialogState.Closed
+  }
+
+  fun setAuthorFilter(author: UserModel) {
+    _authorFilterFlow.value = author
+    updateList()
   }
 
   fun setNewTaskName(name: String) {
@@ -222,6 +253,11 @@ class TaskListViewModel(
       _formattingOptionsModelFlow.value.copy(displayFullStatus = !_formattingOptionsModelFlow.value.displayFullStatus)
     updateList()
   }
+
+  fun onOrderOptionSelected(order: Order) {
+    _orderOptionsFlow.value = _orderOptionsFlow.value.copy(order = order)
+    updateList()
+  }
 }
 
 sealed interface NewTaskWindowState {
@@ -242,7 +278,7 @@ sealed interface TaskSelectWindowState {
   ) : TaskSelectWindowState
 }
 
-sealed interface ExpandedTopAppBarState{
+sealed interface ExpandedTopAppBarState {
   object Closed : ExpandedTopAppBarState
   object Opened : ExpandedTopAppBarState
 }
