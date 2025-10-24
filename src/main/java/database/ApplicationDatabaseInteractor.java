@@ -510,6 +510,26 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    @Override
+    public Result<List<User>> getAllUsers() { // DONE
+        if(!this.isConnected())
+            return new Result<>(null, "not connected", false);
+
+        try(Statement statement = this.connection.get().createStatement()){
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
+            List<User> ans = new LinkedList<>();
+
+            while(resultSet.next()){
+                ans.add(new User(resultSet.getLong("id"),
+                        resultSet.getString("name")));
+            }
+            return new Result<>(ans, null, true);
+        } catch (SQLException e) {
+            pushToConsumer(this.consumerForException, e);
+            return new Result<>(null, null, false);
+        }
+    }
+
     /** Установка ограничений и удаление записей, которые под них не попадают
      * @param deleteRegexes Выражения, которые содержат в себе команду DELETE
      * @param alterRegexes Вырежения, которые содержат в себе команду ALTER
@@ -636,8 +656,4 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
     }
 
-    @Override
-    public Result<List<User>> getAllUsers() {
-        return new Result<>(new ArrayList<>(), null, true);
-    }
 }

@@ -32,6 +32,7 @@ fun main() = application {
 //    var test  = ApplicationDatabaseInteractor()
 //    test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres", "postgres", "postgres"))
 //    test.createDatabase();
+//    test.allUsers.data?.forEach{s -> println(s)};
 //
 //    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
 //    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
