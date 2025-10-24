@@ -198,7 +198,8 @@ class TaskListViewModel(
     if (!validateNewTask(state)) {
       return
     }
-    val result = todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id })
+    val result =
+      todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id }, state.author?.id)
     if (result.success) {
       closeNewTaskWindow()
       updateList()
