@@ -11,16 +11,17 @@ public enum DbTaskStatus {
     this.russianName = name;
   }
 
-  public String getName(){
-    return this.russianName;
-  }
-
   public static DbTaskStatus converter(String russianName){
     for(DbTaskStatus status : DbTaskStatus.values()){
-      if(status.getName().equalsIgnoreCase(russianName))
+      if(status.toString().equalsIgnoreCase(russianName))
         return status;
     }
 
     throw new IllegalStateException("Неизвестный статус");
+  }
+
+  @Override
+  public String toString(){
+    return this.russianName;
   }
 }

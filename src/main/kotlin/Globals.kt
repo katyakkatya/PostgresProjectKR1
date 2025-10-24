@@ -1,3 +1,4 @@
+import database.ApplicationDatabaseInteractor
 import database.DatabaseInteractor
 import repository.TodoRepository
 import stub.StubDatabaseInteractor
@@ -10,7 +11,7 @@ import ui.screens.task_list.TaskListViewModel
 import ui.screens.users.UsersScreenViewModel
 
 object Globals {
-  val databaseInteractor: DatabaseInteractor = StubDatabaseInteractor()
+  val databaseInteractor: DatabaseInteractor = ApplicationDatabaseInteractor()
   val todoRepository: TodoRepository = TodoRepository(databaseInteractor)
   val mainViewModel: MainViewModel = MainViewModel(todoRepository)
   val taskListViewModel: TaskListViewModel = TaskListViewModel(todoRepository)

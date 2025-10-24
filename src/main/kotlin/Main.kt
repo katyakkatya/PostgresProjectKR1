@@ -14,8 +14,11 @@ import database.model.DbTaskStatus
 import database.request.ConnectionRequest
 import database.request.CreateTaskRequest
 import database.request.CreateUserRequest
+import database.request.FormattingOptions
+import database.request.TaskListSortingType
 import database.request.GetUsersWithTasksRequest
 import database.request.TaskListRequest
+import database.request.TaskListSorting
 import theme.TodoAppTheme
 import ui.AppNavigation
 import java.awt.Dimension
@@ -23,21 +26,21 @@ import java.io.PrintStream
 
 
 fun main() = application {
-//    try {
-//        System.setOut(PrintStream(System.out, true, "UTF-8"))
-//        System.setErr(PrintStream(System.err, true, "UTF-8"))
-//    } catch (e: Exception) {
-//        e.printStackTrace()
-//    }
-//    var test  = ApplicationDatabaseInteractor()
-//    test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres", "postgres", "postgres"))
-//    test.createDatabase();
+    try {
+        System.setOut(PrintStream(System.out, true, "UTF-8"))
+        System.setErr(PrintStream(System.err, true, "UTF-8"))
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    var test  = ApplicationDatabaseInteractor()
+    test.tryConnect(ConnectionRequest("jdbc:postgresql://localhost:9876/postgres", "postgres", "postgres"))
+    test.createDatabase();
 //    test.allUsers.data?.forEach{s -> println(s)};
 //
-//    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
-//    test.createTask(CreateTaskRequest("rtnmmrtl", listOf("w"), listOf(), 1));
-//    test.createTask(CreateTaskRequest("ZZZZZZZZZ", listOf("w"), listOf(), 1));
-//    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
+    test.createTask(CreateTaskRequest("gj", listOf("w"), listOf(), null));
+    test.createTask(CreateTaskRequest("atnmmrtl", listOf("w"), listOf(), 1));
+    test.createTask(CreateTaskRequest("ZZZZZZZZZZZZZZZZZZZZZZZZZ", listOf("w"), listOf(), 1));
+    test.createTask(CreateTaskRequest("fghfj", listOf("w"), listOf(1, 2), 1));
 //    test.createUser(CreateUserRequest("user1"))
 //    test.changeSubtaskCompletion(1, 0);
 //    println(test.addSubtask(1L, "test"))
@@ -55,8 +58,9 @@ fun main() = application {
 //    test.setShouldForceUniqueName(true)
 //    println("111 " + test.getForceUniqueTaskTitle())
 //    test.getUsersWithTasks(GetUsersWithTasksRequest("%", 0)).data?.forEach{s -> println(s.toString())}
-//    test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG))).data?.forEach { dbTaskItem -> println(dbTaskItem) };
-
+    test.getTaskList(TaskListRequest(listOf(DbTaskStatus.BACKLOG), 1, TaskListSorting(TaskListSortingType.BY_TASK_NAME, true),
+        FormattingOptions(false, false, false, false, false)
+    )).data?.forEach { dbTaskItem -> println(dbTaskItem) };
     Window(
         onCloseRequest = ::exitApplication,
         title = "ToDo App",

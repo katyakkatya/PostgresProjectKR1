@@ -202,21 +202,25 @@ class TaskListViewModel(
   fun setHeightTransformation(heightTransformation: HeightTransformation) {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(heightTransformation = heightTransformation)
+    updateList()
   }
 
   fun onShowShortToggled() {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(showShort = !_formattingOptionsModelFlow.value.showShort)
+    updateList()
   }
 
   fun onDisplayIdToggled() {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(displayId = !_formattingOptionsModelFlow.value.displayId)
+    updateList()
   }
 
   fun onDisplayFullStatusToggled() {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(displayFullStatus = !_formattingOptionsModelFlow.value.displayFullStatus)
+    updateList()
   }
 }
 
