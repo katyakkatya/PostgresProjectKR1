@@ -3,6 +3,8 @@ package ui.screens.task_list
 import database.model.DbTaskStatus
 import database.request.FormattingOptions
 import database.request.TaskListRequest
+import database.request.TaskListSorting
+import database.request.TaskListSortingType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,11 +80,23 @@ class TaskListViewModel(
       _formattingOptionsModelFlow.value.displayId,
       _formattingOptionsModelFlow.value.displayFullStatus
     )
+    val sorting = if (_orderOptionsFlow.value.orderBy == OrderBy.UNSET) {
+      null
+    } else {
+      TaskListSorting(
+        when (_orderOptionsFlow.value.orderBy) {
+          OrderBy.DATE -> TaskListSortingType.BY_DATE
+          OrderBy.TITLE -> TaskListSortingType.BY_TASK_NAME
+          OrderBy.UNSET -> throw Exception("Cant handle unset here")
+        },
+        _orderOptionsFlow.value.order == Order.ASC
+      )
+    }
     todoRepository.getTasksList(
       TaskListRequest(
         _statusFilterFlow.value.toList(),
         _authorFilterFlow.value?.id,
-        null,
+        sorting,
         formattingOptionsModel
       )
     )
@@ -257,6 +271,11 @@ class TaskListViewModel(
 
   fun onOrderOptionSelected(order: Order) {
     _orderOptionsFlow.value = _orderOptionsFlow.value.copy(order = order)
+    updateList()
+  }
+
+  fun onOrderByOptionSelected(orderBy: OrderBy) {
+    _orderOptionsFlow.value = _orderOptionsFlow.value.copy(orderBy = orderBy)
     updateList()
   }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.Order
+import models.OrderBy
 import models.OrderOptionsModel
 
 @Composable
@@ -41,11 +42,30 @@ fun OrderOptionsContent(
 
     RadioButton(
       text = "Неважно",
-      onClick = { payload.onOrderSelected(Order.UNSET) },
-      selected = payload.orderOptionsModel.order == Order.UNSET
+      onClick = { payload.onOrderBySelected(OrderBy.UNSET) },
+      selected = payload.orderOptionsModel.orderBy == OrderBy.UNSET
     )
 
     Spacer(modifier = Modifier.height(16.dp))
+
+    RadioButton(
+      text = "Сортировать по дате",
+      onClick = { payload.onOrderBySelected(OrderBy.DATE) },
+      selected = payload.orderOptionsModel.orderBy == OrderBy.DATE
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    RadioButton(
+      text = "Сортировать по названию",
+      onClick = { payload.onOrderBySelected(OrderBy.TITLE) },
+      selected = payload.orderOptionsModel.orderBy == OrderBy.TITLE
+    )
+
+    Divider(
+      modifier = Modifier.padding(bottom = 16.dp),
+      color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+    )
 
     RadioButton(
       text = "По возрастанию",
@@ -65,5 +85,6 @@ fun OrderOptionsContent(
 
 class OrderOptionsPayload(
   val orderOptionsModel: OrderOptionsModel,
-  val onOrderSelected: (Order) -> Unit
+  val onOrderSelected: (Order) -> Unit,
+  val onOrderBySelected: (OrderBy) -> Unit,
 )

@@ -112,7 +112,8 @@ fun TaskListScreen(
             author = authorFilter,
             orderOptionsPayload = OrderOptionsPayload(
               orderOptionsModel = orderOptions,
-              onOrderSelected = viewModel::onOrderOptionSelected
+              onOrderSelected = viewModel::onOrderOptionSelected,
+              onOrderBySelected = viewModel::onOrderByOptionSelected,
             ),
             onOpenAuthorFilterSelectDialog = viewModel::openAuthorFilterSelectDialog,
             formattingOptionsPayload = FormattingOptionsPayload(
@@ -160,7 +161,8 @@ fun TaskListScreen(
               author = authorFilter,
               orderOptionsPayload = OrderOptionsPayload(
                 orderOptionsModel = orderOptions,
-                onOrderSelected = viewModel::onOrderOptionSelected
+                onOrderSelected = viewModel::onOrderOptionSelected,
+                onOrderBySelected = viewModel::onOrderByOptionSelected,
               ),
               onOpenAuthorFilterSelectDialog = viewModel::openAuthorFilterSelectDialog,
               formattingOptionsPayload = FormattingOptionsPayload(

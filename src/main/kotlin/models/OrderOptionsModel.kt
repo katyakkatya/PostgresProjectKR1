@@ -1,11 +1,17 @@
 package models
 
 data class OrderOptionsModel(
-  val order: Order = Order.UNSET
+  val orderBy: OrderBy = OrderBy.UNSET,
+  val order: Order = Order.ASC
 )
 
 enum class Order {
   ASC,
   DESC,
+}
+
+enum class OrderBy {
+  DATE,
+  TITLE,
   UNSET
 }
