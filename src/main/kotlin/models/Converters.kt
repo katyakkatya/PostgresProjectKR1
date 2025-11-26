@@ -24,13 +24,14 @@ fun DbTaskItem.asTask(): TaskItemModel {
   )
 }
 
-fun DbTaskStatus.asTaskStatus(): TaskStatus {
+fun String.asTaskStatus(): TaskStatus {
   return when (this) {
     DbTaskStatus.BACKLOG -> TaskStatus.BACKLOG
     DbTaskStatus.IN_PROGRESS -> TaskStatus.IN_PROGRESS
     DbTaskStatus.IN_REVIEW -> TaskStatus.IN_REVIEW
     DbTaskStatus.DONE -> TaskStatus.DONE
     DbTaskStatus.DROPPED -> TaskStatus.DROPPED
+    else -> TaskStatus.CUSTOM(this)
   }
 }
 

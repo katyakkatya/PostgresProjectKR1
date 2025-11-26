@@ -66,7 +66,7 @@ class TaskDetailViewModel(
     }
   }
 
-  fun updateStatus(status: DbTaskStatus) {
+  fun updateStatus(status: String) {
     val result = todoRepository.updateStatus(_taskFlow.value!!.id, status)
     if (result) {
       requestTaskDetail()
@@ -125,7 +125,7 @@ sealed interface NewRelatedTaskState {
 
 sealed class StatusUpdateButton(
   val text: String,
-  val toStatus: DbTaskStatus,
+  val toStatus: String,
 ) {
   val color = toStatus.asTaskStatus().color
 

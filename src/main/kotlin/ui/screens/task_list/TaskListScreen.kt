@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import models.FormattingOptionsModel
 import models.OrderOptionsModel
 import ui.screens.common.dialogs.UserSelectDialog
+import ui.screens.task_list.components.ExtendedFiltersSignals
+import ui.screens.task_list.components.ExtendedFiltersState
 import ui.screens.task_list.components.FormattingOptionsPayload
 import ui.screens.task_list.components.OrderOptionsPayload
 
@@ -96,6 +98,7 @@ fun TaskListScreen(
 
         val authorFilter by viewModel.authorFilterFlow.collectAsState(null)
         val orderOptions by viewModel.orderOptionsFlow.collectAsState(OrderOptionsModel())
+        val extendedFiltersState by viewModel.extendedFiltersStateFlow.collectAsState(ExtendedFiltersState())
         if (showFiltersSidebar && !isFullScreen) {
           FiltersSidebar(
             onClose = {
@@ -122,6 +125,13 @@ fun TaskListScreen(
               onShowShortClicked = { viewModel.onShowShortToggled() },
               onDisplayIdClicked = { viewModel.onDisplayIdToggled() },
               onDisplayFullStatusClicked = { viewModel.onDisplayFullStatusToggled() },
+            ),
+            extendedFiltersState = extendedFiltersState,
+            extendedFiltersSignals = ExtendedFiltersSignals(
+              onSubtasksFilterAllTypeClicked = { viewModel.onSubtasksFilterAllTypeClicked() },
+              onSubtasksFilterSomeTypeClicked = { viewModel.onSubtasksFilterSomeTypeClicked() },
+              onSubtasksFilterCompletedFieldClicked = { viewModel.onSubtasksFilterCompletedFieldClicked() },
+              onSubtasksFilterNotCompletedFieldClicked = { viewModel.onSubtasksFilterNotCompletedFieldClicked() },
             )
           )
         }
@@ -171,6 +181,13 @@ fun TaskListScreen(
                 onShowShortClicked = { viewModel.onShowShortToggled() },
                 onDisplayIdClicked = { viewModel.onDisplayIdToggled() },
                 onDisplayFullStatusClicked = { viewModel.onDisplayFullStatusToggled() },
+              ),
+              extendedFiltersState = extendedFiltersState,
+              extendedFiltersSignals = ExtendedFiltersSignals(
+                onSubtasksFilterAllTypeClicked = { viewModel.onSubtasksFilterAllTypeClicked() },
+                onSubtasksFilterSomeTypeClicked = { viewModel.onSubtasksFilterSomeTypeClicked() },
+                onSubtasksFilterCompletedFieldClicked = { viewModel.onSubtasksFilterCompletedFieldClicked() },
+                onSubtasksFilterNotCompletedFieldClicked = { viewModel.onSubtasksFilterNotCompletedFieldClicked() },
               )
             )
           }

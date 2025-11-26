@@ -61,6 +61,8 @@ fun NewTaskDialog(
               ),
               color = MaterialTheme.colors.onSurface
             )
+            // TODO: где-то тут добавить поле время
+            // на onUpdate вызывать из вьюмодели updateTime(string)
             TextField(
               value = state.taskName,
               onValueChange = onTaskNameChanged,

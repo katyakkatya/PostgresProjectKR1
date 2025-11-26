@@ -7,7 +7,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import database.model.DbTaskStatus
 import models.TaskDetail
 import ui.screens.task_detail.components.AuthorSection
 
@@ -18,7 +17,7 @@ fun TaskScreenContent(
   onAddSubtaskClick: () -> Unit,
   onSubtaskToggled: (Int) -> Unit,
   onRelatedTaskClick: (Long) -> Unit,
-  onStatusChanged: (DbTaskStatus) -> Unit,
+  onStatusChanged: (String) -> Unit,
   onAddRelatedTaskClick: () -> Unit,
 ) {
   LazyColumn(

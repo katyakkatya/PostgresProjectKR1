@@ -2,6 +2,7 @@ package stub
 
 import database.DatabaseInteractor
 import database.model.*
+import database.model.extended_filters.ExtendedFiltersModel
 import database.request.*
 import database.result.Result
 import java.util.*
@@ -104,7 +105,7 @@ class StubDatabaseInteractor : DatabaseInteractor {
     return true
   }
 
-  override fun updateStatus(taskId: Long?, status: DbTaskStatus?): Boolean? {
+  override fun updateStatus(taskId: Long?, status: String?): Boolean? {
     println("StubDatabaseInteractor: updateStatus called with taskId: $taskId, status: $status")
     return true
   }
@@ -166,6 +167,12 @@ class StubDatabaseInteractor : DatabaseInteractor {
         User(1, "Артем"),
         User(2, "idfjs")
       ), null, true
+    )
+  }
+
+  override fun getTaskListWithExtendedFilter(extendedFilters: ExtendedFiltersModel?): Result<List<DbTaskItem>> {
+    return Result(
+      listOf(), null, true
     )
   }
 }

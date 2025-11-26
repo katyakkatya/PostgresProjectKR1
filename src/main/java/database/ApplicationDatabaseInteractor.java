@@ -1,6 +1,10 @@
 package database;
 
-import database.model.*;
+import database.model.DbTaskDetail;
+import database.model.DbTaskItem;
+import database.model.User;
+import database.model.UserWithTaskCount;
+import database.model.extended_filters.ExtendedFiltersModel;
 import database.request.*;
 import database.request.utils.FunctionToQuery;
 import database.result.Result;
@@ -147,7 +151,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 Boolean[] subtasks = (Boolean[]) resultSet.getArray("subtasks_status").getArray();
                 dbTaskItems.add(new DbTaskItem(
                         resultSet.getLong("id"), resultSet.getString("title"),
-                        resultSet.getDate("date"), DbTaskStatus.converter(resultSet.getString("status")),
+                  resultSet.getDate("date"), resultSet.getString("status"),
                         subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
                 ));
             }
@@ -177,7 +181,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                     Boolean[] subtasks = (Boolean[]) resultFroConnected.getArray("subtasks_status").getArray();
                     dbTaskItems.add(new DbTaskItem(
                             resultFroConnected.getLong("id"), resultFroConnected.getString("title"),
-                            resultFroConnected.getDate("date"), DbTaskStatus.converter(resultFroConnected.getString("status")),
+                      resultFroConnected.getDate("date"), resultFroConnected.getString("status"),
                             subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
                     ));
             }
@@ -195,7 +199,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
                 dbTaskDetail = new DbTaskDetail(resultForTask.getLong("id"),
                         resultForTask.getString("title"), resultForTask.getDate("date"),
-                        DbTaskStatus.converter(resultForTask.getString("status")),
+                  resultForTask.getString("status"),
                         List.of((String[]) resultForTask.getArray("subtasks").getArray()),
                         List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
                         dbTaskItems,
@@ -230,6 +234,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    // TODO: support time parameter in new task
     @Override
     public Result<Long> createTask(CreateTaskRequest request) { // DONE
         if(!this.isConnected())
@@ -360,7 +365,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean updateStatus(Long taskId, DbTaskStatus status) { // DONE
+    public Boolean updateStatus(Long taskId, String status) { // DONE
         if(!this.isConnected())
             return false;
 
@@ -682,4 +687,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
     }
 
+    // TODO: implement
+    @Override
+    public Result<List<DbTaskItem>> getTaskListWithExtendedFilter(ExtendedFiltersModel extendedFilters) {
+        return null;
+    }
 }

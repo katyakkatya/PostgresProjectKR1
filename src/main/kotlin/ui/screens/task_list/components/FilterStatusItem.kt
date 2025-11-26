@@ -9,20 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import database.model.DbTaskStatus
-
-@Composable
-fun FilterStatusItem(
-  enabled: Boolean,
-  status: DbTaskStatus,
-  onClick: () -> Unit
-) {
-  FilterStatusItem(
-    enabled = enabled,
-    text = getStatusName(status),
-    onClick = onClick
-  )
-}
 
 @Composable
 fun FilterStatusItem(
@@ -57,12 +43,4 @@ fun FilterStatusItem(
       )
     )
   }
-}
-
-private fun getStatusName(status: DbTaskStatus): String = when (status) {
-  DbTaskStatus.BACKLOG -> "В бэклоге"
-  DbTaskStatus.IN_PROGRESS -> "В процессе"
-  DbTaskStatus.IN_REVIEW -> "На проверке"
-  DbTaskStatus.DONE -> "Выполнено"
-  DbTaskStatus.DROPPED -> "Не будет выполнено"
 }
