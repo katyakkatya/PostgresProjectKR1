@@ -17,6 +17,8 @@ class TaskDetailViewModel(
   private val todoRepository: TodoRepository,
 ) {
 
+  val statusesFlow = todoRepository.statusesFlow
+
   private val _taskFlow: MutableStateFlow<TaskDetail?> = MutableStateFlow(null)
   val taskFlow: Flow<TaskDetail?> = _taskFlow
 
@@ -29,6 +31,14 @@ class TaskDetailViewModel(
   private val _relatedTasksStateFlow: MutableStateFlow<NewRelatedTaskState> =
     MutableStateFlow(NewRelatedTaskState.Closed)
   val relatedTasksStateFlow: Flow<NewRelatedTaskState> = _relatedTasksStateFlow
+
+  private val _customStatusListDialogStateState: MutableStateFlow<CustomStatusListDialogState> =
+    MutableStateFlow(CustomStatusListDialogState.Closed)
+  val customStatusListDialogState: Flow<CustomStatusListDialogState> = _customStatusListDialogStateState
+
+  private val _customStatusCreationDialogStateState: MutableStateFlow<CustomStatusCreationDialogState> =
+    MutableStateFlow(CustomStatusCreationDialogState.Closed)
+  val customStatusCreationDialogState: Flow<CustomStatusCreationDialogState> = _customStatusCreationDialogStateState
 
   fun onInit() {
     requestTaskDetail()
@@ -111,6 +121,42 @@ class TaskDetailViewModel(
       requestTaskDetail()
     }
   }
+
+  fun openCustomStatusDialog() {
+    todoRepository.loadStatuses()
+    _customStatusListDialogStateState.value = CustomStatusListDialogState.Opened
+  }
+
+  fun closeCustomStatusListDialog() {
+    _customStatusListDialogStateState.value = CustomStatusListDialogState.Closed
+  }
+
+  fun selectCustomStatus(status: String) {
+    _customStatusListDialogStateState.value = CustomStatusListDialogState.Closed
+    updateStatus(status)
+  }
+
+  fun openCustomStatusCreationDialog() {
+    _customStatusCreationDialogStateState.value = CustomStatusCreationDialogState.Opened()
+  }
+
+  fun closeCustomStatusCreationDialog() {
+    _customStatusCreationDialogStateState.value = CustomStatusCreationDialogState.Closed
+  }
+
+  fun changeNewCustomStatusName(name: String) {
+    _customStatusCreationDialogStateState.value =
+      (_customStatusCreationDialogStateState.value as CustomStatusCreationDialogState.Opened).copy(name = name)
+  }
+
+  fun trySaveCustomStatus() {
+    val state = _customStatusCreationDialogStateState.value as CustomStatusCreationDialogState.Opened
+    val result = todoRepository.createStatus(state.name)
+    if (result) {
+      todoRepository.loadStatuses()
+      _customStatusCreationDialogStateState.value = CustomStatusCreationDialogState.Closed
+    }
+  }
 }
 
 sealed interface NewSubtaskState {
@@ -144,4 +190,17 @@ sealed class StatusUpdateButton(
       TaskStatus.DROPPED to listOf(ToBacklog)
     )
   }
+}
+
+sealed interface CustomStatusListDialogState {
+  data object Closed : CustomStatusListDialogState
+  data object Opened : CustomStatusListDialogState
+}
+
+sealed interface CustomStatusCreationDialogState {
+  data object Closed : CustomStatusCreationDialogState
+  data class Opened(
+    val name: String = "",
+    val error: String? = null
+  ) : CustomStatusCreationDialogState
 }

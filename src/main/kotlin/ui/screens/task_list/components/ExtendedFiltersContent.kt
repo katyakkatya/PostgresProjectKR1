@@ -18,9 +18,14 @@ import database.model.extended_filters.SubtasksCompletionFilter
 import database.model.extended_filters.SubtasksCompletionFilter.SubtasksCompletionFilterField
 import database.model.extended_filters.SubtasksCompletionFilter.SubtasksCompletionFilterType
 import ui.screens.task_list.components.Constants.ALL
+import ui.screens.task_list.components.Constants.AUTHOR
 import ui.screens.task_list.components.Constants.COMPLETED
+import ui.screens.task_list.components.Constants.CONNECTED_TASKS
+import ui.screens.task_list.components.Constants.HAS
+import ui.screens.task_list.components.Constants.NONE
 import ui.screens.task_list.components.Constants.NOT_COMPLETED
 import ui.screens.task_list.components.Constants.SOME
+import ui.screens.task_list.components.Constants.SUBTASKS
 
 // TODO: доработать механизм для остальных фильтров
 @Composable
@@ -68,8 +73,9 @@ fun ExtendedFiltersContent(
           },
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
-            .padding(16.dp)
+            .padding(8.dp)
             .background(Color.Red)
+            .padding(8.dp)
             .clickable {
               subtasksFilterTypeMenuExpanded = true
             }
@@ -107,8 +113,9 @@ fun ExtendedFiltersContent(
           },
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
-            .padding(16.dp)
+            .padding(8.dp)
             .background(Color.Red)
+            .padding(8.dp)
             .clickable {
               subtasksFilterFieldMenuExpanded = true
             }
@@ -133,6 +140,92 @@ fun ExtendedFiltersContent(
         }
       }
     }
+
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text("Где")
+
+      Box {
+        val relativesFilterTypeOptions = listOf(HAS, NONE)
+        var relativesFilterTypeMenuExpanded by remember { mutableStateOf(false) }
+        Text(
+          text = when (state.relativesFilter?.type) {
+            RelativesFilter.RelativesFilterType.HAS_RELATIVES -> HAS
+            RelativesFilter.RelativesFilterType.NO_RELATIVES -> NONE
+            null -> " "
+          },
+          modifier = Modifier
+            .defaultMinSize(minWidth = 100.dp)
+            .padding(8.dp)
+            .background(Color.Red)
+            .padding(8.dp)
+            .clickable {
+              relativesFilterTypeMenuExpanded = true
+            }
+        )
+        DropdownMenu(
+          expanded = relativesFilterTypeMenuExpanded,
+          onDismissRequest = { relativesFilterTypeMenuExpanded = false }
+        ) {
+          relativesFilterTypeOptions.forEach { option ->
+            DropdownMenuItem(
+              onClick = {
+                when (option) {
+                  HAS -> signals.onRelativesFilterHasRelativesTypeClicked()
+                  NONE -> signals.onRelativesFilterNoRelativesTypeClicked()
+                }
+                relativesFilterTypeMenuExpanded = false
+              }
+            ) {
+              Text(option)
+            }
+          }
+        }
+      }
+
+      Box {
+        val relativesFilterFieldOptions = listOf(AUTHOR, CONNECTED_TASKS, SUBTASKS)
+        var relativesFilterFieldMenuExpanded by remember { mutableStateOf(false) }
+        Text(
+          text = when (state.relativesFilter?.field) {
+            RelativesFilter.RelativesFilterField.CONNECTED_TASKS -> CONNECTED_TASKS
+            RelativesFilter.RelativesFilterField.AUTHOR -> AUTHOR
+            RelativesFilter.RelativesFilterField.SUBTASKS -> SUBTASKS
+            null -> " "
+          },
+          modifier = Modifier
+            .defaultMinSize(minWidth = 100.dp)
+            .padding(8.dp)
+            .background(Color.Red)
+            .padding(8.dp)
+            .clickable {
+              relativesFilterFieldMenuExpanded = true
+            }
+        )
+        DropdownMenu(
+          expanded = relativesFilterFieldMenuExpanded,
+          onDismissRequest = { relativesFilterFieldMenuExpanded = false }
+        ) {
+          relativesFilterFieldOptions.forEach { option ->
+            DropdownMenuItem(
+              onClick = {
+                when (option) {
+                  AUTHOR -> signals.onRelativesFilterAuthorFieldClicked()
+                  CONNECTED_TASKS -> signals.onRelativesFilterConnectedTasksFieldClicked()
+                  SUBTASKS -> signals.onRelativesFilterSubtasksFieldClicked()
+                }
+                relativesFilterFieldMenuExpanded = false
+              }
+            ) {
+              Text(option)
+            }
+          }
+        }
+      }
+    }
+
   }
 }
 
@@ -143,6 +236,9 @@ private object Constants {
   const val NONE = "Нет"
   const val COMPLETED = "Выполнены"
   const val NOT_COMPLETED = "Не выполнены"
+  const val AUTHOR = "Автор"
+  const val CONNECTED_TASKS = "Связанные задачи"
+  const val SUBTASKS = "Подзадачи"
 }
 
 data class ExtendedFiltersState(
@@ -157,4 +253,11 @@ data class ExtendedFiltersSignals(
 
   val onSubtasksFilterCompletedFieldClicked: () -> Unit,
   val onSubtasksFilterNotCompletedFieldClicked: () -> Unit,
+
+  val onRelativesFilterHasRelativesTypeClicked: () -> Unit,
+  val onRelativesFilterNoRelativesTypeClicked: () -> Unit,
+
+  val onRelativesFilterAuthorFieldClicked: () -> Unit,
+  val onRelativesFilterConnectedTasksFieldClicked: () -> Unit,
+  val onRelativesFilterSubtasksFieldClicked: () -> Unit,
 )

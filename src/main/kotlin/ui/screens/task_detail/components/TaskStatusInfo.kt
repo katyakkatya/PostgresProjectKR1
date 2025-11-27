@@ -22,6 +22,7 @@ import ui.screens.task_detail.StatusUpdateButton
 fun TaskStatusInfo(
   task: TaskDetail,
   onStatusChangeClicked: (status: String) -> Unit,
+  onOpenCustomStatusDialog: () -> Unit,
 ) {
   Spacer(modifier = Modifier.height(32.dp))
   Text(
@@ -67,8 +68,27 @@ fun TaskStatusInfo(
         )
       }
     }
-    if (index < buttons.size - 1) {
-      Spacer(modifier = Modifier.height(16.dp))
-    }
+    Spacer(modifier = Modifier.height(16.dp))
+  }
+  Card(
+    modifier = Modifier
+      .padding(horizontal = 24.dp)
+      .clip(RoundedCornerShape(8.dp))
+      .clickable { onOpenCustomStatusDialog() },
+    shape = RoundedCornerShape(8.dp),
+    border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f)),
+    elevation = 8.dp,
+    backgroundColor = MaterialTheme.colors.surface
+  ) {
+    Text(
+      text = "Установить статус",
+      modifier = Modifier.padding(16.dp),
+      fontSize = 24.sp,
+      fontWeight = FontWeight.Normal,
+      fontFamily = MaterialTheme.typography.body1.fontFamily,
+      color = MaterialTheme.colors.onSurface,
+      textDecoration = TextDecoration.None,
+      style = MaterialTheme.typography.body1
+    )
   }
 }

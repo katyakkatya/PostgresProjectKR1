@@ -32,6 +32,9 @@ class TodoRepository(
   private val _settingsFlow = MutableStateFlow(Settings.DEFAULT)
   val settingsFlow: Flow<Settings> = _settingsFlow
 
+  private val _statusesFlow = MutableStateFlow(emptyList<String>())
+  val statusesFlow: Flow<List<String>> = _statusesFlow
+
   init {
     interactor.setConsumers(
       { message ->
@@ -163,6 +166,23 @@ class TodoRepository(
     val result = interactor.createUser(CreateUserRequest(name))
     if (result.success == false) {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании пользователя")
+    }
+    return result
+  }
+
+  fun loadStatuses() {
+    val result = interactor.getStatuses()
+    if (result.success) {
+      _statusesFlow.value = result.data!!
+    } else {
+      showErrorMessage(result.errorMessage ?: "Произошла ошибка при получении списка статусов")
+    }
+  }
+
+  fun createStatus(name: String): Boolean {
+    val result = interactor.createStatus(name)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при создании статуса")
     }
     return result
   }

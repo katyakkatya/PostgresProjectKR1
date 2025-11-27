@@ -4,7 +4,6 @@ import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.model.User;
 import database.model.UserWithTaskCount;
-import database.model.extended_filters.ExtendedFiltersModel;
 import database.request.*;
 import database.request.utils.FunctionToQuery;
 import database.result.Result;
@@ -99,6 +98,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    // TODO: implement extended filters
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) { // DONE
         if(!this.isConnected())
@@ -689,7 +689,12 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
     // TODO: implement
     @Override
-    public Result<List<DbTaskItem>> getTaskListWithExtendedFilter(ExtendedFiltersModel extendedFilters) {
+    public Result<List<String>> getStatuses() {
+        return null;
+    }
+
+    @Override
+    public Boolean createStatus(String name) {
         return null;
     }
 }

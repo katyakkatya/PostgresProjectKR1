@@ -2,7 +2,6 @@ package stub
 
 import database.DatabaseInteractor
 import database.model.*
-import database.model.extended_filters.ExtendedFiltersModel
 import database.request.*
 import database.result.Result
 import java.util.*
@@ -170,9 +169,12 @@ class StubDatabaseInteractor : DatabaseInteractor {
     )
   }
 
-  override fun getTaskListWithExtendedFilter(extendedFilters: ExtendedFiltersModel?): Result<List<DbTaskItem>> {
-    return Result(
-      listOf(), null, true
-    )
+  // TODO: implement
+  override fun getStatuses(): Result<List<String>> {
+    return Result(listOf("BACKLOG", "IN_PROGRESS", "DONE"), null, true)
+  }
+
+  override fun createStatus(name: String): Boolean {
+    return false
   }
 }

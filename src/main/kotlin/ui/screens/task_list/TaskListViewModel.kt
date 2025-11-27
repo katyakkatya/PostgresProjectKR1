@@ -1,6 +1,8 @@
 package ui.screens.task_list
 
 import database.model.DbTaskStatus
+import database.model.extended_filters.ExtendedFiltersModel
+import database.model.extended_filters.RelativesFilter
 import database.model.extended_filters.SubtasksCompletionFilter
 import database.request.FormattingOptions
 import database.request.TaskListRequest
@@ -104,7 +106,12 @@ class TaskListViewModel(
         _statusFilterFlow.value.toList(),
         _authorFilterFlow.value?.id,
         sorting,
-        formattingOptionsModel
+        formattingOptionsModel,
+        ExtendedFiltersModel(
+          _extendedFiltersStateFlow.value.relatedTasksFilter,
+          _extendedFiltersStateFlow.value.subtasksFilter,
+          _extendedFiltersStateFlow.value.relativesFilter,
+        )
       )
     )
   }
@@ -326,6 +333,52 @@ class TaskListViewModel(
       it.copy(subtasksFilter = subtaskFilter)
     }
   }
+
+  fun onRelativesFilterHasRelativesTypeClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        RelativesFilter.RelativesFilterType.HAS_RELATIVES, it.relativesFilter?.field
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterNoRelativesTypeClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        RelativesFilter.RelativesFilterType.NO_RELATIVES, it.relativesFilter?.field
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterAuthorFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.AUTHOR
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterConnectedTasksFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.CONNECTED_TASKS
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterSubtasksFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.SUBTASKS
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
 }
 
 sealed interface NewTaskWindowState {

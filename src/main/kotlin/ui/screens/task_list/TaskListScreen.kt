@@ -132,6 +132,11 @@ fun TaskListScreen(
               onSubtasksFilterSomeTypeClicked = { viewModel.onSubtasksFilterSomeTypeClicked() },
               onSubtasksFilterCompletedFieldClicked = { viewModel.onSubtasksFilterCompletedFieldClicked() },
               onSubtasksFilterNotCompletedFieldClicked = { viewModel.onSubtasksFilterNotCompletedFieldClicked() },
+              onRelativesFilterHasRelativesTypeClicked = { viewModel.onRelativesFilterHasRelativesTypeClicked() },
+              onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
+              onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
+              onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
+              onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
             )
           )
         }
@@ -188,6 +193,11 @@ fun TaskListScreen(
                 onSubtasksFilterSomeTypeClicked = { viewModel.onSubtasksFilterSomeTypeClicked() },
                 onSubtasksFilterCompletedFieldClicked = { viewModel.onSubtasksFilterCompletedFieldClicked() },
                 onSubtasksFilterNotCompletedFieldClicked = { viewModel.onSubtasksFilterNotCompletedFieldClicked() },
+                onRelativesFilterHasRelativesTypeClicked = { viewModel.onRelativesFilterHasRelativesTypeClicked() },
+                onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
+                onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
+                onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
+                onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
               )
             )
           }

@@ -4,7 +4,6 @@ import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.model.User;
 import database.model.UserWithTaskCount;
-import database.model.extended_filters.ExtendedFiltersModel;
 import database.request.*;
 import database.result.Result;
 
@@ -117,7 +116,12 @@ public interface DatabaseInteractor {
   int getMaxTaskTitleLength();
 
   /**
-   * Gets tasks with extended filter
+   * Gets all enum statuses
    */
-  Result<List<DbTaskItem>> getTaskListWithExtendedFilter(ExtendedFiltersModel extendedFilters);
+  Result<List<String>> getStatuses();
+
+  /**
+   * Creates new status enum by its name
+   */
+  Boolean createStatus(String name);
 }

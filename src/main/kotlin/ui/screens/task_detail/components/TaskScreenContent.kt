@@ -19,6 +19,7 @@ fun TaskScreenContent(
   onRelatedTaskClick: (Long) -> Unit,
   onStatusChanged: (String) -> Unit,
   onAddRelatedTaskClick: () -> Unit,
+  onOpenCustomStatusDialog: () -> Unit
 ) {
   LazyColumn(
     modifier = Modifier
@@ -30,9 +31,11 @@ fun TaskScreenContent(
     item {
       TaskHeader(task = task)
       AuthorSection(user = task.author)
-      TaskStatusInfo(task = task) { status ->
-        onStatusChanged(status)
-      }
+      TaskStatusInfo(
+        task = task,
+        onStatusChangeClicked = { status -> onStatusChanged(status) },
+        onOpenCustomStatusDialog = { onOpenCustomStatusDialog() }
+      )
       SubtasksSection(
         subtasks = task.subtasks,
         onItemClick = { index -> onSubtaskToggled(index) },
