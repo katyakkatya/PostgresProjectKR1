@@ -188,6 +188,8 @@ class TodoRepository(
     val result = interactor.createStatus(name)
     if (result == false) {
       showErrorMessage("Произошла ошибка при создании статуса")
+    } else {
+      loadStatuses()
     }
     return result
   }

@@ -9,10 +9,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import database.model.DbTaskStatus
 
 @Composable
 fun StatusesFilterContent(
+  statuses: Set<String>,
   appliedFilters: Set<String>,
   onFilterToggled: (String) -> Unit,
   onFilterReset: () -> Unit
@@ -33,11 +33,6 @@ fun StatusesFilterContent(
     Divider(
       modifier = Modifier.padding(bottom = 8.dp),
       color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
-    )
-
-    val statuses = listOf(
-      DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW,
-      DbTaskStatus.DONE, DbTaskStatus.DROPPED
     )
 
     statuses.forEach { status ->

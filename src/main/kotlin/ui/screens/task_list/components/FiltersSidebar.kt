@@ -16,6 +16,7 @@ import ui.screens.task_list.components.*
 
 @Composable
 fun FiltersSidebar(
+  statuses: Set<String>,
   appliedFilters: Set<String>,
   onFilterToggled: (String) -> Unit,
   onFilterReset: () -> Unit,
@@ -58,6 +59,7 @@ fun FiltersSidebar(
         }
         Spacer(modifier = Modifier.height(16.dp))
         StatusesFilterContent(
+          statuses = statuses,
           appliedFilters = appliedFilters,
           onFilterToggled = onFilterToggled,
           onFilterReset = onFilterReset,

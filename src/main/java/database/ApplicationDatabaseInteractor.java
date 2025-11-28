@@ -139,15 +139,20 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
           builder.append("AND %b = %s(subtasks_status)\n".formatted(isCompleted, whatTasks));
         }
 
-        if(request.extendedFilters().relativesFilter() != null){
+        if (request.extendedFilters().relativesFilter() != null &&
+          request.extendedFilters().relativesFilter().type() != null &&
+          request.extendedFilters().relativesFilter().field() != null) {
+
             String relativesFilterType = switch(request.extendedFilters().relativesFilter().type()){
-                case HAS_RELATIVES -> request.extendedFilters().relativesFilter().field() == AUTHOR ? "EXISTS" : "id =";
-                case NO_RELATIVES -> request.extendedFilters().relativesFilter().field() == AUTHOR ? "NOT EXISTS" : "id <>";
+                case HAS_RELATIVES ->
+                  request.extendedFilters().relativesFilter().field() == AUTHOR ? "EXISTS" : "EXISTS";
+                case NO_RELATIVES ->
+                  request.extendedFilters().relativesFilter().field() == AUTHOR ? "NOT EXISTS" : "NOT EXISTS";
             };
 
             String subquery = switch (request.extendedFilters().relativesFilter().field()){
-                case AUTHOR -> "SELECT author_id FROM task AS st WHERE t.author_id = st.author_id";
-                case CONNECTED_TASKS -> "SELECT task_id FROM connected_task AS st WHERE t.task_id = st.task_id";
+                case AUTHOR -> "SELECT 1 FROM task AS st WHERE task.author_id = st.author_id";
+                case CONNECTED_TASKS -> "SELECT 1 FROM connected_task AS ct WHERE task.id = ct.task_id";
             };
 
             builder.append("AND %s (%s)\n".formatted(relativesFilterType, subquery));
@@ -774,8 +779,9 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             alterStatement(statement);
         } catch (SQLException e) {
             pushToConsumer(consumerForException, e);
+            return false;
         }
 
-        return false;
+        return true;
     }
 }
