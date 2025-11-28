@@ -9,6 +9,7 @@ import database.request.utils.FunctionToQuery;
 import database.result.Result;
 
 import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -245,7 +246,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             this.connection.get().setAutoCommit(false);
 
             statement.setString(1, request.title());
-            statement.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            statement.setDate(2, new Date(System.currentTimeMillis()));
             statement.setArray(3,
                     this.connection.get().createArrayOf(
                             "VARCHAR", request.subtasks().toArray(new String[0])));
@@ -687,14 +688,39 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
     }
 
-    // TODO: implement
     @Override
-    public Result<List<String>> getStatuses() {
-        return null;
+    public Result<List<String>> getStatuses() { // DONE
+        if(!this.isConnected())
+            return new Result<>(null, "not connected", false);
+
+        try(PreparedStatement statement = this.connection.get()
+                        .prepareStatement("SELECT enum_range(null::state)")){
+            ResultSet resultSet = statement.executeQuery();
+            String[] arr = new String[]{};
+
+            if(resultSet.next())
+                arr = (String[]) resultSet.getArray(1).getArray();
+
+            pushToConsumer(consumerForStatement, statement.toString());
+            return new Result<>(List.of(arr), "", arr.length != 0);
+        } catch (SQLException e) {
+            this.pushToConsumer(consumerForException, e);
+            return  new Result<>(null, e.getMessage(), false);
+        }
     }
 
     @Override
-    public Boolean createStatus(String name) {
-        return null;
+    public Boolean createStatus(String name) { // DONE
+        if(!this.isConnected())
+            return false;
+
+        try{
+            String statement = "ALTER TYPE state ADD VALUE IF NOT EXISTS '%s'".formatted(name);
+            alterStatement(statement);
+        } catch (SQLException e) {
+            pushToConsumer(consumerForException, e);
+        }
+
+        return false;
     }
 }
