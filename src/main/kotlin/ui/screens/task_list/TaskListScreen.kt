@@ -136,7 +136,6 @@ fun TaskListScreen(
               onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
               onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
               onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
-              onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
             )
           )
         }
@@ -197,7 +196,6 @@ fun TaskListScreen(
                 onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
                 onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
                 onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
-                onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
               )
             )
           }
@@ -217,6 +215,7 @@ fun TaskListScreen(
     onNewTaskSaved = viewModel::saveNewTask,
     onNewTaskClosed = viewModel::closeNewTaskWindow,
     onAuthorSelectWindowOpened = viewModel::openAuthorSelectDialog,
+    onTimeStringChanged = viewModel::setNewTaskTime,
   )
 
   val taskSelectionState by viewModel.taskSelectWindowState.collectAsState()

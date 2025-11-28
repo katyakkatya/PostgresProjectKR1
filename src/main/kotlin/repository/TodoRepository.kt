@@ -130,9 +130,14 @@ class TodoRepository(
     return result
   }
 
-  // TODO: сюда передавать время
-  fun saveNewTask(title: String, subtasks: List<String>, connectedTasks: List<Long>, authorId: Long?): Result<Long> {
-    val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks, authorId, null))
+  fun saveNewTask(
+    title: String,
+    subtasks: List<String>,
+    connectedTasks: List<Long>,
+    authorId: Long?,
+    time: Int?
+  ): Result<Long> {
+    val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks, authorId, time))
     if (result.success == false) {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании новой задачи")
     }

@@ -33,6 +33,7 @@ fun NewTaskDialog(
   onNewTaskSaved: () -> Unit,
   onNewTaskClosed: () -> Unit,
   onAuthorSelectWindowOpened: () -> Unit,
+  onTimeStringChanged: (String) -> Unit,
 ) {
   when (state) {
     NewTaskWindowState.Closed -> Unit
@@ -61,8 +62,6 @@ fun NewTaskDialog(
               ),
               color = MaterialTheme.colors.onSurface
             )
-            // TODO: где-то тут добавить поле время
-            // на onUpdate вызывать из вьюмодели updateTime(string)
             TextField(
               value = state.taskName,
               onValueChange = onTaskNameChanged,
@@ -73,6 +72,36 @@ fun NewTaskDialog(
                   color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                 )
               },
+              textStyle = LocalTextStyle.current.copy(
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onSurface
+              ),
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp)
+                .height(60.dp)
+                .padding(horizontal = 24.dp),
+              colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colors.surface,
+                textColor = MaterialTheme.colors.onSurface,
+                focusedIndicatorColor = MaterialTheme.colors.primary,
+                unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = 0.12f),
+                cursorColor = MaterialTheme.colors.primary
+              )
+            )
+            Text(
+              text = "Время выполнения",
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+              style = MaterialTheme.typography.h5.copy(
+                fontWeight = FontWeight.Bold
+              ),
+              color = MaterialTheme.colors.onSurface
+            )
+            TextField(
+              value = state.time?.toString() ?: "",
+              onValueChange = onTimeStringChanged,
               textStyle = LocalTextStyle.current.copy(
                 fontSize = 24.sp,
                 color = MaterialTheme.colors.onSurface

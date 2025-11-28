@@ -232,7 +232,13 @@ class TaskListViewModel(
       return
     }
     val result =
-      todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id }, state.author?.id)
+      todoRepository.saveNewTask(
+        state.taskName,
+        state.subtasks,
+        state.connectedTasks.map { it.id },
+        state.author?.id,
+        state.time
+      )
     if (result.success) {
       closeNewTaskWindow()
       updateList()
@@ -259,6 +265,14 @@ class TaskListViewModel(
       return false
     } else if (state.taskName.trim().length > settings.maxTaskTitleLength) {
       _newTaskWindowStateFlow.value = state.copy(error = "Максимальная длина ${settings.maxTaskTitleLength}")
+      return false
+    }
+
+    if ((state.time ?: 1) < 0) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Время должно быть положительным")
+      return false
+    } else if ((state.time ?: 1) > 1000) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Время должно быть меньше 1000")
       return false
     }
     return true
@@ -370,13 +384,10 @@ class TaskListViewModel(
     }
   }
 
-  fun onRelativesFilterSubtasksFieldClicked() {
-    _extendedFiltersStateFlow.update {
-      val relativesFilter = RelativesFilter(
-        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.SUBTASKS
-      )
-      it.copy(relativesFilter = relativesFilter)
-    }
+  fun setNewTaskTime(input: String) {
+    val input = input.filter { it.isDigit() }
+    val time = input.trim().toIntOrNull()
+    _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(time = time)
   }
 
 }

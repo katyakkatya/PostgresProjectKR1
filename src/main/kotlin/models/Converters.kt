@@ -21,6 +21,7 @@ fun DbTaskItem.asTask(): TaskItemModel {
     status = status.asTaskStatus(),
     date = localDate,
     progress = progress,
+    time = time,
   )
 }
 
@@ -57,7 +58,8 @@ fun DbTaskDetail.asTaskDetail(): TaskDetail {
     relatedTasks = relatedTasks.map { it.asTask() },
     date = localDate,
     progress = progress,
-    author = author?.asUser()
+    author = author?.asUser(),
+    time = time
   )
 }
 

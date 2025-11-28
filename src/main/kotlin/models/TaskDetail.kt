@@ -10,5 +10,6 @@ data class TaskDetail(
   val relatedTasks: List<TaskItemModel>,
   val date: LocalDate,
   val progress: Float,
-  val author: UserModel?
+  val author: UserModel?,
+  val time: String,
 )

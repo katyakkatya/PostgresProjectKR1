@@ -28,7 +28,6 @@ import ui.screens.task_list.components.Constants.HAS
 import ui.screens.task_list.components.Constants.NONE
 import ui.screens.task_list.components.Constants.NOT_COMPLETED
 import ui.screens.task_list.components.Constants.SOME
-import ui.screens.task_list.components.Constants.SUBTASKS
 
 // TODO: доработать механизм для остальных фильтров
 @Composable
@@ -196,13 +195,12 @@ fun ExtendedFiltersContent(
       }
 
       Box {
-        val relativesFilterFieldOptions = listOf(AUTHOR, CONNECTED_TASKS, SUBTASKS)
+        val relativesFilterFieldOptions = listOf(AUTHOR, CONNECTED_TASKS)
         var relativesFilterFieldMenuExpanded by remember { mutableStateOf(false) }
         Text(
           text = when (state.relativesFilter?.field) {
             RelativesFilter.RelativesFilterField.CONNECTED_TASKS -> CONNECTED_TASKS
             RelativesFilter.RelativesFilterField.AUTHOR -> AUTHOR
-            RelativesFilter.RelativesFilterField.SUBTASKS -> SUBTASKS
             null -> " "
           },
           modifier = Modifier
@@ -226,7 +224,6 @@ fun ExtendedFiltersContent(
                 when (option) {
                   AUTHOR -> signals.onRelativesFilterAuthorFieldClicked()
                   CONNECTED_TASKS -> signals.onRelativesFilterConnectedTasksFieldClicked()
-                  SUBTASKS -> signals.onRelativesFilterSubtasksFieldClicked()
                 }
                 relativesFilterFieldMenuExpanded = false
               }
@@ -250,7 +247,6 @@ private object Constants {
   const val NOT_COMPLETED = "Не выполнены"
   const val AUTHOR = "Автор"
   const val CONNECTED_TASKS = "Связанные задачи"
-  const val SUBTASKS = "Подзадачи"
 }
 
 data class ExtendedFiltersState(
@@ -271,5 +267,4 @@ data class ExtendedFiltersSignals(
 
   val onRelativesFilterAuthorFieldClicked: () -> Unit,
   val onRelativesFilterConnectedTasksFieldClicked: () -> Unit,
-  val onRelativesFilterSubtasksFieldClicked: () -> Unit,
 )

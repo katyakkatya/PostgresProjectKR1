@@ -39,11 +39,12 @@ sealed interface TaskStatus {
 }
 
 data class TaskItemModel(
-    val id: Long,
-    val title: String,
-    val status: TaskStatus,
-    val date: LocalDate,
-    val progress: Float
+  val id: Long,
+  val title: String,
+  val status: TaskStatus,
+  val date: LocalDate,
+  val progress: Float,
+  val time: String,
 ) {
-    val color: Color get() = status.color
+  val color: Color get() = status.color
 }

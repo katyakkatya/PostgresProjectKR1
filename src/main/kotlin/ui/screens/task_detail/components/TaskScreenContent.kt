@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import models.TaskDetail
 import ui.screens.task_detail.components.AuthorSection
+import ui.screens.task_detail.components.TimeSection
 
 @Composable
 fun TaskScreenContent(
@@ -30,6 +31,7 @@ fun TaskScreenContent(
   ) {
     item {
       TaskHeader(task = task)
+      TimeSection(time = task.time)
       AuthorSection(user = task.author)
       TaskStatusInfo(
         task = task,
