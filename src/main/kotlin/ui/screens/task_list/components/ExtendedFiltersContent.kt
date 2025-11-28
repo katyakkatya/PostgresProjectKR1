@@ -1,12 +1,15 @@
 package ui.screens.task_list.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,11 +77,13 @@ fun ExtendedFiltersContent(
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .background(Color.Transparent)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               subtasksFilterTypeMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
         )
         DropdownMenu(
           expanded = subtasksFilterTypeMenuExpanded,
@@ -114,11 +119,13 @@ fun ExtendedFiltersContent(
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .background(Color.Transparent)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               subtasksFilterFieldMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
         )
         DropdownMenu(
           expanded = subtasksFilterFieldMenuExpanded,
@@ -158,12 +165,15 @@ fun ExtendedFiltersContent(
           },
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
+            .background(Color.Transparent)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               relativesFilterTypeMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
+
         )
         DropdownMenu(
           expanded = relativesFilterTypeMenuExpanded,
@@ -198,11 +208,13 @@ fun ExtendedFiltersContent(
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .background(Color.Transparent)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               relativesFilterFieldMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
         )
         DropdownMenu(
           expanded = relativesFilterFieldMenuExpanded,
