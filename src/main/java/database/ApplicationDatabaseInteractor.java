@@ -4,6 +4,7 @@ import database.model.DbTaskDetail;
 import database.model.DbTaskItem;
 import database.model.User;
 import database.model.UserWithTaskCount;
+import database.model.extended_filters.SubtasksCompletionFilter;
 import database.request.*;
 import database.request.utils.FunctionToQuery;
 import database.result.Result;
@@ -14,6 +15,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static database.model.extended_filters.RelativesFilter.RelativesFilterField.AUTHOR;
 
 public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
@@ -99,7 +102,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
-    // TODO: implement extended filters
+
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) { // DONE
         if(!this.isConnected())
@@ -107,7 +110,16 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if (request.statuses().isEmpty())
             return new Result<>(new ArrayList<>(), null, true);
 
-        StringBuilder builder = new StringBuilder("SELECT id, title AS title, date, status, subtasks, subtasks_status, author_id FROM task WHERE status IN ('");
+        StringBuilder builder = new StringBuilder("SELECT id, title AS title, date, status, subtasks, subtasks_status, author_id, \n" +
+                "    CASE \n" +
+                "        WHEN time > 24 THEN 'Больше 1 дня'\n" +
+                "        WHEN NULLIF(time, 0) IS NOT NULL THEN \n" +
+                "            COALESCE(time::text, 'Время не указано') || ' ч'\n" +
+                "        ELSE 'время не указано'\n" +
+                "    END AS time_description\n" +
+                "FROM task WHERE status IN ('");
+
+        // WHERE
         builder.append(request.statuses().getFirst()).append("'");
 
         for(int i = 1; i < request.statuses().size(); ++i){
@@ -119,6 +131,30 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if(request.authorId() != null){
             builder.append("AND task.author_id = %d\n".formatted(request.authorId()));
         }
+
+        if(request.extendedFilters().subtasksFilter() != null){
+          String whatTasks = (request.extendedFilters().subtasksFilter().type() == SubtasksCompletionFilter.SubtasksCompletionFilterType.ALL_COMPLETED ? "ALL" : "ANY");
+          Boolean isCompleted = request.extendedFilters().subtasksFilter().field() == SubtasksCompletionFilter.SubtasksCompletionFilterField.COMPLETED;
+
+          builder.append("AND %b = %s(subtasks_status)\n".formatted(isCompleted, whatTasks));
+        }
+
+        if(request.extendedFilters().relativesFilter() != null){
+            String relativesFilterType = switch(request.extendedFilters().relativesFilter().type()){
+                case HAS_RELATIVES -> request.extendedFilters().relativesFilter().field() == AUTHOR ? "EXISTS" : "id =";
+                case NO_RELATIVES -> request.extendedFilters().relativesFilter().field() == AUTHOR ? "NOT EXISTS" : "id <>";
+            };
+            
+            String subquery = switch (request.extendedFilters().relativesFilter().field()){
+                case AUTHOR -> "SELECT author_id FROM task AS st WHERE t.author_id = st.author_id";
+                case CONNECTED_TASKS -> "SELECT task_id FROM connected_task AS st WHERE t.task_id = st.task_id";
+                case SUBTASKS -> null;
+            };
+
+            builder.append("AND %s (%s)\n".formatted(relativesFilterType, subquery));
+        }
+
+        // ORDER
         if(request.sorting() != null){
             builder.append("ORDER BY %s %s\n".formatted(request.sorting().type(),
                     request.sorting().ascending() ? "ASC" : "DESC"));
@@ -126,6 +162,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
 
         FunctionToQuery finalQuery = FunctionToQuery.from(builder, "title").addFunction("TRIM");
 
+        // FUNCTION TO title
         if(request.formattingOptions().inLowerCase()){
             finalQuery.addFunction("LOWER");
         }
@@ -153,7 +190,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 dbTaskItems.add(new DbTaskItem(
                         resultSet.getLong("id"), resultSet.getString("title"),
                   resultSet.getDate("date"), resultSet.getString("status"),
-                        subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
+                        subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count(), resultSet.getString("time_description")
                 ));
             }
 
@@ -170,9 +207,23 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             return new Result<>(null, null, false);
 
         try(PreparedStatement statementForConnected = this.
-                connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, ct.task_id  \n" +
+                connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, " +
+                        "    CASE \n" +
+                        "        WHEN t.time > 24 THEN 'Больше 1 дня'\n" +
+                        "        WHEN NULLIF(t.time, 0) IS NOT NULL THEN \n" +
+                        "            COALESCE(t.time::text, 'время не указано') || ' ч'\n" +
+                        "        ELSE 'время не указано'\n" +
+                        "    END AS time_description\n" +
+                        ", ct.task_id  \n" +
                         "FROM connected_task ct INNER JOIN task t ON ct.another_task_id = t.id WHERE ct.task_id = ?");
-            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT * FROM task\nLEFT JOIN users ON users.id = task.author_id\nWHERE task.id = ?")){
+            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, t.author_id, u.name, " +
+                    "    CASE \n" +
+                    "        WHEN t.time > 24 THEN 'Больше 1 дня'\n" +
+                    "        WHEN NULLIF(t.time, 0) IS NOT NULL THEN \n" +
+                    "            COALESCE(time::text, 'время не указано') || ' часов'\n" +
+                    "        ELSE 'время не указано'\n" +
+                    "    END AS time_description\n" +
+                    "FROM task AS t\nLEFT JOIN users AS u ON u.id = t.author_id\nWHERE t.id = ?")){
             // CONNECTED TASKS
             statementForConnected.setLong(1, taskId);
 
@@ -183,7 +234,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                     dbTaskItems.add(new DbTaskItem(
                             resultFroConnected.getLong("id"), resultFroConnected.getString("title"),
                       resultFroConnected.getDate("date"), resultFroConnected.getString("status"),
-                            subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
+                            subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count(), resultFroConnected.getString("time_description")
                     ));
             }
             resultFroConnected.close();
@@ -197,7 +248,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             DbTaskDetail dbTaskDetail = null;
 
             if(resultForTask.next()){
-
                 dbTaskDetail = new DbTaskDetail(resultForTask.getLong("id"),
                         resultForTask.getString("title"), resultForTask.getDate("date"),
                   resultForTask.getString("status"),
@@ -205,7 +255,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
                         dbTaskItems,
                         resultForTask.getString("author_id") == null ? null :
-                                new User(resultForTask.getLong("author_id"), resultForTask.getString("name")));
+                                new User(resultForTask.getLong("author_id"), resultForTask.getString("name")), resultForTask.getString("time_description"));
             }
 
 
@@ -235,14 +285,13 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
-    // TODO: support time parameter in new task
     @Override
     public Result<Long> createTask(CreateTaskRequest request) { // DONE
         if(!this.isConnected())
             return new Result<>(-1L, null, false);
 
         try(PreparedStatement statement = this.connection.get().prepareStatement("INSERT INTO task " +
-                "(title, date, subtasks, subtasks_status, author_id) VALUES (?, ?, ?, ?, ?) RETURNING id")){
+                "(title, date, subtasks, subtasks_status, author_id, time) VALUES (?, ?, ?, ?, ?, ?) RETURNING id")){
             this.connection.get().setAutoCommit(false);
 
             statement.setString(1, request.title());
@@ -259,6 +308,11 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 statement.setLong(5, request.authorId());
             else
                 statement.setNull(5, Types.INTEGER);
+
+            if(request.time() != null)
+                statement.setInt(6, request.time());
+            else
+                statement.setNull(6, Types.INTEGER);
 
             this.pushToConsumer(this.consumerForStatement, statement.toString());
             ResultSet res = statement.executeQuery();
@@ -636,6 +690,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                         "id SERIAL PRIMARY KEY,\n" +
                         "title VARCHAR(100) NOT NULL,\n" +
                         "date DATE,\n" +
+                        "time INTEGER,\n" +
                         "status state DEFAULT 'Бэклог',\n" +
                         "subtasks VARCHAR(100)[],\n" +
                         "subtasks_status BOOLEAN[],\n" +
@@ -702,6 +757,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 arr = (String[]) resultSet.getArray(1).getArray();
 
             pushToConsumer(consumerForStatement, statement.toString());
+            resultSet.close();
             return new Result<>(List.of(arr), "", arr.length != 0);
         } catch (SQLException e) {
             this.pushToConsumer(consumerForException, e);

@@ -27,13 +27,13 @@ class StubDatabaseInteractor : DatabaseInteractor {
     println("StubDatabaseInteractor: getTaskList called with request: $request")
     return Result(
       listOf(
-        DbTaskItem(1, "Тестовая таска", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 10, 5),
-        DbTaskItem(2, "Тестовая таска 2", Date.from(java.time.Instant.now()), DbTaskStatus.BACKLOG, 10, 5),
-        DbTaskItem(3, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
-        DbTaskItem(4, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
-        DbTaskItem(5, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
-        DbTaskItem(6, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
-        DbTaskItem(7, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5),
+        DbTaskItem(1, "Тестовая таска", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 10, 5, ""),
+        DbTaskItem(2, "Тестовая таска 2", Date.from(java.time.Instant.now()), DbTaskStatus.BACKLOG, 10, 5, ""),
+        DbTaskItem(3, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5, ""),
+        DbTaskItem(4, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5, ""),
+        DbTaskItem(5, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5, ""),
+        DbTaskItem(6, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5, ""),
+        DbTaskItem(7, "Тестовая таска 24534", Date.from(java.time.Instant.now()), DbTaskStatus.DROPPED, 10, 5, ""),
       ),
       null,
       true
@@ -52,9 +52,9 @@ class StubDatabaseInteractor : DatabaseInteractor {
           listOf("сделать одно", "сделать два", "сделать три"),
           listOf(false, false, false),
           listOf(
-            DbTaskItem(2, "Тестовая таска 2", Date.from(java.time.Instant.now()), DbTaskStatus.BACKLOG, 2, 1)
+            DbTaskItem(2, "Тестовая таска 2", Date.from(java.time.Instant.now()), DbTaskStatus.BACKLOG, 2, 1, "")
           ),
-          User(1, "Денис")
+          User(1, "Денис"), "время 0:26, я ебашу блядское время с case when"
         ),
         null,
         true
@@ -69,9 +69,9 @@ class StubDatabaseInteractor : DatabaseInteractor {
           listOf("сделать одно", "сделать два"),
           listOf(true, false),
           listOf(
-            DbTaskItem(1, "Тестовая таска 1", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 3, 0)
+            DbTaskItem(1, "Тестовая таска 1", Date.from(java.time.Instant.now()), DbTaskStatus.IN_PROGRESS, 3, 0, "")
           ),
-          null
+          null, "ПООМГИТЕ МЕН ДЕРРЖАТ В ЗАЛОЖНИКАХ"
         ),
         null,
         true
