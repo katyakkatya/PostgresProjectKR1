@@ -1,21 +1,25 @@
 package ui.screens.task_list
 
 import database.model.DbTaskStatus
+import database.model.extended_filters.ExtendedFiltersModel
+import database.model.extended_filters.RelativesFilter
+import database.model.extended_filters.SubtasksCompletionFilter
 import database.request.FormattingOptions
 import database.request.TaskListRequest
+import database.request.TaskListSorting
+import database.request.TaskListSortingType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import models.FormattingOptionsModel
-import models.HeightTransformation
-import models.TaskItemModel
-import models.UserModel
+import models.*
 import repository.Settings
 import repository.TodoRepository
 import ui.screens.common.dialogs.UserSelectDialogState
+import ui.screens.task_list.components.ExtendedFiltersState
 
 class TaskListViewModel(
   private val todoRepository: TodoRepository,
@@ -43,18 +47,32 @@ class TaskListViewModel(
   private val _statusFilterFlow = MutableStateFlow(initialFilters)
   val statusFilterFlow = _statusFilterFlow
 
+  private val _authorFilterFlow = MutableStateFlow<UserModel?>(null)
+  val authorFilterFlow = _authorFilterFlow
+
+  private val _authorSelectDialogStateFlow: MutableStateFlow<UserSelectDialogState> =
+    MutableStateFlow(UserSelectDialogState.Closed)
+  val authorSelectDialogStateFlow = _authorSelectDialogStateFlow
+
   private val _formattingOptionsModelFlow = MutableStateFlow(FormattingOptionsModel())
   val formattingOptionsModelFlow = _formattingOptionsModelFlow
+
+  private val _orderOptionsFlow = MutableStateFlow(OrderOptionsModel())
+  val orderOptionsFlow = _orderOptionsFlow
 
   private val _usersSelectDialogStateFlow: MutableStateFlow<UserSelectDialogState> =
     MutableStateFlow(UserSelectDialogState.Closed)
   val usersSelectDialogStateFlow = _usersSelectDialogStateFlow
 
-  fun openExpandedTopAppBar(){
+  private val _extendedFiltersStateFlow: MutableStateFlow<ExtendedFiltersState> =
+    MutableStateFlow(ExtendedFiltersState())
+  val extendedFiltersStateFlow = _extendedFiltersStateFlow
+
+  fun openExpandedTopAppBar() {
     _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Opened
   }
 
-  fun closeExpandedTopAppBar(){
+  fun closeExpandedTopAppBar() {
     _expandedTopAppBarStateFlow.value = ExpandedTopAppBarState.Closed
   }
 
@@ -71,7 +89,31 @@ class TaskListViewModel(
       _formattingOptionsModelFlow.value.displayId,
       _formattingOptionsModelFlow.value.displayFullStatus
     )
-    todoRepository.getTasksList(TaskListRequest(_statusFilterFlow.value.toList(), null, null, formattingOptionsModel))
+    val sorting = if (_orderOptionsFlow.value.orderBy == OrderBy.UNSET) {
+      null
+    } else {
+      TaskListSorting(
+        when (_orderOptionsFlow.value.orderBy) {
+          OrderBy.DATE -> TaskListSortingType.BY_DATE
+          OrderBy.TITLE -> TaskListSortingType.BY_TASK_NAME
+          OrderBy.UNSET -> throw Exception("Cant handle unset here")
+        },
+        _orderOptionsFlow.value.order == Order.ASC
+      )
+    }
+    todoRepository.getTasksList(
+      TaskListRequest(
+        _statusFilterFlow.value.toList(),
+        _authorFilterFlow.value?.id,
+        sorting,
+        formattingOptionsModel,
+        ExtendedFiltersModel(
+          _extendedFiltersStateFlow.value.relatedTasksFilter,
+          _extendedFiltersStateFlow.value.subtasksFilter,
+          _extendedFiltersStateFlow.value.relativesFilter,
+        )
+      )
+    )
   }
 
   private fun updateSettings() {
@@ -80,7 +122,7 @@ class TaskListViewModel(
     }
   }
 
-  fun toggleStatusFilter(status: DbTaskStatus) {
+  fun toggleStatusFilter(status: String) {
     val current = _statusFilterFlow.value
     _statusFilterFlow.value = if (status in current) {
       current.toMutableSet().apply { remove(status) }
@@ -112,6 +154,28 @@ class TaskListViewModel(
 
   fun setNewTaskAuthor(author: UserModel) {
     _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(author = author)
+  }
+
+  fun updateTime(timeString: String) {
+    _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(
+      time = timeString.toIntOrNull().takeIf { (it ?: -1) > 0 })
+  }
+
+  fun openAuthorFilterSelectDialog() {
+    todoRepository.getAllUsers()
+    CoroutineScope(Dispatchers.IO).launch {
+      val users = todoRepository.usersListFlow.first()
+      _authorSelectDialogStateFlow.value = UserSelectDialogState.Opened(users)
+    }
+  }
+
+  fun closeAuthorFilterSelectDialog() {
+    _authorSelectDialogStateFlow.value = UserSelectDialogState.Closed
+  }
+
+  fun setAuthorFilter(author: UserModel) {
+    _authorFilterFlow.value = author
+    updateList()
   }
 
   fun setNewTaskName(name: String) {
@@ -167,7 +231,8 @@ class TaskListViewModel(
     if (!validateNewTask(state)) {
       return
     }
-    val result = todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id })
+    val result =
+      todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id }, state.author?.id)
     if (result.success) {
       closeNewTaskWindow()
       updateList()
@@ -202,22 +267,118 @@ class TaskListViewModel(
   fun setHeightTransformation(heightTransformation: HeightTransformation) {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(heightTransformation = heightTransformation)
+    updateList()
   }
 
   fun onShowShortToggled() {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(showShort = !_formattingOptionsModelFlow.value.showShort)
+    updateList()
   }
 
   fun onDisplayIdToggled() {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(displayId = !_formattingOptionsModelFlow.value.displayId)
+    updateList()
   }
 
   fun onDisplayFullStatusToggled() {
     _formattingOptionsModelFlow.value =
       _formattingOptionsModelFlow.value.copy(displayFullStatus = !_formattingOptionsModelFlow.value.displayFullStatus)
+    updateList()
   }
+
+  fun onOrderOptionSelected(order: Order) {
+    _orderOptionsFlow.value = _orderOptionsFlow.value.copy(order = order)
+    updateList()
+  }
+
+  fun onOrderByOptionSelected(orderBy: OrderBy) {
+    _orderOptionsFlow.value = _orderOptionsFlow.value.copy(orderBy = orderBy)
+    updateList()
+  }
+
+  fun onSubtasksFilterAllTypeClicked() {
+    _extendedFiltersStateFlow.update {
+      val subtaskFilter = SubtasksCompletionFilter(
+        SubtasksCompletionFilter.SubtasksCompletionFilterType.ALL_COMPLETED, it.subtasksFilter?.field
+      )
+      it.copy(subtasksFilter = subtaskFilter)
+    }
+  }
+
+  fun onSubtasksFilterSomeTypeClicked() {
+    _extendedFiltersStateFlow.update {
+      val subtaskFilter = SubtasksCompletionFilter(
+        SubtasksCompletionFilter.SubtasksCompletionFilterType.SOME_COMPLETED, it.subtasksFilter?.field
+      )
+      it.copy(subtasksFilter = subtaskFilter)
+    }
+  }
+
+  fun onSubtasksFilterCompletedFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val subtaskFilter = SubtasksCompletionFilter(
+        it.subtasksFilter?.type, SubtasksCompletionFilter.SubtasksCompletionFilterField.COMPLETED
+      )
+      it.copy(subtasksFilter = subtaskFilter)
+    }
+  }
+
+  fun onSubtasksFilterNotCompletedFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val subtaskFilter = SubtasksCompletionFilter(
+        it.subtasksFilter?.type, SubtasksCompletionFilter.SubtasksCompletionFilterField.NOT_COMPLETED
+      )
+      it.copy(subtasksFilter = subtaskFilter)
+    }
+  }
+
+  fun onRelativesFilterHasRelativesTypeClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        RelativesFilter.RelativesFilterType.HAS_RELATIVES, it.relativesFilter?.field
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterNoRelativesTypeClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        RelativesFilter.RelativesFilterType.NO_RELATIVES, it.relativesFilter?.field
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterAuthorFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.AUTHOR
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterConnectedTasksFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.CONNECTED_TASKS
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
+  fun onRelativesFilterSubtasksFieldClicked() {
+    _extendedFiltersStateFlow.update {
+      val relativesFilter = RelativesFilter(
+        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.SUBTASKS
+      )
+      it.copy(relativesFilter = relativesFilter)
+    }
+  }
+
 }
 
 sealed interface NewTaskWindowState {
@@ -228,6 +389,7 @@ sealed interface NewTaskWindowState {
     val connectedTasks: List<TaskItemModel> = emptyList(),
     val error: String? = null,
     val author: UserModel? = null,
+    val time: Int? = null,
   ) : NewTaskWindowState
 }
 
@@ -238,7 +400,7 @@ sealed interface TaskSelectWindowState {
   ) : TaskSelectWindowState
 }
 
-sealed interface ExpandedTopAppBarState{
+sealed interface ExpandedTopAppBarState {
   object Closed : ExpandedTopAppBarState
   object Opened : ExpandedTopAppBarState
 }

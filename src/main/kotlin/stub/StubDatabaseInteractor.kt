@@ -104,7 +104,7 @@ class StubDatabaseInteractor : DatabaseInteractor {
     return true
   }
 
-  override fun updateStatus(taskId: Long?, status: DbTaskStatus?): Boolean? {
+  override fun updateStatus(taskId: Long?, status: String?): Boolean? {
     println("StubDatabaseInteractor: updateStatus called with taskId: $taskId, status: $status")
     return true
   }
@@ -167,5 +167,14 @@ class StubDatabaseInteractor : DatabaseInteractor {
         User(2, "idfjs")
       ), null, true
     )
+  }
+
+  // TODO: implement
+  override fun getStatuses(): Result<List<String>> {
+    return Result(listOf("BACKLOG", "IN_PROGRESS", "DONE"), null, true)
+  }
+
+  override fun createStatus(name: String): Boolean {
+    return false
   }
 }

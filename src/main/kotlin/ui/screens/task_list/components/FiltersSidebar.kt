@@ -11,19 +11,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import database.model.DbTaskStatus
-import ui.screens.task_list.components.FormattingOptionsPayload
-import ui.screens.task_list.components.FormattionOptionsContent
+import models.UserModel
+import ui.screens.task_list.components.*
 
 @Composable
 fun FiltersSidebar(
-  appliedFilters: Set<DbTaskStatus>,
-  onFilterToggled: (DbTaskStatus) -> Unit,
+  appliedFilters: Set<String>,
+  onFilterToggled: (String) -> Unit,
   onFilterReset: () -> Unit,
   onClose: () -> Unit,
   modifier: Modifier = Modifier,
   isPermanent: Boolean = false,
   formattingOptionsPayload: FormattingOptionsPayload,
+  author: UserModel? = null,
+  onOpenAuthorFilterSelectDialog: () -> Unit,
+  orderOptionsPayload: OrderOptionsPayload,
+  extendedFiltersState: ExtendedFiltersState,
+  extendedFiltersSignals: ExtendedFiltersSignals,
 ) {
   Surface(
     modifier = modifier
@@ -57,6 +61,21 @@ fun FiltersSidebar(
           appliedFilters = appliedFilters,
           onFilterToggled = onFilterToggled,
           onFilterReset = onFilterReset,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        // TODO: сделать красивым если не лень
+        ExtendedFiltersContent(
+          state = extendedFiltersState,
+          signals = extendedFiltersSignals
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        AuthorFilterContent(
+          author = author,
+          onOpenAuthorFilterSelectDialog = onOpenAuthorFilterSelectDialog,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        OrderOptionsContent(
+          payload = orderOptionsPayload
         )
         Spacer(modifier = Modifier.height(16.dp))
         FormattionOptionsContent(

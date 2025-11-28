@@ -1,7 +1,11 @@
 package database;
 
-import database.model.*;
+import database.model.DbTaskDetail;
+import database.model.DbTaskItem;
+import database.model.User;
+import database.model.UserWithTaskCount;
 import database.request.*;
+import database.request.utils.FunctionToQuery;
 import database.result.Result;
 
 import java.sql.*;
@@ -84,6 +88,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                 statement.execute(cmd);
             }
             createTables(statement);
+            createFunctions(statement);
             this.createUser(new CreateUserRequest("admin"));
 
             return true;
@@ -93,8 +98,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
-    // TODO: Add trim to task name
-    // TODO: support new options in [TaskListRequest]
+    // TODO: implement extended filters
     @Override
     public Result<List<DbTaskItem>> getTaskList(TaskListRequest request) { // DONE
         if(!this.isConnected())
@@ -102,26 +106,52 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         if (request.statuses().isEmpty())
             return new Result<>(new ArrayList<>(), null, true);
 
-        StringBuilder builder = new StringBuilder("SELECT * FROM task WHERE status IN ('");
-        builder.append(request.statuses().getFirst().getName()).append("'");
+        StringBuilder builder = new StringBuilder("SELECT id, title AS title, date, status, subtasks, subtasks_status, author_id FROM task WHERE status IN ('");
+        builder.append(request.statuses().getFirst()).append("'");
 
         for(int i = 1; i < request.statuses().size(); ++i){
             builder.append(" ,'")
-                    .append(request.statuses().get(i).getName())
+                    .append(request.statuses().get(i))
                     .append("'");
         }
-        builder.append(')');
+        builder.append(")\n");
+        if(request.authorId() != null){
+            builder.append("AND task.author_id = %d\n".formatted(request.authorId()));
+        }
+        if(request.sorting() != null){
+            builder.append("ORDER BY %s %s\n".formatted(request.sorting().type(),
+                    request.sorting().ascending() ? "ASC" : "DESC"));
+        }
+
+        FunctionToQuery finalQuery = FunctionToQuery.from(builder, "title").addFunction("TRIM");
+
+        if(request.formattingOptions().inLowerCase()){
+            finalQuery.addFunction("LOWER");
+        }
+        if(request.formattingOptions().inUpperCase()){
+            finalQuery.addFunction("UPPER");
+        }
+        if(request.formattingOptions().displayId()){
+            finalQuery.addFunction("displayId", "id");
+        }
+        if(request.formattingOptions().displayFullStatus()){
+            finalQuery.addFunction("displayFullStatus", "status");
+        }
+        if(request.formattingOptions().isShortDisplay()){
+            finalQuery.addFunction("shortDisplay");
+        }
+
 
         try(Statement statement = this.connection.get().createStatement()){
-            ResultSet resultSet = statement.executeQuery(builder.toString());
-            this.pushToConsumer(this.consumerForStatement, builder.toString());
+            ResultSet resultSet = statement.executeQuery(finalQuery.build());
+            this.pushToConsumer(this.consumerForStatement, finalQuery.build());
             List<DbTaskItem> dbTaskItems = new LinkedList<>();
 
             while(resultSet.next()){
                 Boolean[] subtasks = (Boolean[]) resultSet.getArray("subtasks_status").getArray();
                 dbTaskItems.add(new DbTaskItem(
                         resultSet.getLong("id"), resultSet.getString("title"),
-                        resultSet.getDate("date"), DbTaskStatus.converter(resultSet.getString("status")),
+                  resultSet.getDate("date"), resultSet.getString("status"),
                         subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
                 ));
             }
@@ -141,7 +171,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         try(PreparedStatement statementForConnected = this.
                 connection.get().prepareStatement("SELECT t.id, t.title, t.date, t.status, t.subtasks, t.subtasks_status, ct.task_id  \n" +
                         "FROM connected_task ct INNER JOIN task t ON ct.another_task_id = t.id WHERE ct.task_id = ?");
-            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT * FROM task WHERE id = ?")){
+            PreparedStatement statementForTask = this.connection.get().prepareStatement("SELECT * FROM task\nLEFT JOIN users ON users.id = task.author_id\nWHERE task.id = ?")){
             // CONNECTED TASKS
             statementForConnected.setLong(1, taskId);
 
@@ -151,7 +181,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
                     Boolean[] subtasks = (Boolean[]) resultFroConnected.getArray("subtasks_status").getArray();
                     dbTaskItems.add(new DbTaskItem(
                             resultFroConnected.getLong("id"), resultFroConnected.getString("title"),
-                            resultFroConnected.getDate("date"), DbTaskStatus.converter(resultFroConnected.getString("status")),
+                      resultFroConnected.getDate("date"), resultFroConnected.getString("status"),
                             subtasks.length, (int) Arrays.stream(subtasks).filter(b -> b == true).count()
                     ));
             }
@@ -166,14 +196,15 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             DbTaskDetail dbTaskDetail = null;
 
             if(resultForTask.next()){
+
                 dbTaskDetail = new DbTaskDetail(resultForTask.getLong("id"),
                         resultForTask.getString("title"), resultForTask.getDate("date"),
-                        DbTaskStatus.converter(resultForTask.getString("status")),
+                  resultForTask.getString("status"),
                         List.of((String[]) resultForTask.getArray("subtasks").getArray()),
                         List.of((Boolean[]) resultForTask.getArray("subtasks_status").getArray()),
-                  dbTaskItems,
-                  // TODO: добавить пользователя
-                  new User(1L, "123"));
+                        dbTaskItems,
+                        resultForTask.getString("author_id") == null ? null :
+                                new User(resultForTask.getLong("author_id"), resultForTask.getString("name")));
             }
 
 
@@ -203,6 +234,7 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    // TODO: support time parameter in new task
     @Override
     public Result<Long> createTask(CreateTaskRequest request) { // DONE
         if(!this.isConnected())
@@ -333,13 +365,13 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     }
 
     @Override
-    public Boolean updateStatus(Long taskId, DbTaskStatus status) { // DONE
+    public Boolean updateStatus(Long taskId, String status) { // DONE
         if(!this.isConnected())
             return false;
 
         try(PreparedStatement statement = this.connection.get()
                 .prepareStatement("UPDATE task SET status = ?::state WHERE id = ?")){
-            statement.setString(1, status.getName());
+            statement.setString(1, status.toString());
             statement.setLong(2, taskId);
 
             this.pushToConsumer(this.consumerForStatement, statement.toString());
@@ -354,39 +386,15 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
     public Boolean setShouldForceUniqueName(boolean shouldForceUniqueName) { // DONE
         if(!this.isConnected())
             return false;
-        try{
-            alterStatement("ALTER TABLE task DROP CONSTRAINT IF EXISTS title_unique;");
-            if(shouldForceUniqueName){
-                this.connection.get().setAutoCommit(false);
+        List<String> alterRegexes = new LinkedList<>(List.of("ALTER TABLE task DROP CONSTRAINT IF EXISTS title_unique;"));
+        if(shouldForceUniqueName)
+            alterRegexes.add("ALTER TABLE task ADD CONSTRAINT title_unique UNIQUE (title);");
 
-                Statement statement = this.connection.get().createStatement();
-                statement.executeUpdate("DELETE FROM task WHERE title IN \n" +
+        return setConstraintsAndDelete(shouldForceUniqueName ? List.of("DELETE FROM task WHERE title IN \n" +
                         "(SELECT title FROM task\n" +
                         "EXCEPT ALL\n" +
-                        "SELECT DISTINCT title FROM task);");
-                statement.close();
-
-                alterStatement("ALTER TABLE task ADD CONSTRAINT title_unique UNIQUE (title);");
-
-                this.connection.get().commit();
-            }
-
-            return true;
-        } catch (SQLException e) {
-            try {
-                this.connection.get().rollback();
-            } catch (SQLException ex) {
-                pushToConsumer(this.consumerForException, ex);
-            }
-            this.pushToConsumer(this.consumerForException, e);
-            return false;
-        }finally {
-            try {
-                this.connection.get().setAutoCommit(true);
-            } catch (SQLException e) {
-                pushToConsumer(this.consumerForException, e);
-            }
-        }
+                        "SELECT DISTINCT title FROM task);") : List.of(),
+                alterRegexes);
     }
 
     @Override
@@ -510,6 +518,26 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    @Override
+    public Result<List<User>> getAllUsers() { // DONE
+        if(!this.isConnected())
+            return new Result<>(null, "not connected", false);
+
+        try(Statement statement = this.connection.get().createStatement()){
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
+            List<User> ans = new LinkedList<>();
+
+            while(resultSet.next()){
+                ans.add(new User(resultSet.getLong("id"),
+                        resultSet.getString("name")));
+            }
+            return new Result<>(ans, null, true);
+        } catch (SQLException e) {
+            pushToConsumer(this.consumerForException, e);
+            return new Result<>(null, null, false);
+        }
+    }
+
     /** Установка ограничений и удаление записей, которые под них не попадают
      * @param deleteRegexes Выражения, которые содержат в себе команду DELETE
      * @param alterRegexes Вырежения, которые содержат в себе команду ALTER
@@ -624,6 +652,29 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         }
     }
 
+    private void createFunctions(Statement statement) throws SQLException{
+        List<String> functions = List.of("CREATE OR REPLACE FUNCTION shortDisplay(line VARCHAR)\n" +
+                "RETURNS VARCHAR AS $$\n" +
+                "\tSELECT \n" +
+                "\tCASE WHEN LENGTH(line) > 10 THEN SUBSTRING(line, 1, 10) || '...'\n" +
+                "\tELSE SUBSTRING(line, 1, 10)\n" +
+                "\tEND;\n" +
+                "$$ LANGUAGE SQL;",
+                "CREATE OR REPLACE FUNCTION displayId(id INTEGER, line VARCHAR)\n" +
+                "RETURNS VARCHAR AS $$\n" +
+                "\tSELECT CONCAT(LPAD(CAST(id AS TEXT), 5, '0'), ' | ', line)\n" +
+                "$$ LANGUAGE SQL;",
+                "CREATE OR REPLACE FUNCTION displayFullStatus(status state, line VARCHAR)\n" +
+                "RETURNS VARCHAR AS $$\n" +
+                "\tSELECT CONCAT(line, ' | ', status)\n" +
+                "$$ LANGUAGE SQL;");
+
+        for(String create : functions){
+            this.pushToConsumer(this.consumerForStatement, create);
+            statement.execute(create);
+        }
+    }
+
     /** Возвращает число, которое заложено в ограничении
      * @param constraintContent Содержимое ограничения
      * @param pattern regex-выражение
@@ -636,8 +687,14 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
         throw new IllegalArgumentException("Заданного паттерна %s не найдено.".formatted(pattern.toString()));
     }
 
+    // TODO: implement
     @Override
-    public Result<List<User>> getAllUsers() {
-        return new Result<>(new ArrayList<>(), null, true);
+    public Result<List<String>> getStatuses() {
+        return null;
+    }
+
+    @Override
+    public Boolean createStatus(String name) {
+        return null;
     }
 }

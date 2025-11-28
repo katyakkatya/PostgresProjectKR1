@@ -66,6 +66,10 @@ class SettingsScreenViewModel(
       _errorFlow.value = "Минимальная длина должна быть меньше или равна максимальной длине"
       return
     }
+    if (maxLength > 100) {
+      _errorFlow.value = "Нельзя задать максимальную длину больше 100 символов"
+      return
+    }
     val settingsToApply = Settings(
       forceUniqueTaskTitle = _forceUniqueTitle.value,
       minTaskTitleLength = minLength,

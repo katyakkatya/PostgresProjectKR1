@@ -1,8 +1,8 @@
 package repository
 
 import database.DatabaseInteractor
-import database.model.DbTaskStatus
 import database.request.CreateTaskRequest
+import database.request.CreateUserRequest
 import database.request.GetUsersWithTasksRequest
 import database.request.TaskListRequest
 import database.result.Result
@@ -31,6 +31,9 @@ class TodoRepository(
 
   private val _settingsFlow = MutableStateFlow(Settings.DEFAULT)
   val settingsFlow: Flow<Settings> = _settingsFlow
+
+  private val _statusesFlow = MutableStateFlow(emptyList<String>())
+  val statusesFlow: Flow<List<String>> = _statusesFlow
 
   init {
     interactor.setConsumers(
@@ -103,7 +106,7 @@ class TodoRepository(
     return result
   }
 
-  fun updateStatus(taskId: Long, status: DbTaskStatus): Boolean {
+  fun updateStatus(taskId: Long, status: String): Boolean {
     val result = interactor.updateStatus(taskId, status)
     if (result == false) {
       showErrorMessage("Произошла ошибка при обновлении статуса задачи")
@@ -127,9 +130,9 @@ class TodoRepository(
     return result
   }
 
-  fun saveNewTask(title: String, subtasks: List<String>, connectedTasks: List<Long>): Result<Long> {
-    val userId = 1
-    val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks, 1))
+  // TODO: сюда передавать время
+  fun saveNewTask(title: String, subtasks: List<String>, connectedTasks: List<Long>, authorId: Long?): Result<Long> {
+    val result = interactor.createTask(CreateTaskRequest(title, subtasks, connectedTasks, authorId, null))
     if (result.success == false) {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании новой задачи")
     }
@@ -157,6 +160,31 @@ class TodoRepository(
     } else {
       showErrorMessage(result.errorMessage ?: "Произошла ошибка при получении списка задач")
     }
+  }
+
+  fun createUser(name: String): Result<Long> {
+    val result = interactor.createUser(CreateUserRequest(name))
+    if (result.success == false) {
+      showErrorMessage(result.errorMessage ?: "Произошла ошибка при создании пользователя")
+    }
+    return result
+  }
+
+  fun loadStatuses() {
+    val result = interactor.getStatuses()
+    if (result.success) {
+      _statusesFlow.value = result.data!!
+    } else {
+      showErrorMessage(result.errorMessage ?: "Произошла ошибка при получении списка статусов")
+    }
+  }
+
+  fun createStatus(name: String): Boolean {
+    val result = interactor.createStatus(name)
+    if (result == false) {
+      showErrorMessage("Произошла ошибка при создании статуса")
+    }
+    return result
   }
 }
 

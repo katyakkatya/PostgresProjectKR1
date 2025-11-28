@@ -13,8 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import models.FormattingOptionsModel
+import models.OrderOptionsModel
 import ui.screens.common.dialogs.UserSelectDialog
+import ui.screens.task_list.components.ExtendedFiltersSignals
+import ui.screens.task_list.components.ExtendedFiltersState
 import ui.screens.task_list.components.FormattingOptionsPayload
+import ui.screens.task_list.components.OrderOptionsPayload
 
 @Composable
 fun TaskListScreen(
@@ -92,6 +96,9 @@ fun TaskListScreen(
           }
         }
 
+        val authorFilter by viewModel.authorFilterFlow.collectAsState(null)
+        val orderOptions by viewModel.orderOptionsFlow.collectAsState(OrderOptionsModel())
+        val extendedFiltersState by viewModel.extendedFiltersStateFlow.collectAsState(ExtendedFiltersState())
         if (showFiltersSidebar && !isFullScreen) {
           FiltersSidebar(
             onClose = {
@@ -105,12 +112,31 @@ fun TaskListScreen(
             appliedFilters = appliedFilters,
             onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
             onFilterReset = { viewModel.resetFilters() },
+            author = authorFilter,
+            orderOptionsPayload = OrderOptionsPayload(
+              orderOptionsModel = orderOptions,
+              onOrderSelected = viewModel::onOrderOptionSelected,
+              onOrderBySelected = viewModel::onOrderByOptionSelected,
+            ),
+            onOpenAuthorFilterSelectDialog = viewModel::openAuthorFilterSelectDialog,
             formattingOptionsPayload = FormattingOptionsPayload(
               onHeightTransformationClicked = { viewModel.setHeightTransformation(it) },
               formattingOptionsModel = formattingOptionsModel,
               onShowShortClicked = { viewModel.onShowShortToggled() },
               onDisplayIdClicked = { viewModel.onDisplayIdToggled() },
               onDisplayFullStatusClicked = { viewModel.onDisplayFullStatusToggled() },
+            ),
+            extendedFiltersState = extendedFiltersState,
+            extendedFiltersSignals = ExtendedFiltersSignals(
+              onSubtasksFilterAllTypeClicked = { viewModel.onSubtasksFilterAllTypeClicked() },
+              onSubtasksFilterSomeTypeClicked = { viewModel.onSubtasksFilterSomeTypeClicked() },
+              onSubtasksFilterCompletedFieldClicked = { viewModel.onSubtasksFilterCompletedFieldClicked() },
+              onSubtasksFilterNotCompletedFieldClicked = { viewModel.onSubtasksFilterNotCompletedFieldClicked() },
+              onRelativesFilterHasRelativesTypeClicked = { viewModel.onRelativesFilterHasRelativesTypeClicked() },
+              onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
+              onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
+              onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
+              onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
             )
           )
         }
@@ -147,12 +173,31 @@ fun TaskListScreen(
               appliedFilters = appliedFilters,
               onFilterToggled = { status -> viewModel.toggleStatusFilter(status) },
               onFilterReset = { viewModel.resetFilters() },
+              author = authorFilter,
+              orderOptionsPayload = OrderOptionsPayload(
+                orderOptionsModel = orderOptions,
+                onOrderSelected = viewModel::onOrderOptionSelected,
+                onOrderBySelected = viewModel::onOrderByOptionSelected,
+              ),
+              onOpenAuthorFilterSelectDialog = viewModel::openAuthorFilterSelectDialog,
               formattingOptionsPayload = FormattingOptionsPayload(
                 onHeightTransformationClicked = { viewModel.setHeightTransformation(it) },
                 formattingOptionsModel = formattingOptionsModel,
                 onShowShortClicked = { viewModel.onShowShortToggled() },
                 onDisplayIdClicked = { viewModel.onDisplayIdToggled() },
                 onDisplayFullStatusClicked = { viewModel.onDisplayFullStatusToggled() },
+              ),
+              extendedFiltersState = extendedFiltersState,
+              extendedFiltersSignals = ExtendedFiltersSignals(
+                onSubtasksFilterAllTypeClicked = { viewModel.onSubtasksFilterAllTypeClicked() },
+                onSubtasksFilterSomeTypeClicked = { viewModel.onSubtasksFilterSomeTypeClicked() },
+                onSubtasksFilterCompletedFieldClicked = { viewModel.onSubtasksFilterCompletedFieldClicked() },
+                onSubtasksFilterNotCompletedFieldClicked = { viewModel.onSubtasksFilterNotCompletedFieldClicked() },
+                onRelativesFilterHasRelativesTypeClicked = { viewModel.onRelativesFilterHasRelativesTypeClicked() },
+                onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
+                onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
+                onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
+                onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
               )
             )
           }
@@ -185,5 +230,11 @@ fun TaskListScreen(
     state = userSelectDialogState,
     onWindowClosed = viewModel::closeAuthorSelectDialog,
     onUserClicked = viewModel::setNewTaskAuthor,
+  )
+  val authorSelectDialogState by viewModel.authorSelectDialogStateFlow.collectAsState()
+  UserSelectDialog(
+    state = authorSelectDialogState,
+    onWindowClosed = viewModel::closeAuthorFilterSelectDialog,
+    onUserClicked = viewModel::setAuthorFilter,
   )
 }

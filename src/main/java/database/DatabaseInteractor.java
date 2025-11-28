@@ -1,6 +1,9 @@
 package database;
 
-import database.model.*;
+import database.model.DbTaskDetail;
+import database.model.DbTaskItem;
+import database.model.User;
+import database.model.UserWithTaskCount;
 import database.request.*;
 import database.result.Result;
 
@@ -62,7 +65,7 @@ public interface DatabaseInteractor {
   /**
    * Changes task status and returns true on success
    */
-  Boolean updateStatus(Long taskId, DbTaskStatus status);
+  Boolean updateStatus(Long taskId, String status);
 
   /**
    * Sets consumers for logs
@@ -111,4 +114,14 @@ public interface DatabaseInteractor {
   int getMinTaskTitleLength();
 
   int getMaxTaskTitleLength();
+
+  /**
+   * Gets all enum statuses
+   */
+  Result<List<String>> getStatuses();
+
+  /**
+   * Creates new status enum by its name
+   */
+  Boolean createStatus(String name);
 }

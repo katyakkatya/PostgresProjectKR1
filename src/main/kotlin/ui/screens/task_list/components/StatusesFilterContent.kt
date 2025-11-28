@@ -7,16 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import database.model.DbTaskStatus
-import models.TaskStatus
 
 @Composable
 fun StatusesFilterContent(
-  appliedFilters: Set<DbTaskStatus>,
-  onFilterToggled: (DbTaskStatus) -> Unit,
+  appliedFilters: Set<String>,
+  onFilterToggled: (String) -> Unit,
   onFilterReset: () -> Unit
 ) {
   Column(
@@ -45,7 +43,7 @@ fun StatusesFilterContent(
     statuses.forEach { status ->
       FilterStatusItem(
         enabled = (status in appliedFilters),
-        status = status,
+        text = status,
         onClick = { onFilterToggled(status) }
       )
     }

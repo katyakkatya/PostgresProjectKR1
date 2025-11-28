@@ -7,7 +7,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import database.model.DbTaskStatus
 import models.TaskDetail
 import ui.screens.task_detail.components.AuthorSection
 
@@ -18,8 +17,9 @@ fun TaskScreenContent(
   onAddSubtaskClick: () -> Unit,
   onSubtaskToggled: (Int) -> Unit,
   onRelatedTaskClick: (Long) -> Unit,
-  onStatusChanged: (DbTaskStatus) -> Unit,
+  onStatusChanged: (String) -> Unit,
   onAddRelatedTaskClick: () -> Unit,
+  onOpenCustomStatusDialog: () -> Unit
 ) {
   LazyColumn(
     modifier = Modifier
@@ -31,9 +31,11 @@ fun TaskScreenContent(
     item {
       TaskHeader(task = task)
       AuthorSection(user = task.author)
-      TaskStatusInfo(task = task) { status ->
-        onStatusChanged(status)
-      }
+      TaskStatusInfo(
+        task = task,
+        onStatusChangeClicked = { status -> onStatusChanged(status) },
+        onOpenCustomStatusDialog = { onOpenCustomStatusDialog() }
+      )
       SubtasksSection(
         subtasks = task.subtasks,
         onItemClick = { index -> onSubtaskToggled(index) },
