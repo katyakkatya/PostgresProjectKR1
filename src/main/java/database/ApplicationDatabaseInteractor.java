@@ -148,7 +148,6 @@ public class ApplicationDatabaseInteractor implements DatabaseInteractor{
             String subquery = switch (request.extendedFilters().relativesFilter().field()){
                 case AUTHOR -> "SELECT author_id FROM task AS st WHERE t.author_id = st.author_id";
                 case CONNECTED_TASKS -> "SELECT task_id FROM connected_task AS st WHERE t.task_id = st.task_id";
-                case SUBTASKS -> null;
             };
 
             builder.append("AND %s (%s)\n".formatted(relativesFilterType, subquery));
