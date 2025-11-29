@@ -33,7 +33,7 @@ fun TaskStatusInfo(
     style = MaterialTheme.typography.h6
   )
   Spacer(modifier = Modifier.height(24.dp))
-  val buttons = StatusUpdateButton.buttonMappings[task.status]!!
+  val buttons = StatusUpdateButton.buttonMappings[task.status] ?: emptyList()
   buttons.forEachIndexed { index, button ->
     Card(
       modifier = Modifier

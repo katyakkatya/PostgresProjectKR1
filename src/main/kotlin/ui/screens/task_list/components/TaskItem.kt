@@ -3,19 +3,10 @@ package ui.screens.task_list.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.runtime.Composable
@@ -52,17 +43,29 @@ fun TaskItem(
           .clip(CircleShape)
           .background(color = task.color)
       )
-      Text(
-        text = task.title,
+      Column(
         modifier = Modifier
           .weight(1f)
           .padding(start = 16.dp),
-        fontSize = 28.sp,
-        fontFamily = MaterialTheme.typography.h6.fontFamily,
-        fontWeight = FontWeight.W400,
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h6
-      )
+      ) {
+        Text(
+          text = task.title,
+          fontSize = 28.sp,
+          fontFamily = MaterialTheme.typography.h6.fontFamily,
+          fontWeight = FontWeight.W400,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.h6
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = task.time,
+          fontSize = 22.sp,
+          fontFamily = MaterialTheme.typography.h6.fontFamily,
+          fontWeight = FontWeight.W400,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.h6
+        )
+      }
       CircularProgressIndicator(
         progress = task.progress,
         modifier = Modifier.padding(end = 24.dp),

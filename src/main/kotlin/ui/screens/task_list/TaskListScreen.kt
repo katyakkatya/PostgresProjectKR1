@@ -32,6 +32,7 @@ fun TaskListScreen(
   val expandedTopAppBarState by viewModel.expandedTopAppBarStateFlow.collectAsState(false)
   var searchQuery by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
+  val allStatuses by viewModel.allStatusesFlow.collectAsState(emptySet())
   val appliedFilters by viewModel.statusFilterFlow.collectAsState(emptySet())
   val formattingOptionsModel by viewModel.formattingOptionsModelFlow.collectAsState(FormattingOptionsModel())
 
@@ -101,6 +102,7 @@ fun TaskListScreen(
         val extendedFiltersState by viewModel.extendedFiltersStateFlow.collectAsState(ExtendedFiltersState())
         if (showFiltersSidebar && !isFullScreen) {
           FiltersSidebar(
+            statuses = allStatuses,
             onClose = {
               showFiltersSidebar = false
             },
@@ -136,7 +138,6 @@ fun TaskListScreen(
               onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
               onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
               onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
-              onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
             )
           )
         }
@@ -167,6 +168,7 @@ fun TaskListScreen(
             }
 
             FiltersSidebar(
+              statuses = allStatuses,
               onClose = { },
               modifier = Modifier.weight(1.5f),
               isPermanent = true,
@@ -197,7 +199,6 @@ fun TaskListScreen(
                 onRelativesFilterNoRelativesTypeClicked = { viewModel.onRelativesFilterNoRelativesTypeClicked() },
                 onRelativesFilterAuthorFieldClicked = { viewModel.onRelativesFilterAuthorFieldClicked() },
                 onRelativesFilterConnectedTasksFieldClicked = { viewModel.onRelativesFilterConnectedTasksFieldClicked() },
-                onRelativesFilterSubtasksFieldClicked = { viewModel.onRelativesFilterSubtasksFieldClicked() },
               )
             )
           }
@@ -217,6 +218,7 @@ fun TaskListScreen(
     onNewTaskSaved = viewModel::saveNewTask,
     onNewTaskClosed = viewModel::closeNewTaskWindow,
     onAuthorSelectWindowOpened = viewModel::openAuthorSelectDialog,
+    onTimeStringChanged = viewModel::setNewTaskTime,
   )
 
   val taskSelectionState by viewModel.taskSelectWindowState.collectAsState()

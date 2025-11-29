@@ -1,6 +1,5 @@
 package ui.screens.task_list
 
-import database.model.DbTaskStatus
 import database.model.extended_filters.ExtendedFiltersModel
 import database.model.extended_filters.RelativesFilter
 import database.model.extended_filters.SubtasksCompletionFilter
@@ -24,7 +23,10 @@ import ui.screens.task_list.components.ExtendedFiltersState
 class TaskListViewModel(
   private val todoRepository: TodoRepository,
 ) {
+  private val scope = CoroutineScope(Dispatchers.IO)
+
   val tasksListFlow = todoRepository.tasksListFlow
+  val statusesFlow = todoRepository.statusesFlow
 
   private var settings = Settings.DEFAULT
 
@@ -41,10 +43,10 @@ class TaskListViewModel(
     MutableStateFlow(TaskSelectWindowState.Closed)
   val taskSelectWindowState = _taskSelectWindowState
 
-  private val initialFilters = mutableSetOf(
-    DbTaskStatus.BACKLOG, DbTaskStatus.IN_PROGRESS, DbTaskStatus.IN_REVIEW, DbTaskStatus.DONE, DbTaskStatus.DROPPED
-  )
-  private val _statusFilterFlow = MutableStateFlow(initialFilters)
+  private val _allStatusesFlow = MutableStateFlow(emptySet<String>())
+  val allStatusesFlow = _allStatusesFlow
+
+  private val _statusFilterFlow = MutableStateFlow(emptySet<String>())
   val statusFilterFlow = _statusFilterFlow
 
   private val _authorFilterFlow = MutableStateFlow<UserModel?>(null)
@@ -79,6 +81,22 @@ class TaskListViewModel(
   fun onInit() {
     updateList()
     updateSettings()
+    listenStatuses()
+  }
+
+  private fun listenStatuses() {
+    scope.launch {
+      todoRepository.loadStatuses()
+      statusesFlow.collect { statuses ->
+        _allStatusesFlow.value = statuses.toSet()
+        _statusFilterFlow.value = statuses.toSet()
+      }
+    }
+    scope.launch {
+      _statusFilterFlow.collect {
+        updateList()
+      }
+    }
   }
 
   private fun updateList() {
@@ -117,7 +135,7 @@ class TaskListViewModel(
   }
 
   private fun updateSettings() {
-    CoroutineScope(Dispatchers.IO).launch {
+    scope.launch {
       settings = todoRepository.settingsFlow.first()
     }
   }
@@ -142,7 +160,7 @@ class TaskListViewModel(
 
   fun openAuthorSelectDialog() {
     todoRepository.getAllUsers()
-    CoroutineScope(Dispatchers.IO).launch {
+    scope.launch {
       val users = todoRepository.usersListFlow.first()
       _usersSelectDialogStateFlow.value = UserSelectDialogState.Opened(users)
     }
@@ -163,7 +181,7 @@ class TaskListViewModel(
 
   fun openAuthorFilterSelectDialog() {
     todoRepository.getAllUsers()
-    CoroutineScope(Dispatchers.IO).launch {
+    scope.launch {
       val users = todoRepository.usersListFlow.first()
       _authorSelectDialogStateFlow.value = UserSelectDialogState.Opened(users)
     }
@@ -232,7 +250,13 @@ class TaskListViewModel(
       return
     }
     val result =
-      todoRepository.saveNewTask(state.taskName, state.subtasks, state.connectedTasks.map { it.id }, state.author?.id)
+      todoRepository.saveNewTask(
+        state.taskName,
+        state.subtasks,
+        state.connectedTasks.map { it.id },
+        state.author?.id,
+        state.time
+      )
     if (result.success) {
       closeNewTaskWindow()
       updateList()
@@ -240,8 +264,11 @@ class TaskListViewModel(
   }
 
   fun resetFilters() {
-    _statusFilterFlow.value = initialFilters
-    updateList()
+    scope.launch {
+      val initialFilters = statusesFlow.first().toSet()
+      _statusFilterFlow.value = initialFilters
+      updateList()
+    }
   }
 
   private fun validateNewTask(state: NewTaskWindowState.Opened): Boolean {
@@ -259,6 +286,14 @@ class TaskListViewModel(
       return false
     } else if (state.taskName.trim().length > settings.maxTaskTitleLength) {
       _newTaskWindowStateFlow.value = state.copy(error = "Максимальная длина ${settings.maxTaskTitleLength}")
+      return false
+    }
+
+    if ((state.time ?: 1) < 0) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Время должно быть положительным")
+      return false
+    } else if ((state.time ?: 1) > 1000) {
+      _newTaskWindowStateFlow.value = state.copy(error = "Время должно быть меньше 1000")
       return false
     }
     return true
@@ -305,6 +340,7 @@ class TaskListViewModel(
       )
       it.copy(subtasksFilter = subtaskFilter)
     }
+    updateList()
   }
 
   fun onSubtasksFilterSomeTypeClicked() {
@@ -314,6 +350,7 @@ class TaskListViewModel(
       )
       it.copy(subtasksFilter = subtaskFilter)
     }
+    updateList()
   }
 
   fun onSubtasksFilterCompletedFieldClicked() {
@@ -323,6 +360,7 @@ class TaskListViewModel(
       )
       it.copy(subtasksFilter = subtaskFilter)
     }
+    updateList()
   }
 
   fun onSubtasksFilterNotCompletedFieldClicked() {
@@ -332,6 +370,7 @@ class TaskListViewModel(
       )
       it.copy(subtasksFilter = subtaskFilter)
     }
+    updateList()
   }
 
   fun onRelativesFilterHasRelativesTypeClicked() {
@@ -341,6 +380,7 @@ class TaskListViewModel(
       )
       it.copy(relativesFilter = relativesFilter)
     }
+    updateList()
   }
 
   fun onRelativesFilterNoRelativesTypeClicked() {
@@ -350,6 +390,7 @@ class TaskListViewModel(
       )
       it.copy(relativesFilter = relativesFilter)
     }
+    updateList()
   }
 
   fun onRelativesFilterAuthorFieldClicked() {
@@ -359,6 +400,7 @@ class TaskListViewModel(
       )
       it.copy(relativesFilter = relativesFilter)
     }
+    updateList()
   }
 
   fun onRelativesFilterConnectedTasksFieldClicked() {
@@ -368,15 +410,13 @@ class TaskListViewModel(
       )
       it.copy(relativesFilter = relativesFilter)
     }
+    updateList()
   }
 
-  fun onRelativesFilterSubtasksFieldClicked() {
-    _extendedFiltersStateFlow.update {
-      val relativesFilter = RelativesFilter(
-        it.relativesFilter?.type, RelativesFilter.RelativesFilterField.SUBTASKS
-      )
-      it.copy(relativesFilter = relativesFilter)
-    }
+  fun setNewTaskTime(input: String) {
+    val input = input.filter { it.isDigit() }
+    val time = input.trim().toIntOrNull()
+    _newTaskWindowStateFlow.value = (_newTaskWindowStateFlow.value as NewTaskWindowState.Opened).copy(time = time)
   }
 
 }

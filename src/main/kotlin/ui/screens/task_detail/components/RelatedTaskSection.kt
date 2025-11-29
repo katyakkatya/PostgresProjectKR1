@@ -1,9 +1,4 @@
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -16,7 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.TaskItemModel
-import ui.screens.task_list.components.TaskList
+import ui.screens.task_list.components.TaskItem
 
 @Composable
 fun RelatedTasksSection(
@@ -33,10 +28,14 @@ fun RelatedTasksSection(
     style = MaterialTheme.typography.h5
   )
   if (relatedTasks.isNotEmpty()) {
-    TaskList(
-      tasks = relatedTasks,
-      onTaskClick = onRelatedTaskClick,
-    )
+    Column {
+      relatedTasks.forEach { task ->
+        TaskItem(
+          task = task,
+          onTaskClick = { onRelatedTaskClick(task.id) }
+        )
+      }
+    }
   } else {
     Text(
       text = "Нет связанных задач",

@@ -1,12 +1,15 @@
 package ui.screens.task_list.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,7 +28,6 @@ import ui.screens.task_list.components.Constants.HAS
 import ui.screens.task_list.components.Constants.NONE
 import ui.screens.task_list.components.Constants.NOT_COMPLETED
 import ui.screens.task_list.components.Constants.SOME
-import ui.screens.task_list.components.Constants.SUBTASKS
 
 // TODO: доработать механизм для остальных фильтров
 @Composable
@@ -74,11 +76,13 @@ fun ExtendedFiltersContent(
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .background(Color.Transparent)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               subtasksFilterTypeMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
         )
         DropdownMenu(
           expanded = subtasksFilterTypeMenuExpanded,
@@ -114,11 +118,13 @@ fun ExtendedFiltersContent(
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .background(Color.Transparent)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               subtasksFilterFieldMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
         )
         DropdownMenu(
           expanded = subtasksFilterFieldMenuExpanded,
@@ -158,12 +164,15 @@ fun ExtendedFiltersContent(
           },
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
+            .background(Color.Transparent)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               relativesFilterTypeMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
+
         )
         DropdownMenu(
           expanded = relativesFilterTypeMenuExpanded,
@@ -186,23 +195,24 @@ fun ExtendedFiltersContent(
       }
 
       Box {
-        val relativesFilterFieldOptions = listOf(AUTHOR, CONNECTED_TASKS, SUBTASKS)
+        val relativesFilterFieldOptions = listOf(AUTHOR, CONNECTED_TASKS)
         var relativesFilterFieldMenuExpanded by remember { mutableStateOf(false) }
         Text(
           text = when (state.relativesFilter?.field) {
             RelativesFilter.RelativesFilterField.CONNECTED_TASKS -> CONNECTED_TASKS
             RelativesFilter.RelativesFilterField.AUTHOR -> AUTHOR
-            RelativesFilter.RelativesFilterField.SUBTASKS -> SUBTASKS
             null -> " "
           },
           modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
-            .background(Color.Red)
-            .padding(8.dp)
+            .background(Color.Transparent)
+            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .clip(RoundedCornerShape(500.dp))
             .clickable {
               relativesFilterFieldMenuExpanded = true
             }
+            .padding(16.dp, 8.dp)
         )
         DropdownMenu(
           expanded = relativesFilterFieldMenuExpanded,
@@ -214,7 +224,6 @@ fun ExtendedFiltersContent(
                 when (option) {
                   AUTHOR -> signals.onRelativesFilterAuthorFieldClicked()
                   CONNECTED_TASKS -> signals.onRelativesFilterConnectedTasksFieldClicked()
-                  SUBTASKS -> signals.onRelativesFilterSubtasksFieldClicked()
                 }
                 relativesFilterFieldMenuExpanded = false
               }
@@ -238,7 +247,6 @@ private object Constants {
   const val NOT_COMPLETED = "Не выполнены"
   const val AUTHOR = "Автор"
   const val CONNECTED_TASKS = "Связанные задачи"
-  const val SUBTASKS = "Подзадачи"
 }
 
 data class ExtendedFiltersState(
@@ -259,5 +267,4 @@ data class ExtendedFiltersSignals(
 
   val onRelativesFilterAuthorFieldClicked: () -> Unit,
   val onRelativesFilterConnectedTasksFieldClicked: () -> Unit,
-  val onRelativesFilterSubtasksFieldClicked: () -> Unit,
 )

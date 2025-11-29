@@ -83,7 +83,7 @@ fun TaskScreen(
     is CustomStatusListDialogState.Opened -> {
       CustomStatusListWindow(
         statuses = statuses,
-        onCustomStatusSelected = { viewModel.openCustomStatusCreationDialog() },
+        onCustomStatusSelected = { viewModel.selectCustomStatus(it) },
         onClose = { viewModel.closeCustomStatusListDialog() },
         onAddCustomStatus = { viewModel.openCustomStatusCreationDialog() },
       )

@@ -11,7 +11,6 @@ public record RelativesFilter(
 
   public enum RelativesFilterField {
     AUTHOR,
-    CONNECTED_TASKS,
-    SUBTASKS
+    CONNECTED_TASKS
   }
 }
