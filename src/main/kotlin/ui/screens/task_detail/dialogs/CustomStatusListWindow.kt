@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 
+// TODO: проверить
+// Поменял цвет заголовка, добавил отступы между статусами
+// Изменил кнопки добавил отступы
+
 @Composable
 fun CustomStatusListWindow(
   statuses: List<String>,
@@ -43,7 +47,7 @@ fun CustomStatusListWindow(
           fontSize = 32.sp,
           fontWeight = FontWeight.Bold,
           fontFamily = MaterialTheme.typography.h4.fontFamily,
-          color = MaterialTheme.colors.error,
+          color = MaterialTheme.colors.onSurface,
           modifier = Modifier.padding(vertical = 16.dp),
           style = MaterialTheme.typography.h4
         )
@@ -55,7 +59,7 @@ fun CustomStatusListWindow(
             Card(
               modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { onCustomStatusSelected(it) },
               shape = RoundedCornerShape(8.dp),
@@ -78,30 +82,40 @@ fun CustomStatusListWindow(
         }
 
         Button(
-          onClick = { onAddCustomStatus() }
+          onClick = { onAddCustomStatus() },
+          modifier = Modifier
+            .padding(all = 24.dp),
+          shape = RoundedCornerShape(16.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary,
+            contentColor = MaterialTheme.colors.onSecondary
+          )
         ) {
           Text(
-            text = "Добавить статус",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Normal,
-            fontFamily = MaterialTheme.typography.body1.fontFamily,
-            color = MaterialTheme.colors.onSurface,
-            textDecoration = TextDecoration.None,
-            style = MaterialTheme.typography.body1
+            text = "Добавить статусь",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.W400,
+            modifier = Modifier.padding(vertical = 12.dp),
+            style = MaterialTheme.typography.button
           )
         }
 
         Button(
-          onClick = { onClose() }
+          onClick = { onClose() },
+          modifier = Modifier
+            .padding(bottom = 12.dp),
+          shape = RoundedCornerShape(16.dp),
+          colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary,
+            contentColor = MaterialTheme.colors.onSecondary
+          )
         ) {
           Text(
             text = "Закрыть",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Normal,
-            fontFamily = MaterialTheme.typography.body1.fontFamily,
-            color = MaterialTheme.colors.onSurface,
-            textDecoration = TextDecoration.None,
-            style = MaterialTheme.typography.body1
+            fontSize = 22.sp,
+            fontWeight = FontWeight.W400,
+            modifier = Modifier.padding(vertical = 12.dp),
+            style = MaterialTheme.typography.button
           )
         }
 

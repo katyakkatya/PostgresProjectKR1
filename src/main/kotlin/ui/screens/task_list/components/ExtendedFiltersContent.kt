@@ -30,15 +30,17 @@ import ui.screens.task_list.components.Constants.NOT_COMPLETED
 import ui.screens.task_list.components.Constants.SOME
 
 // TODO: доработать механизм для остальных фильтров
+
+// TODO: Проверить
+// Изменил стиль текста
+
 @Composable
 fun ExtendedFiltersContent(
   state: ExtendedFiltersState,
   signals: ExtendedFiltersSignals,
 ) {
   Column(
-    modifier = Modifier
-      .fillMaxWidth()
-      .padding(8.dp)
+    modifier = Modifier.padding(8.dp)
   ) {
     Text(
       text = "Расширенные фильтры",
@@ -55,16 +57,21 @@ fun ExtendedFiltersContent(
       color = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
     )
 
-    Spacer(modifier = Modifier.height(8.dp))
-
+    Spacer(modifier = Modifier.height(12.dp))
 
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Text("Где")
+      Text(
+        text = "Где",
+        fontSize = 24.sp,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.padding(horizontal = 8.dp)
+      )
 
-      Box {
+      Box{
         val subtasksFilterTypeOptions = listOf(ALL, SOME)
         var subtasksFilterTypeMenuExpanded by remember { mutableStateOf(false) }
         Text(
@@ -77,12 +84,15 @@ fun ExtendedFiltersContent(
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
             .background(Color.Transparent)
-            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .border(2.dp,MaterialTheme.colors.secondary, RoundedCornerShape(500.dp))
             .clip(RoundedCornerShape(500.dp))
             .clickable {
               subtasksFilterTypeMenuExpanded = true
             }
-            .padding(16.dp, 8.dp)
+            .padding(16.dp, 8.dp),
+          fontSize = 24.sp,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.body1,
         )
         DropdownMenu(
           expanded = subtasksFilterTypeMenuExpanded,
@@ -98,13 +108,24 @@ fun ExtendedFiltersContent(
                 subtasksFilterTypeMenuExpanded = false
               }
             ) {
-              Text(option)
+              Text(
+                text = option,
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onSurface,
+                style = MaterialTheme.typography.body1,
+                )
             }
           }
         }
       }
 
-      Text("подзадачи")
+      Text(
+        text = "подзадачи",
+        fontSize = 24.sp,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.padding(horizontal = 8.dp)
+      )
 
       Box {
         val subtasksFilterFieldOptions = listOf(COMPLETED, NOT_COMPLETED)
@@ -119,12 +140,15 @@ fun ExtendedFiltersContent(
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
             .background(Color.Transparent)
-            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .border(2.dp, MaterialTheme.colors.secondary, RoundedCornerShape(500.dp))
             .clip(RoundedCornerShape(500.dp))
             .clickable {
               subtasksFilterFieldMenuExpanded = true
             }
-            .padding(16.dp, 8.dp)
+            .padding(16.dp, 8.dp),
+          fontSize = 24.sp,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.body1,
         )
         DropdownMenu(
           expanded = subtasksFilterFieldMenuExpanded,
@@ -140,20 +164,35 @@ fun ExtendedFiltersContent(
                 subtasksFilterFieldMenuExpanded = false
               }
             ) {
-              Text(option)
+              Text(
+                text = option,
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onSurface,
+                style = MaterialTheme.typography.body1,
+                )
             }
           }
         }
       }
     }
 
+    Spacer(modifier = Modifier.height(12.dp))
+
     Row(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Text("Где")
+      Text(
+        text = "Где",
+        fontSize = 24.sp,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.padding(start = 8.dp)
+      )
 
-      Box {
+      Box (
+        modifier = Modifier.padding(horizontal = 8.dp)
+      ){
         val relativesFilterTypeOptions = listOf(HAS, NONE)
         var relativesFilterTypeMenuExpanded by remember { mutableStateOf(false) }
         Text(
@@ -166,12 +205,15 @@ fun ExtendedFiltersContent(
             .defaultMinSize(minWidth = 100.dp)
             .background(Color.Transparent)
             .padding(8.dp)
-            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .border(2.dp, MaterialTheme.colors.secondary, RoundedCornerShape(500.dp))
             .clip(RoundedCornerShape(500.dp))
             .clickable {
               relativesFilterTypeMenuExpanded = true
             }
-            .padding(16.dp, 8.dp)
+            .padding(16.dp, 8.dp),
+          fontSize = 24.sp,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.body1,
 
         )
         DropdownMenu(
@@ -188,7 +230,12 @@ fun ExtendedFiltersContent(
                 relativesFilterTypeMenuExpanded = false
               }
             ) {
-              Text(option)
+              Text(
+                text = option,
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onSurface,
+                style = MaterialTheme.typography.body1,
+              )
             }
           }
         }
@@ -207,12 +254,15 @@ fun ExtendedFiltersContent(
             .defaultMinSize(minWidth = 100.dp)
             .padding(8.dp)
             .background(Color.Transparent)
-            .border(2.dp, Color.Green, RoundedCornerShape(500.dp))
+            .border(2.dp, MaterialTheme.colors.secondary, RoundedCornerShape(500.dp))
             .clip(RoundedCornerShape(500.dp))
             .clickable {
               relativesFilterFieldMenuExpanded = true
             }
-            .padding(16.dp, 8.dp)
+            .padding(16.dp, 8.dp),
+          fontSize = 24.sp,
+          color = MaterialTheme.colors.onSurface,
+          style = MaterialTheme.typography.body1,
         )
         DropdownMenu(
           expanded = relativesFilterFieldMenuExpanded,
@@ -228,7 +278,12 @@ fun ExtendedFiltersContent(
                 relativesFilterFieldMenuExpanded = false
               }
             ) {
-              Text(option)
+              Text(
+                text = option,
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onSurface,
+                style = MaterialTheme.typography.body1,
+                )
             }
           }
         }
